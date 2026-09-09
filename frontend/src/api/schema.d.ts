@@ -44,10 +44,16 @@ export interface components {
     schemas: {
         /** HealthResponse */
         HealthResponse: {
-            /** Status */
-            status: string;
-            /** Database */
-            database: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "ok" | "degraded";
+            /**
+             * Database
+             * @enum {string}
+             */
+            database: "ok" | "unavailable";
         };
         /** ScheduleResponse */
         ScheduleResponse: {

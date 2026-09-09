@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 
 import psycopg
 from fastapi import Depends, FastAPI, Response
@@ -8,8 +9,8 @@ from pydantic import BaseModel
 
 
 class HealthResponse(BaseModel):
-    status: str
-    database: str
+    status: Literal["ok", "degraded"]
+    database: Literal["ok", "unavailable"]
 
 
 class ScheduleResponse(BaseModel):

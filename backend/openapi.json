@@ -58,10 +58,18 @@
         "properties": {
           "status": {
             "type": "string",
+            "enum": [
+              "ok",
+              "degraded"
+            ],
             "title": "Status"
           },
           "database": {
             "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
             "title": "Database"
           }
         },
