@@ -1,0 +1,52 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: motorsport
+      POSTGRES_USER: motorsport
+      POSTGRES_PASSWORD: motorsport
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U motorsport -d motorsport"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://packagefeedproxy.microsoft.io/pypi/simple/}
+    environment:
+      DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres-data:
