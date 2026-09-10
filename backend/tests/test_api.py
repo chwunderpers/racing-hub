@@ -8,6 +8,14 @@ class EmptyOperationalStore:
         return []
 
 
+def test_openapi_uses_racing_hub_product_name() -> None:
+    with TestClient(app) as client:
+        response = client.get("/openapi.json")
+
+    assert response.status_code == 200
+    assert response.json()["info"]["title"] == "Racing Hub"
+
+
 def test_health_reports_ready_when_database_is_available() -> None:
     app.dependency_overrides[database_status] = lambda: "ok"
 

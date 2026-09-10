@@ -45,6 +45,7 @@ def test_publish_promotes_only_after_operational_and_graph_versions_agree() -> N
         {
             "publicationVersion": result.version,
             "id": "meeting:f1:2026:australia",
+            "status": "scheduled",
             "name": "Australian Grand Prix",
             "competition": "Formula One",
             "season": 2026,
@@ -158,7 +159,7 @@ def test_disagreement_does_not_promote_a_staged_publication(monkeypatch) -> None
     graph = InMemoryGraphProjection()
     publication = PublicationModule(operational, graph)
     first = publication.publish(formula_one_envelope())
-    monkeypatch.setattr(graph, "agrees", lambda version, meeting_id: False)
+    monkeypatch.setattr(graph, "agrees", lambda version, meeting_id, envelope: False)
 
     with pytest.raises(RuntimeError, match="does not agree"):
         publication.publish(formula_one_envelope().model_copy(update={"evidence": "Revised evidence"}))

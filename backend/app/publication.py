@@ -1,13 +1,18 @@
 import hashlib
 import json
+from contextlib import AbstractContextManager
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
+from threading import RLock
 from typing import Literal, Protocol
 
-from pydantic import BaseModel
+from pydantic import AwareDatetime, BaseModel, ConfigDict, HttpUrl, field_validator, model_validator
 
 
 class CandidateMeeting(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
+    status: Literal["scheduled", "cancelled"] = "scheduled"
     competition_identity: str
     circuit_identity: str
     competition_name: str
@@ -17,14 +22,28 @@ class CandidateMeeting(BaseModel):
     start_date: date
     end_date: date
 
+    @model_validator(mode="after")
+    def validate_dates(self) -> "CandidateMeeting":
+        if self.start_date > self.end_date:
+            raise ValueError("Meeting start_date must not be after end_date")
+        return self
+
 
 class CandidateEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
     source_identity: str
     source_url: str
-    retrieved_at: datetime
+    retrieved_at: AwareDatetime
     source_language: Literal["en"]
     evidence: str
     meeting: CandidateMeeting
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_source_url(cls, value: str) -> str:
+        HttpUrl(value)
+        return value
 
 
 @dataclass(frozen=True)
@@ -34,6 +53,10 @@ class PublicationResult:
 
 
 class OperationalStore(Protocol):
+    def publication_lock(self) -> AbstractContextManager: ...
+
+    def current_publication_version(self) -> str | None: ...
+
     def stage(self, version: str, envelope: CandidateEnvelope) -> None: ...
 
     def promote(self, version: str) -> None: ...
@@ -42,7 +65,7 @@ class OperationalStore(Protocol):
 class GraphProjection(Protocol):
     def project(self, version: str, envelope: CandidateEnvelope) -> None: ...
 
-    def agrees(self, version: str, meeting_id: str) -> bool: ...
+    def agrees(self, version: str, meeting_id: str, envelope: CandidateEnvelope | None = None) -> bool: ...
 
 
 def canonical_meeting_id(source_identity: str) -> str:
@@ -71,6 +94,7 @@ def meeting_view(envelope: CandidateEnvelope) -> dict[str, object]:
     meeting = envelope.meeting
     return {
         "id": canonical_meeting_id(envelope.source_identity),
+        "status": meeting.status,
         "name": meeting.meeting_name,
         "competition": meeting.competition_name,
         "season": meeting.season_year,
@@ -92,11 +116,32 @@ class PublicationModule:
         self._graph_projection = graph_projection
 
     def publish(self, envelope: CandidateEnvelope) -> PublicationResult:
+        with self._operational_store.publication_lock():
+            return self._publish(envelope)
+
+    def publish_initial(self, envelope: CandidateEnvelope) -> PublicationResult:
+        with self._operational_store.publication_lock():
+            current_version = self._operational_store.current_publication_version()
+            if current_version is not None:
+                return PublicationResult(status="published", version=current_version)
+            return self._publish(envelope)
+
+    def publish_revision(self, envelope: CandidateEnvelope, baseline_version: str | None) -> PublicationResult:
+        with self._operational_store.publication_lock():
+            current_version = self._operational_store.current_publication_version()
+            version = publication_version(envelope)
+            if current_version == version:
+                return PublicationResult(status="published", version=version)
+            if current_version != baseline_version:
+                raise ValueError("Publication baseline is stale; preview and review again")
+            return self._publish(envelope)
+
+    def _publish(self, envelope: CandidateEnvelope) -> PublicationResult:
         version = publication_version(envelope)
         meeting_id = canonical_meeting_id(envelope.source_identity)
         self._operational_store.stage(version, envelope)
         self._graph_projection.project(version, envelope)
-        if not self._graph_projection.agrees(version, meeting_id):
+        if not self._graph_projection.agrees(version, meeting_id, envelope):
             raise RuntimeError("Graph projection does not agree with publication")
         self._operational_store.promote(version)
         return PublicationResult(status="published", version=version)
@@ -134,6 +179,13 @@ class InMemoryOperationalStore:
         self.current_version: str | None = None
         self._staged: dict[str, CandidateEnvelope] = {}
         self._resources = InMemoryCanonicalResources()
+        self._publication_lock = RLock()
+
+    def publication_lock(self) -> AbstractContextManager:
+        return self._publication_lock
+
+    def current_publication_version(self) -> str | None:
+        return self.current_version
 
     def stage(self, version: str, envelope: CandidateEnvelope) -> None:
         self._staged[version] = envelope
@@ -143,6 +195,9 @@ class InMemoryOperationalStore:
         if version not in self._staged:
             raise RuntimeError("Publication version was not staged")
         self.current_version = version
+
+    def publication_envelope(self, version: str) -> CandidateEnvelope:
+        return self._staged[version].model_copy(deep=True)
 
     def visible_meetings(self) -> list[dict[str, object]]:
         if self.current_version is None:
@@ -165,7 +220,7 @@ class InMemoryGraphProjection:
         self.current_version = version
         self._resources.add(envelope)
 
-    def agrees(self, version: str, meeting_id: str) -> bool:
+    def agrees(self, version: str, meeting_id: str, envelope: CandidateEnvelope | None = None) -> bool:
         return (
             self.current_version == version
             and self._resources.contains_meeting(meeting_id)

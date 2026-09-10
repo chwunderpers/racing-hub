@@ -15,12 +15,10 @@ def main() -> None:
     )
     operational.initialize()
     graph.initialize()
-    fixture_path = Path(
-        os.environ.get("SAMPLE_ENVELOPE", "fixtures/f1-2026-australia.json")
-    )
+    fixture_path = Path(__file__).parents[1] / "fixtures/f1-2026-australia.json"
     envelope = CandidateEnvelope.model_validate(json.loads(fixture_path.read_text("utf-8")))
-    result = PublicationModule(operational, graph).publish(envelope)
-    print(f"Published version {result.version}")
+    result = PublicationModule(operational, graph).publish_initial(envelope)
+    print(f"Current publication version {result.version}")
 
 
 if __name__ == "__main__":

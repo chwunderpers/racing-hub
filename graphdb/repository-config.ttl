@@ -6,7 +6,7 @@
 
 [] a rep:Repository ;
     rep:repositoryID "motorsport" ;
-    rdfs:label "Motorsport Hub" ;
+    rdfs:label "Racing Hub" ;
     rep:repositoryImpl [
         rep:repositoryType "graphdb:SailRepository" ;
         sr:sailImpl [

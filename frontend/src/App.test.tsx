@@ -22,6 +22,7 @@ it("shows a ready empty schedule when the backend is healthy", async () => {
   render(<App />);
 
   expect(await screen.findByText("System ready")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Racing Hub home" })).toHaveTextContent("Racing Hub");
   expect(screen.getByText("No meetings published yet")).toBeVisible();
 });
 
@@ -45,7 +46,7 @@ it("shows an unavailable state when the backend health check fails", async () =>
 });
 
 
-it("shows a published Formula One meeting with its provenance", async () => {
+it.each(["scheduled", "cancelled"])("shows a %s Formula One meeting with its provenance", async (status) => {
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
     const url = String(input);
     if (url.endsWith("/api/health")) {
@@ -55,6 +56,7 @@ it("shows a published Formula One meeting with its provenance", async () => {
       meetings: [
         {
           id: "meeting:f1:2026:australia",
+          status,
           name: "Australian Grand Prix",
           competition: "Formula One",
           season: 2026,
@@ -80,4 +82,9 @@ it("shows a published Formula One meeting with its provenance", async () => {
   );
   expect(screen.getByText("Retrieved 15 January 2026, 12:00 UTC")).toBeVisible();
   expect(screen.queryByText("No meetings published yet")).not.toBeInTheDocument();
+  if (status === "cancelled") {
+    expect(screen.getByText("Cancelled")).toBeVisible();
+  } else {
+    expect(screen.queryByText("Cancelled")).not.toBeInTheDocument();
+  }
 });

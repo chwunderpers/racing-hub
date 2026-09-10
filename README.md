@@ -1,4 +1,8 @@
-# Motorsport Hub
+# Racing Hub
+
+Repository: <https://github.com/chwunderpers/racing-hub>.
+See [the repository rename record](docs/repository-rename.md) for preserved
+GitHub history and stable data identifiers.
 
 Local-first proof of concept for publishing a curated motorsport schedule.
 The first publication contains the approved English Formula One Australian
@@ -40,13 +44,14 @@ local PostgreSQL and GraphDB data volumes.
 
 The checked-in fixture is an approved, fixed candidate envelope, not a live
 source fetch. Its retrieval timestamp is fixture data. The browser has no write
-endpoint; maintenance runs through the private command:
+endpoint. Bootstrap initializes only an empty store and never replaces an existing
+publication:
 
 ```powershell
 docker compose run --rm bootstrap
 ```
 
-The command prints a content-derived version. Repeating the same envelope
+The command prints the current content-derived version. Repeating the same envelope
 creates no duplicate canonical resources. PostgreSQL stages the version, GraphDB
 writes a named graph and verifies agreement, and only then PostgreSQL atomically
 promotes the schedule. A failed update leaves the previous schedule visible;
@@ -79,8 +84,16 @@ SELECT ?meeting ?name WHERE {
 }
 ```
 
-This tracer supports one Meeting per publication. Multi-meeting snapshots,
-source acquisition, and identity review workflows are later slices.
+For schedule changes, select **Racing Review** in VS Code Chat and provide a
+structured candidate JSON file. The private agent previews one Review Item,
+records the exact human decision, then asks separately for publication approval.
+See [the review workflow](docs/review-workflow.md) for commands, candidate and
+decision formats, audit files and failure recovery. Acceptance alone never publishes.
+
+This tracer supports one Meeting per publication, including date corrections,
+explicit identity resolutions and visible cancellation status. Multi-Meeting
+snapshot merging and source acquisition/normalization are later slices. Replacing
+a different Meeting is previewed as a conflict and blocked, not silently published.
 
 ## Run for development
 
@@ -126,8 +139,10 @@ npm run build
 Regenerate `frontend/src/api/schema.d.ts` whenever the backend HTTP contract
 changes.
 
-Run the real-service tests against the initialized local PoC (they republish the
-fixture and leave staged test versions, so do not target a shared database):
+Run the real-service tests using the local PoC services. The supplied PostgreSQL
+login must be able to create temporary databases; GraphDB must allow repository
+creation. Every test creates its own uniquely named database and repository and
+removes both afterward. The demo database and `motorsport` graph are not modified:
 
 ```powershell
 $env:PYTHONPATH = "backend"
@@ -137,3 +152,6 @@ $env:TEST_GRAPHDB_URL = "http://localhost:7200"
 ```
 
 Without those variables, service tests skip; unit tests do not require Docker.
+Do not target production/shared services. If the process is forcibly terminated,
+resources named `review_test_<uuid>` may remain; remove only those confirmed to
+belong to the interrupted test run.

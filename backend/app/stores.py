@@ -1,10 +1,13 @@
 from pathlib import Path
+from contextlib import contextmanager
+from collections.abc import Iterator
 from urllib.parse import quote
 
 import httpx
 import psycopg
 from psycopg.rows import dict_row
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
+from rdflib.compare import isomorphic
 
 from app.publication import CandidateEnvelope, canonical_resource_ids, meeting_view
 
@@ -72,6 +75,19 @@ class PostgresOperationalStore:
     def initialize(self) -> None:
         with psycopg.connect(self._database_url, connect_timeout=5) as connection:
             connection.execute(SCHEMA_SQL)
+
+    @contextmanager
+    def publication_lock(self) -> Iterator[None]:
+        with psycopg.connect(self._database_url, connect_timeout=5) as connection:
+            row = connection.execute("SELECT pg_try_advisory_xact_lock(426804)").fetchone()
+            if row is None or not row[0]:
+                raise RuntimeError("Another publication is in progress")
+            yield
+
+    def current_publication_version(self) -> str | None:
+        with psycopg.connect(self._database_url, connect_timeout=5) as connection:
+            row = connection.execute("SELECT current_version FROM publication_state WHERE singleton").fetchone()
+            return row[0] if row else None
 
     def stage(self, version: str, envelope: CandidateEnvelope) -> None:
         ids = canonical_resource_ids(envelope)
@@ -220,7 +236,17 @@ class GraphDbProjection:
         )
         response.raise_for_status()
 
-    def agrees(self, version: str, meeting_id: str) -> bool:
+    def agrees(self, version: str, meeting_id: str, envelope: CandidateEnvelope | None = None) -> bool:
+        if envelope is not None:
+            response = httpx.get(
+                f"{self.repository_url}/statements",
+                params={"context": f"<{PUBLICATION_GRAPH}{version}>", "infer": "false"},
+                headers={"Accept": "application/n-triples"},
+                timeout=30,
+            )
+            response.raise_for_status()
+            actual = Graph().parse(data=response.text, format="nt")
+            return isomorphic(actual, self._build_graph(version, envelope))
         meeting_iri = self._resource_iri(meeting_id)
         query = f"""ASK WHERE {{
             GRAPH <{PUBLICATION_GRAPH}{version}> {{
@@ -256,6 +282,7 @@ class GraphDbProjection:
         graph.add((circuit_iri, RDF.type, MOTORSPORT.Circuit))
         graph.add((circuit_iri, RDFS.label, Literal(meeting.circuit_name, lang="en")))
         graph.add((meeting_iri, RDF.type, MOTORSPORT.Meeting))
+        graph.add((meeting_iri, MOTORSPORT.status, Literal(meeting.status)))
         graph.add((meeting_iri, RDFS.label, Literal(meeting.meeting_name, lang="en")))
         graph.add((meeting_iri, MOTORSPORT.competition, competition_iri))
         graph.add((meeting_iri, MOTORSPORT.season, season_iri))

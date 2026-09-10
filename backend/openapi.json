@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Motorsport Hub",
+    "title": "Racing Hub",
     "version": "0.1.0"
   },
   "paths": {
@@ -82,6 +82,15 @@
       },
       "MeetingResponse": {
         "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "cancelled"
+            ],
+            "title": "Status",
+            "default": "scheduled"
+          },
           "publicationVersion": {
             "type": "string",
             "title": "Publicationversion"
