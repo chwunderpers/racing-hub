@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .env
 *.license
+ontology-reviews/
 
 frontend/dist/
 frontend/node_modules/
