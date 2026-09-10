@@ -7,12 +7,14 @@ import {
   FlaskConical,
   Gauge,
   MapPin,
+  MessageCircle,
   Trophy,
 } from "lucide-react";
 
 import { getHealth, getSchedule } from "./api/client";
 import type { components } from "./api/schema";
 import { MeetingDetails } from "./MeetingDetails";
+import { AssistantChat } from "./AssistantChat";
 import "./styles.css";
 
 type Meeting = components["schemas"]["MeetingResponse"];
@@ -63,6 +65,7 @@ function validFilterDate(value: string): boolean {
 }
 
 function App() {
+  const [chatOpen, setChatOpen] = useState(false);
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [coverage, setCoverage] = useState<components["schemas"]["SeasonCoverageResponse"][]>([]);
@@ -140,6 +143,7 @@ function App() {
           <span>Racing Hub</span>
         </a>
 
+        <button className="assistant-toggle" type="button" aria-expanded={chatOpen} onClick={() => setChatOpen(value => !value)}><MessageCircle size={20} aria-hidden="true" />Ask</button>
         <div className={`system-status system-status--${viewState}`} role="status">
           <Activity size={16} aria-hidden="true" />
           <span>
@@ -152,6 +156,7 @@ function App() {
       </header>
 
       <main>
+        {chatOpen && <AssistantChat zone={query.get("zone") === "event" ? selected?.eventTimezone || "UTC" : query.get("zone") && query.get("zone") !== "browser" ? query.get("zone")! : Intl.DateTimeFormat().resolvedOptions().timeZone} setZone={zone => changeQuery("zone", zone)} />}
         <section className="schedule-heading" aria-labelledby="schedule-title">
           <div>
             <p className="date-line">2026 season</p>
