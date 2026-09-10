@@ -60,6 +60,10 @@ services:
       DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
       GRAPHDB_URL: http://graphdb:7200
       GRAPHDB_REPOSITORY: motorsport
+      ASSISTANT_DATABASE_URL: ${ASSISTANT_DOCKER_DATABASE_URL:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_BASE_URL: ${AZURE_OPENAI_BASE_URL:-https://admin-4138-resource.services.ai.azure.com/openai/v1/}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-gpt-6-astra}
     depends_on:
       bootstrap:
         condition: service_completed_successfully

@@ -50,10 +50,206 @@
           }
         }
       }
+    },
+    "/api/assistant/sessions": {
+      "post": {
+        "summary": "Assistant Session",
+        "operationId": "assistant_session_api_assistant_sessions_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assistant/messages": {
+      "post": {
+        "summary": "Assistant Message",
+        "operationId": "assistant_message_api_assistant_messages_post",
+        "parameters": [
+          {
+            "name": "x-assistant-session",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 100,
+              "title": "X-Assistant-Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnswer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/assistant/session": {
+      "delete": {
+        "summary": "Assistant Reset",
+        "operationId": "assistant_reset_api_assistant_session_delete",
+        "parameters": [
+          {
+            "name": "x-assistant-session",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 32,
+              "maxLength": 100,
+              "title": "X-Assistant-Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AssistantAnswer": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "stated",
+              "derived",
+              "unsupported"
+            ],
+            "title": "Classification"
+          },
+          "displayTimeZone": {
+            "type": "string",
+            "title": "Displaytimezone"
+          },
+          "publicationVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publicationversion"
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/FreshnessResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "citations",
+          "classification",
+          "displayTimeZone",
+          "publicationVersion",
+          "freshness"
+        ],
+        "title": "AssistantAnswer"
+      },
+      "AssistantMessage": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Message"
+          },
+          "displayTimeZone": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Displaytimezone"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "message",
+          "displayTimeZone"
+        ],
+        "title": "AssistantMessage"
+      },
+      "AssistantSessionResponse": {
+        "properties": {
+          "sessionToken": {
+            "type": "string",
+            "title": "Sessiontoken"
+          },
+          "available": {
+            "type": "boolean",
+            "title": "Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sessionToken",
+          "available"
+        ],
+        "title": "AssistantSessionResponse"
+      },
       "CandidateLayout": {
         "properties": {
           "identity": {
@@ -103,6 +299,46 @@
           "name"
         ],
         "title": "CandidatePlace"
+      },
+      "Citation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "iri": {
+            "type": "string",
+            "title": "Iri"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "title": "Sourceurl"
+          },
+          "retrievedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrievedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "iri",
+          "title",
+          "sourceUrl",
+          "retrievedAt"
+        ],
+        "title": "Citation"
       },
       "CoverageAssessment": {
         "properties": {
@@ -290,6 +526,19 @@
           "stale"
         ],
         "title": "FreshnessResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
       },
       "HealthResponse": {
         "properties": {
@@ -858,6 +1107,39 @@
           "authorization"
         ],
         "title": "TranslationRecord"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   }

@@ -38,10 +38,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assistant/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assistant Session */
+        post: operations["assistant_session_api_assistant_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assistant Message */
+        post: operations["assistant_message_api_assistant_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Assistant Reset */
+        delete: operations["assistant_reset_api_assistant_session_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AssistantAnswer */
+        AssistantAnswer: {
+            /** Text */
+            text: string;
+            /** Citations */
+            citations: components["schemas"]["Citation"][];
+            /**
+             * Classification
+             * @enum {string}
+             */
+            classification: "stated" | "derived" | "unsupported";
+            /** Displaytimezone */
+            displayTimeZone: string;
+            /** Publicationversion */
+            publicationVersion: string | null;
+            freshness: components["schemas"]["FreshnessResponse"];
+        };
+        /** AssistantMessage */
+        AssistantMessage: {
+            /** Message */
+            message: string;
+            /** Displaytimezone */
+            displayTimeZone: string;
+        };
+        /** AssistantSessionResponse */
+        AssistantSessionResponse: {
+            /** Sessiontoken */
+            sessionToken: string;
+            /** Available */
+            available: boolean;
+        };
         /** CandidateLayout */
         CandidateLayout: {
             /** Identity */
@@ -57,6 +139,19 @@ export interface components {
             identity: string;
             /** Name */
             name: string;
+        };
+        /** Citation */
+        Citation: {
+            /** Id */
+            id: string;
+            /** Iri */
+            iri: string;
+            /** Title */
+            title: string;
+            /** Sourceurl */
+            sourceUrl: string;
+            /** Retrievedat */
+            retrievedAt: string | null;
         };
         /** CoverageAssessment */
         CoverageAssessment: {
@@ -120,6 +215,11 @@ export interface components {
             lastSuccessAt?: string | null;
             /** Sources */
             sources?: components["schemas"]["SourceFreshnessResponse"][];
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
         };
         /** HealthResponse */
         HealthResponse: {
@@ -301,6 +401,15 @@ export interface components {
             /** Authorization */
             authorization: string;
         };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -355,6 +464,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleResponse"];
+                };
+            };
+        };
+    };
+    assistant_session_api_assistant_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantSessionResponse"];
+                };
+            };
+        };
+    };
+    assistant_message_api_assistant_messages_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-assistant-session": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantMessage"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAnswer"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assistant_reset_api_assistant_session_delete: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-assistant-session": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

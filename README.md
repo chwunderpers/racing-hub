@@ -30,6 +30,11 @@ Open <http://localhost:5173>. FastAPI is available at
 <http://localhost:8000/docs> and its health endpoint is
 <http://localhost:8000/api/health>.
 
+The optional **Ask** panel answers schedule and canonical-resource questions with
+source citations and an explicit display time zone. See [assistant setup and
+privacy boundaries](docs/assistant.md) for the approved Azure deployment, local
+API-key configuration and restricted PostgreSQL reader provisioning.
+
 GraphDB Workbench is at <http://localhost:7200>. Compose provisions the
 `motorsport` repository with OWL 2 RL optimized reasoning, then runs the
 one-shot bootstrap before starting the API. Service ports bind to loopback;
@@ -50,7 +55,7 @@ local PostgreSQL and GraphDB data volumes.
 ## Publication
 
 The checked-in fixture is an approved, fixed candidate envelope, not a live
-source fetch. Its retrieval timestamp is fixture data. The browser has no write
+source fetch. Its retrieval timestamp is fixture data. The browser has no publication write
 endpoint. Bootstrap initializes only an empty store and never replaces an existing
 publication:
 

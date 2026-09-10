@@ -1,5 +1,23 @@
 from datetime import UTC, datetime, timedelta
 
+from pydantic import BaseModel, Field
+
+
+class SourceFreshnessResponse(BaseModel):
+    sourceFamily: str
+    stale: bool
+    reason: str | None = None
+    checkedAt: str | None = None
+    lastSuccessAt: str | None = None
+
+
+class FreshnessResponse(BaseModel):
+    stale: bool
+    reason: str | None = None
+    checkedAt: str | None = None
+    lastSuccessAt: str | None = None
+    sources: list[SourceFreshnessResponse] = Field(default_factory=list)
+
 
 def source_freshness_view(attempts: dict[str, dict | None], competitions: set[str]) -> dict:
     families = set(attempts) | (competitions & {"formula-one", "gt-world-challenge-europe", "nls"})
