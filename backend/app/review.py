@@ -3,14 +3,25 @@ from datetime import UTC, datetime
 import hashlib
 import json
 from functools import wraps
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import uuid4
 
 import yaml
 from filelock import FileLock
-from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.publication import CandidateEnvelope, PublicationModule, publication_version
+
+
+class DecisionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
+    outcome: Literal["accepted", "rejected", "corrected", "deferred"]
+    person: str
+    rationale: str
+    evidence: list[str] = Field(min_length=1)
+    corrected_candidate: dict | None = None
+    identity_resolutions: dict[str, str] = Field(default_factory=dict)
 
 
 class ReviewStore(Protocol):
@@ -55,23 +66,23 @@ class ReviewService:
         evidence: list[str], corrected_candidate: dict | None = None,
         identity_resolutions: dict[str, str] | None = None,
     ) -> dict:
-        if outcome not in ("accepted", "rejected", "corrected", "deferred"):
-            raise ValueError("Unknown decision outcome")
-        if not person.strip() or not rationale.strip() or not evidence or not all(value.strip() for value in evidence):
-            raise ValueError("Person, rationale and evidence are required")
-        if (outcome == "corrected") != (corrected_candidate is not None):
+        request = DecisionRequest.model_validate({
+            "outcome": outcome, "person": person, "rationale": rationale, "evidence": evidence,
+            "corrected_candidate": corrected_candidate, "identity_resolutions": identity_resolutions or {},
+        })
+        if (request.outcome == "corrected") != (request.corrected_candidate is not None):
             raise ValueError("A correction requires exactly one corrected candidate")
-        if corrected_candidate is not None:
-            CandidateEnvelope.model_validate(corrected_candidate)
+        if request.corrected_candidate is not None:
+            CandidateEnvelope.model_validate(request.corrected_candidate)
         queue = self._queue()
         item = next(entry for entry in queue["items"] if entry["id"] == item_id)
         decision = {
-            "id": str(uuid4()), "itemId": item_id, "outcome": outcome,
-            "person": person, "rationale": rationale, "evidence": evidence,
+            "id": str(uuid4()), "itemId": item_id, "outcome": request.outcome,
+            "person": request.person, "rationale": request.rationale, "evidence": request.evidence,
             "proposedAt": datetime.now(UTC).isoformat(),
             "candidate": item["candidate"], "baselineVersion": item["baselineVersion"],
-            "preview": item["preview"], "correctedCandidate": corrected_candidate,
-            "identityResolutions": identity_resolutions or {},
+            "preview": item["preview"], "correctedCandidate": request.corrected_candidate,
+            "identityResolutions": request.identity_resolutions,
         }
         proposal = {"decision": decision, "confirmation": self._digest(decision)}
         item["proposal"] = proposal
@@ -191,23 +202,26 @@ class ReviewService:
             candidate = CandidateEnvelope.model_validate(candidate).model_dump(mode="json")
         except ValidationError as error:
             errors = [f"{'.'.join(map(str, entry['loc']))}: {entry['msg']}" for entry in error.errors()]
-        previous = baseline.meeting.model_dump(mode="json") if baseline else {}
-        proposed = candidate.get("meeting", {})
+        source_identity = candidate.get("source_identity")
+        same_meeting = baseline is not None and source_identity == baseline.source_identity
+        previous = baseline.meeting.model_dump(mode="json") if same_meeting else {}
+        proposed = candidate.get("meeting")
+        if not isinstance(proposed, dict):
+            proposed = {}
         changes = {
             field: {"before": previous.get(field), "after": value}
             for field, value in proposed.items()
             if previous.get(field) != value
-        }
-        old_envelope = baseline.model_dump(mode="json") if baseline else {}
+        } if same_meeting else {}
+        old_envelope = baseline.model_dump(mode="json") if same_meeting else {}
         for field in ("source_identity", "source_url", "retrieved_at", "evidence"):
-            if old_envelope.get(field) != candidate.get(field):
+            if same_meeting and old_envelope.get(field) != candidate.get(field):
                 changes[field] = {"before": old_envelope.get(field), "after": candidate.get(field)}
         unresolved = [
             field for field in ("competition_identity", "circuit_identity")
-            if not proposed.get(field) or (baseline and previous[field] != proposed.get(field))
+            if not proposed.get(field) or (same_meeting and previous[field] != proposed.get(field))
         ]
         conflicts = []
-        source_identity = candidate.get("source_identity")
         if baseline and source_identity != baseline.source_identity:
             conflicts.append("This single-Meeting publication would replace a different Meeting; merge the schedule first")
         if not source_identity:

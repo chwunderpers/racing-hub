@@ -311,3 +311,43 @@ def test_recorded_decision_survives_interrupted_queue_update(tmp_path, monkeypat
     service.record_decision(item["id"], proposal["confirmation"])
     assert records[0].read_bytes() == recorded
     assert service.propose_publication(item["id"])["decisionId"] == proposal["decision"]["id"]
+
+
+@pytest.mark.parametrize("meeting", [None, [], "not a Meeting"])
+def test_malformed_meeting_is_retained_for_human_correction(tmp_path, meeting) -> None:
+    store = InMemoryOperationalStore()
+    service = ReviewService(tmp_path, store, PublicationModule(store, InMemoryGraphProjection()))
+    update = candidate()
+    update["meeting"] = meeting
+    item = service.preview(update)
+    assert item["preview"]["validationErrors"]
+    assert service.show(item["id"])["candidate"]["meeting"] == meeting
+    assert service.show(item["id"])["status"] == "open"
+    assert store.visible_meetings() == []
+
+
+def test_different_meeting_preview_does_not_inherit_unrelated_cancellation(tmp_path) -> None:
+    store = InMemoryOperationalStore()
+    publisher = PublicationModule(store, InMemoryGraphProjection())
+    existing = candidate()
+    existing["meeting"]["status"] = "cancelled"
+    publisher.publish(CandidateEnvelope.model_validate(existing))
+    update = candidate()
+    update["source_identity"] = "f1:2026:china"
+    update["meeting"]["meeting_name"] = "Chinese Grand Prix"
+    update["meeting"]["status"] = "cancelled"
+    service = ReviewService(tmp_path, store, publisher)
+    item = service.preview(update)
+    assert item["preview"]["additions"] == ["f1:2026:china"]
+    assert item["preview"]["conflicts"]
+    assert item["preview"]["cancellations"] == ["f1:2026:china"]
+    assert item["preview"]["changes"] == {}
+
+
+def test_decision_request_rejects_incorrect_evidence_shape(tmp_path) -> None:
+    store = InMemoryOperationalStore()
+    service = ReviewService(tmp_path, store, PublicationModule(store, InMemoryGraphProjection()))
+    item = service.preview(candidate())
+    with pytest.raises(ValueError, match="evidence"):
+        service.propose_decision(item["id"], "accepted", "Operator", "Checked source", "https://example.org")
+    assert "proposal" not in service.show(item["id"])

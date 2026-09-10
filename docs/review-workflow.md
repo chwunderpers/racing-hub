@@ -60,7 +60,7 @@ to its exact proposed identity. The rationale and evidence must justify it.
 Do not derive identity from a matching display name.
 
 `propose` persists the exact proposed decision and returns its confirmation digest.
-Show the complete proposal to the human before recording it. The digest binds
+The digest binds
 content; it is not authentication and is not evidence of a human response by itself.
 
 ```powershell
@@ -68,13 +68,41 @@ content; it is not authentication and is not evidence of a human response by its
 .venv\Scripts\python -m app.review_cli publication ITEM_ID
 ```
 
-The first command requires explicit confirmation of the shown decision. The second
-only prepares and validates a publication proposal. Show its candidate, decision ID,
-baseline and target version, and obtain a **separate** explicit publication approval:
+`decide` records the decision; `publication` only prepares and validates the
+publication proposal. Apply the conversation gates below before either confirmation:
 
 ```powershell
 .venv\Scripts\python -m app.review_cli publish ITEM_ID --confirmation PUBLICATION_DIGEST
 ```
+
+## Conversation
+
+1. Given a candidate file, run `preview`; given an Item ID, run `show`. Present the
+  additions, changes (including provenance), cancellations, conflicts, unresolved
+  identities and validation errors. State the baseline version and Item ID.
+2. Ask the human for acceptance, rejection, correction or deferral, their identity,
+  rationale and evidence references. Do not invent any of these. Translate the
+  rationale into English when necessary and present it for confirmation. Check
+  that candidate labels and retained evidence are English.
+3. Create the structured decision request and run `propose`. Show the exact returned
+  decision, including the complete candidate, any corrected candidate, identity
+  resolutions, person, evidence, rationale, baseline and confirmation digest.
+  Ask the human to confirm this exact proposal. **End the turn here.**
+4. Only after a new explicit human confirmation, run `decide` with the displayed
+  digest. Report the recorded decision ID. A correction is not acceptance of the
+  corrected candidate: refresh its preview and return to the decision steps.
+5. For an accepted decision, run `publication`. Display its exact candidate,
+  decision ID, baseline, version and confirmation digest. Ask separately whether
+  to publish this specific version now. **End the turn here**, even if the earlier
+  acceptance was explicit.
+6. Only after a new explicit publication approval, run `publish` with that proposal's
+  digest. Report the decision ID, published version and receipt path on success.
+  On failure, report the pending item without claiming success. Inspect current
+  status before retrying a promotion whose receipt write failed. A changed
+  candidate or stale baseline requires a fresh preview and human decision,
+  never automatic reapproval.
+
+Stop after one item. Do not continue with the next item without the human asking.
 
 ## Persistence and failure
 
