@@ -56,8 +56,10 @@ Local source timestamps retain their lexical precision, offset and source zone.
 An instant exists only for a clock with an explicit valid offset and consistent
 IANA rules when a zone is provided. Unknown zones and contradictory offsets stay
 unresolved. Date-only values never become midnight instants. Scheduled end times
-are not actual finishes. The tzdata dependency pins fallback rules on Windows;
-hosts with a system tzdb use that database's installed rules.
+are not actual finishes. Resolution uses packaged tzdata 2026.3 on every host,
+independent of the system timezone database. Each clock retains that rules version
+in its hashed candidate; a missing rules version blocks processing rather than
+silently recomputing an accepted assertion with different rules.
 
 Source attempts are stored separately from publication envelopes. A new retrieval
 timestamp alone does not create a semantic revision. Changes in dates, sessions,
@@ -72,7 +74,7 @@ The captured revision has 23 numbered Meetings and 115 available Sessions, exclu
 testing. This is current calendar coverage, not complete historical cancellation
 coverage. The separately reported Saudi Arabian cancellation is not reconstructed
 into this F1-only fixture. The Adapter pins the observed Meeting-key inventory and
-Round order; a changed calendar fails closed until investigation verifies the new
+Round order and regular/Sprint session-code sets; a changed calendar fails closed until investigation verifies the new
 membership and updates that manifest and fixture. New membership changes must also
 be assessed against the current published baseline and human-reviewed as a whole season. Multi-Competition
 ingestion, source scheduling, historical backfill and formal OWL/SHACL are outside

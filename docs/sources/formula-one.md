@@ -11,7 +11,17 @@ is now documented in [source workflow](../source-workflow.md). The original
 rights findings below remain evidence, not an implementation prohibition or a
 claim of legal clearance.
 
-**Do not enable automated Formula1.com acquisition or commit a full-season raw fixture yet.** The official pages are publicly reachable, but current F1 terms expressly prohibit scraping and its guidelines restrict substantial timing-data reuse and AI use. Private review alone does not resolve these restrictions. Obtain written permission covering acquisition, retention, deterministic fixtures, private processing and any later display, or use a separately licensed source. No raw fixture was saved during this investigation.
+## Historical Findings (Initial Investigation)
+
+The initial recommendation was to pause automated acquisition pending a source
+authorization decision. That implementation pause was superseded by the explicit
+PoC authorization above. The official pages were publicly reachable, but F1 terms
+prohibited scraping and its guidelines restricted substantial timing-data reuse
+and AI use. Private review alone does not resolve those restrictions. Production
+redistribution still needs an appropriate rights determination. No raw fixture was
+saved during this initial investigation; the later factual projection is documented
+in the follow-up. Statements below about unverified fields describe this initial
+pass only, before the structured payload investigation.
 
 The live F1 calendar displays **23 numbered race rounds plus two testing events**. FIA independently lists **23 non-called-off events and one called-off Saudi Arabian event**. These are observations of the current revision, not proof that the application has approved that revision. Do not hard-code an assumed 24 active races or silently discard cancellation history. [F1 calendar][f1-calendar] [FIA season][fia-season]
 

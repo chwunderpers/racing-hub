@@ -3,11 +3,13 @@ import json
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from importlib.resources import files
 import re
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 from threading import RLock
 from typing import Literal, Protocol
 
+import tzdata
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
 
 
@@ -60,6 +62,7 @@ class PublishedTime(BaseModel):
     local: str
     offset: str | None = None
     zone: str | None = None
+    rules_version: Literal["2026.3"] = "2026.3"
 
     @field_validator("local")
     @classmethod
@@ -84,9 +87,14 @@ class PublishedTime(BaseModel):
             return None
         resolved = datetime.fromisoformat(self.local + self.offset)
         if self.zone:
+            if tzdata.__version__ != self.rules_version:
+                raise ValueError("The accepted timezone rules version is not installed")
+            if not re.fullmatch(r"[A-Za-z0-9_+-]+(?:/[A-Za-z0-9_+-]+)*", self.zone):
+                return None
             try:
-                in_zone = resolved.astimezone(ZoneInfo(self.zone))
-            except ZoneInfoNotFoundError:
+                with files("tzdata.zoneinfo").joinpath(*self.zone.split("/")).open("rb") as rules:
+                    in_zone = resolved.astimezone(ZoneInfo.from_file(rules, key=self.zone))
+            except (FileNotFoundError, IsADirectoryError):
                 return None
             if in_zone.replace(tzinfo=None) != resolved.replace(tzinfo=None) or in_zone.utcoffset() != resolved.utcoffset():
                 return None

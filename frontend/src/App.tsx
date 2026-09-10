@@ -54,6 +54,13 @@ function formatRetrieved(retrievedAt: string): string {
   return `${retrievalFormatter.format(new Date(retrievedAt)).replace(" at ", ", ")} UTC`;
 }
 
+function validFilterDate(value: string): boolean {
+  if (!value) return true;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
 function App() {
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -76,8 +83,11 @@ function App() {
   }, []);
   const competition = query.get("competition") || "";
   const circuit = query.get("circuit") || "";
-  const from = query.get("from") || "";
-  const through = query.get("through") || "";
+  const rawFrom = query.get("from") || "";
+  const rawThrough = query.get("through") || "";
+  const malformedDates = !validFilterDate(rawFrom) || !validFilterDate(rawThrough);
+  const from = validFilterDate(rawFrom) ? rawFrom : "";
+  const through = validFilterDate(rawThrough) ? rawThrough : "";
   const invalidDates = Boolean(from && through && from > through);
   const filtered = meetings.filter((meeting) => !invalidDates && (!competition || meeting.competition === competition)
     && (!circuit || meeting.circuit === circuit) && (!from || meeting.endDate >= from) && (!through || meeting.startDate <= through));
@@ -165,6 +175,7 @@ function App() {
 
         {viewState === "ready" && freshness?.stale && <p className="stale-notice" role="status">Schedule may be outdated. {freshness.reason}{freshness.lastSuccessAt ? ` Last verified ${formatRetrieved(freshness.lastSuccessAt)}.` : ""}</p>}
         {invalidDates && <p className="stale-notice" role="alert">From date must not follow through date.</p>}
+        {malformedDates && <p className="stale-notice" role="alert">Date filters must use valid YYYY-MM-DD dates.</p>}
         {viewState === "ready" && selected && <MeetingDetails meeting={selected} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
         {viewState === "ready" && selectedId && !selected && <div className="empty-state"><h2>Meeting not found</h2><a href={queryFor("meeting", "")} onClick={(event) => { event.preventDefault(); changeQuery("meeting", ""); }}>Back to schedule</a></div>}
 

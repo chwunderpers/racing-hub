@@ -91,7 +91,8 @@ it.each(["scheduled", "cancelled"])("shows a %s Formula One meeting with its pro
   }
 });
 
-it("preserves filters through details and displays resolved and unresolved session times", async () => {
+it.each(["/", "/?from=2026-2-01", "/?from=2026-02-30"])("preserves filters through details and displays resolved and unresolved session times at %s", async (url) => {
+  window.history.replaceState({}, "", url);
   const meeting = {
     id: "meeting:australia", name: "Australian Grand Prix", competition: "Formula One",
     circuit: "Albert Park", season: 2026, status: "scheduled", round: 1,
@@ -108,6 +109,11 @@ it("preserves filters through details and displays resolved and unresolved sessi
   render(<App />);
   await screen.findByText("System ready");
   expect(screen.getByText(/Schedule may be outdated/)).toBeVisible();
+  if (url !== "/") {
+    expect(screen.getByRole("alert")).toHaveTextContent("Date filters must use valid YYYY-MM-DD dates");
+    expect(screen.getByRole("link", { name: "Australian Grand Prix" })).toBeVisible();
+    fireEvent.change(screen.getByLabelText("From date"), { target: { value: "2026-03-06" } });
+  }
   fireEvent.change(screen.getByRole("combobox", { name: "Competition" }), { target: { value: "Formula One" } });
   fireEvent.change(screen.getByLabelText("Through date"), { target: { value: "2026-03-08" } });
   expect(screen.queryByText("Chinese Grand Prix")).not.toBeInTheDocument();

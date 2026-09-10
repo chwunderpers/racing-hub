@@ -149,7 +149,7 @@ def test_schedule_api_retains_nullable_clock_fields(tmp_path):
         app.dependency_overrides.clear()
 
 
-@pytest.mark.parametrize("mutation", ["duplicate", "unknown-state", "invalid-date", "missing-id", "truncated", "invalid-offset"])
+@pytest.mark.parametrize("mutation", ["duplicate", "unknown-state", "invalid-date", "missing-id", "truncated", "invalid-offset", "missing-session"])
 def test_adapter_rejects_untrustworthy_schedule_records(mutation):
     source = source_fixture()
     if mutation == "duplicate":
@@ -162,7 +162,52 @@ def test_adapter_rejects_untrustworthy_schedule_records(mutation):
         source["meetings"][0]["race"]["meetingSessions"][0]["meetingSessionKey"] = None
     elif mutation == "invalid-offset":
         source["meetings"][0]["race"]["meetingSessions"][0]["gmtOffset"] = "+10:99"
+    elif mutation == "missing-session":
+        source["meetings"][0]["race"]["meetingSessions"].pop()
     else:
         source["meetings"].pop()
     with pytest.raises(ValueError):
         adapt_season(source)
+
+
+def test_malformed_flight_length_terminates():
+    import subprocess
+    import sys
+    code = 'from app.formula_one import race_payload; race_payload(\'<script>self.__next_f.push([1,"0:T-6,"])</script>\')'
+    result = subprocess.run([sys.executable, "-c", code], capture_output=True, timeout=5)
+    assert result.returncode != 0
+    assert b"ValueError" in result.stderr
+
+
+def test_malformed_session_payload_records_source_failure(tmp_path):
+    from app.source_workflow import fetch_for_review
+    store = InMemoryOperationalStore()
+    store.record_source_attempt(datetime.now(UTC), True)
+    service = ReviewService(tmp_path, store, PublicationModule(store, InMemoryGraphProjection()))
+    source = source_fixture()
+    source["meetings"][0]["race"]["meetingSessions"] = [None]
+    with httpx.Client(transport=source_transport(source)) as client:
+        assert fetch_for_review(2026, client, store, service)["status"] == "failed"
+    assert store.source_freshness()["stale"] is True
+
+
+def test_review_rejects_missing_published_sessions(tmp_path):
+    store = InMemoryOperationalStore()
+    service = ReviewService(tmp_path, store, PublicationModule(store, InMemoryGraphProjection()))
+    candidate = adapt_season(source_fixture())
+    publish_reviewed(service, candidate)
+    candidate.meetings[0].meeting.sessions.pop()
+    item = service.preview(candidate.model_dump(mode="json"))
+    assert any("Missing published Sessions" in conflict for conflict in item["preview"]["conflicts"])
+
+
+def test_clock_resolution_uses_versioned_packaged_rules(monkeypatch):
+    from app import publication
+    class HostRulesMustNotBeUsed:
+        def __new__(cls, *args):
+            raise AssertionError("Host timezone rules used")
+        from_file = staticmethod(publication.ZoneInfo.from_file)
+    monkeypatch.setattr(publication, "ZoneInfo", HostRulesMustNotBeUsed)
+    clock = adapt_season(source_fixture()).meetings[0].meeting.sessions[0].start
+    assert clock.instant.isoformat() == "2026-03-06T01:30:00+00:00"
+    assert clock.model_dump()["rules_version"] == "2026.3"

@@ -17,6 +17,7 @@ SESSION_STATES = {"upcoming": "scheduled", "completed": "completed", "cancelled"
 VERIFIED_MEETING_KEYS = {
     2026: ("1279", "1280", "1281", "1284", "1285", "1286", "1287", "1288", "1289", "1290", "1291", "1292", "1293", "1294", "1295", "1308", "1296", "1297", "1298", "1299", "1300", "1301", "1302"),
 }
+SPRINT_MEETING_KEYS = {"1280", "1284", "1285", "1289", "1292", "1296"}
 
 
 def source_key(value) -> str:
@@ -41,6 +42,9 @@ def adapt_season(source: dict) -> SeasonCandidateEnvelope:
         if path.scheme != "https" or path.netloc != "www.formula1.com" or not path.path.startswith(f"/en/racing/{season}/"):
             raise ValueError("Unexpected official Meeting URL")
         sessions = []
+        expected_codes = {"p1", "ss", "s", "q", "r"} if str(race["meetingKey"]) in SPRINT_MEETING_KEYS else {"p1", "p2", "p3", "q", "r"}
+        if len(race["meetingSessions"]) != len(expected_codes) or {session["session"] for session in race["meetingSessions"]} != expected_codes:
+            raise ValueError("Session inventory differs from the verified Meeting schedule")
         for session in race["meetingSessions"]:
             source_key(session["meetingSessionKey"])
             if session["session"] not in SESSION_NAMES or session["state"] not in SESSION_STATES:
@@ -109,7 +113,10 @@ def race_payload(html: str) -> dict:
         start = colon + 1
         if stream[start:start + 1] == b"T":
             comma = stream.index(b",", start)
-            length = int(stream[start + 1:comma], 16)
+            encoded_length = stream[start + 1:comma]
+            if not re.fullmatch(rb"[0-9a-f]+", encoded_length):
+                raise ValueError("Invalid Flight text length")
+            length = int(encoded_length, 16)
             offset = comma + 1 + length
             if offset > len(stream):
                 raise ValueError("Truncated Flight text")
@@ -134,6 +141,8 @@ def race_payload(html: str) -> dict:
     if len(matches) != 1:
         raise ValueError("Expected one official race payload")
     race = matches[0]
+    if not isinstance(race, dict) or not isinstance(race.get("meetingSessions"), list) or any(not isinstance(session, dict) for session in race["meetingSessions"]):
+        raise ValueError("Unexpected race or Session shape")
     fields = ("meetingNumber", "meetingKey", "meetingName", "meetingStartDate", "meetingEndDate", "circuitKey", "circuitOfficialName", "meetingTimezone")
     result = {field: race[field] for field in fields}
     session_fields = ("session", "meetingSessionKey", "startTime", "endTime", "gmtOffset", "timezone", "state")

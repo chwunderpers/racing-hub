@@ -265,6 +265,10 @@ class ReviewService:
         unresolved = []
         for identity in previous.keys() & proposed.keys():
             before, after = previous[identity], proposed[identity]
+            prior_sessions = {session["identity"] for session in before["meeting"].get("sessions", [])}
+            next_sessions = {session["identity"] for session in after["meeting"].get("sessions", [])}
+            if prior_sessions - next_sessions:
+                conflicts.append("Missing published Sessions; retain them with explicit sourced cancellation: " + ", ".join(sorted(prior_sessions - next_sessions)))
             fields = {key: {"before": before["meeting"].get(key), "after": value} for key, value in after["meeting"].items() if before["meeting"].get(key) != value}
             for field in ("source_url", "retrieved_at", "evidence"):
                 if before.get(field) != after.get(field):
