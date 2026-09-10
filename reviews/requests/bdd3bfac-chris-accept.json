@@ -1,0 +1,15 @@
+{
+  "outcome": "accepted",
+  "person": "Chris",
+  "rationale": "All fine",
+  "evidence": [
+    "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_03_-_2026-06-25.pdf#page=9 (A2.2.1 opening condition)",
+    "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_03_-_2026-06-25.pdf#page=10 (A2.2.1(d), table column 4, first position)",
+    "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_03_-_2026-06-25.pdf#page=11 (A2.2.3)",
+    "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_b_sporting_-_iss_08_-_2026-08-05_7.pdf#page=25 (B2.5.5(c))"
+  ],
+  "identity_resolutions": {},
+  "regulation_confirmations": [
+    "regulations/formula-one:2026/9d14b4a36d698d86983ecf08086b7f4d8bd89fe6a0f777d46c4a97a07298fc9d"
+  ]
+}

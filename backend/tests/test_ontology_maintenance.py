@@ -112,6 +112,53 @@ def test_shacl_blocks_invalid_and_non_english_examples(tmp_path, invalid):
     assert (None, RDF.type, Namespace("http://www.w3.org/ns/shacl#").ValidationResult) in validation
 
 
+@pytest.mark.parametrize("literal_options", [{}, {"datatype": XSD.string}, {"lang": "en"}, {"lang": "fr"}],
+                         ids=["plain", "typed-string", "english-tagged", "french-tagged"])
+def test_regulation_machine_fields_require_neutral_strings(tmp_path, literal_options):
+    values = {
+        ONTOLOGY.checksum: "a" * 64,
+        ONTOLOGY.sectionAnchor: "B2.2.1",
+        ONTOLOGY.evidenceKind: "original",
+        ONTOLOGY.topic: "scoring",
+        ONTOLOGY.knowledgeState: "known",
+    }
+    data = Graph()
+    for predicate, value in values.items():
+        data.add((RESOURCE["example-regulation"], predicate, Literal(value, **literal_options)))
+    path = tmp_path / "regulation.ttl"
+    data.serialize(path, format="turtle")
+    completed, output = run_example(tmp_path, data=path)
+    expected_conforms = "lang" not in literal_options
+    assert completed.returncode == (0 if expected_conforms else 2), completed.stdout + completed.stderr
+    report = json.loads((output / "report.json").read_text("utf-8"))
+    assert report["conforms"] is expected_conforms
+    assert report["published"] is False
+    validation = Graph().parse(output / "validation.ttl", format="turtle")
+    paths = set(validation.objects(None, Namespace("http://www.w3.org/ns/shacl#").resultPath))
+    assert paths == (set() if expected_conforms else set(values))
+
+
+@pytest.mark.parametrize("literal_options", [{"lang": "en"}, {}, {"datatype": XSD.string}, {"lang": "fr"}],
+                         ids=["english", "untagged", "typed-string", "non-english"])
+def test_regulation_prose_still_requires_english(tmp_path, literal_options):
+    predicates = {RDFS.label, RDFS.comment, ONTOLOGY.evidence, ONTOLOGY.translationMethod,
+                  ONTOLOGY.passageText, ONTOLOGY.normalizedValue}
+    data = Graph()
+    for predicate in predicates:
+        data.add((RESOURCE["example-regulation"], predicate, Literal("Example prose", **literal_options)))
+    path = tmp_path / "prose.ttl"
+    data.serialize(path, format="turtle")
+    completed, output = run_example(tmp_path, data=path)
+    expected_conforms = literal_options.get("lang") == "en"
+    assert completed.returncode == (0 if expected_conforms else 2), completed.stdout + completed.stderr
+    report = json.loads((output / "report.json").read_text("utf-8"))
+    assert report["conforms"] is expected_conforms
+    assert report["published"] is False
+    validation = Graph().parse(output / "validation.ttl", format="turtle")
+    paths = set(validation.objects(None, Namespace("http://www.w3.org/ns/shacl#").resultPath))
+    assert paths == (set() if expected_conforms else predicates)
+
+
 def test_vocabulary_rename_rehearses_migration_and_records_compatibility(tmp_path):
     ontology = Graph().parse(ROOT / "ontology/motorsport.ttl", format="turtle")
     candidate = Graph()

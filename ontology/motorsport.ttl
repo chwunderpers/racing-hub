@@ -32,3 +32,72 @@ msh:startDate a owl:DatatypeProperty ; rdfs:label "start date"@en .
 msh:endDate a owl:DatatypeProperty ; rdfs:label "end date"@en .
 msh:identity a owl:DatatypeProperty ; rdfs:label "identity"@en ;
     rdfs:comment "An optional canonical identity key; labels never establish identity."@en .
+
+msh:CompetitionProfile a owl:Class ; rdfs:label "Competition Profile"@en ;
+    rdfs:comment "An English, season-scoped structured projection of a Competition's regulations, with each known value linked to governing Provisions and English evidence."@en .
+msh:ProfileValue a owl:Class ; rdfs:label "Profile Value"@en ;
+    rdfs:comment "An evidence-linked normalization for one Competition Profile topic, with an explicit knowledge state; not an authoritative Provision or an event award."@en .
+msh:RegulationDocument a owl:Class ; rdfs:label "Regulation Document"@en ;
+    rdfs:comment "An inventoried version of a governing document with authority, source, retrieval, checksum and section anchors; its issue date alone does not establish historical applicability."@en .
+msh:EnglishEvidencePassage a owl:Class ; rdfs:label "English Evidence Passage"@en ;
+    rdfs:comment "English evidence tied to a document section, explicitly distinguished as quotation, paraphrase or translation. Translation metadata does not turn a translation into an original quotation."@en .
+msh:Provision a owl:Class ; rdfs:label "Provision"@en ;
+    rdfs:comment "A section-addressable statement in a governing document, preserved with its version, applicability and source passage; linked interpretations do not replace the source."@en .
+
+msh:includesProfile a owl:ObjectProperty ; rdfs:label "includes profile"@en ;
+    rdfs:comment "Links a Publication to a Competition Profile included in that version; the link does not itself establish human approval."@en .
+msh:profileValue a owl:ObjectProperty ; rdfs:label "profile value"@en ;
+    rdfs:comment "Links a Competition Profile to a topic-specific normalized value or explicit knowledge state."@en .
+msh:provision a owl:ObjectProperty ; rdfs:label "provision"@en ;
+    rdfs:comment "Links a profile value to its supporting same-topic Provisions; evidence and conditions must remain accessible."@en .
+msh:provenance a owl:ObjectProperty ; rdfs:label "provenance"@en ;
+    rdfs:comment "Links a resource to supporting evidence. For regulations this is an English Evidence Passage, without restricting other existing provenance uses."@en .
+msh:document a owl:ObjectProperty ; rdfs:label "document"@en ;
+    rdfs:comment "Links an evidence passage to its inventoried source document version."@en .
+msh:amends a owl:ObjectProperty ; rdfs:label "amends"@en ;
+    rdfs:comment "Links an amending Provision to the Provision it changes; absence of a link is not proof of no amendments. No transitive or effective-date inference is asserted."@en .
+msh:sourceUrl a owl:ObjectProperty ; rdfs:label "source URL"@en ;
+    rdfs:comment "An external evidence URL, optionally with a page anchor; it identifies a source rather than a canonical resource or an authorization."@en .
+
+msh:version a owl:DatatypeProperty ; rdfs:label "version"@en ;
+    rdfs:comment "A language-neutral version identifier; ordering and historical applicability are not inferred from its lexical form."@en .
+msh:sourceLanguage a owl:DatatypeProperty ; rdfs:label "source language"@en ;
+    rdfs:comment "A language-neutral code identifying the original source language, not a claim that stored text has been linguistically verified."@en .
+msh:checksum a owl:DatatypeProperty ; rdfs:label "checksum"@en ;
+    rdfs:comment "For regulation documents, the language-neutral lowercase SHA-256 digest of retrieved source bytes. It verifies byte identity, not interpretation or reuse permission."@en .
+msh:authority a owl:DatatypeProperty ; rdfs:label "authority"@en ;
+    rdfs:comment "An English textual identification of the document's issuing authority; not a new organization identity mapping."@en .
+msh:retrievedAt a owl:DatatypeProperty ; rdfs:label "retrieved at"@en ;
+    rdfs:comment "The timezone-aware source observation time, stored as a neutral typed date-time; not an approval or effective time."@en .
+msh:issuedOn a owl:DatatypeProperty ; rdfs:label "issued on"@en ;
+    rdfs:comment "The document version's stated issue date, stored as a neutral typed date; not sufficient evidence of applicability to an earlier event."@en .
+msh:sectionAnchor a owl:DatatypeProperty ; rdfs:label "section anchor"@en ;
+    rdfs:comment "A language-neutral source locator or article identifier, optionally including a PDF page number, within an identified document version."@en .
+msh:passageText a owl:DatatypeProperty ; rdfs:label "passage text"@en ;
+    rdfs:comment "The retained English evidence wording, tagged as English and interpreted with its evidence kind and source anchor."@en .
+msh:evidenceKind a owl:DatatypeProperty ; rdfs:label "evidence kind"@en ;
+    rdfs:comment "The neutral code quotation, paraphrase or translation describing the relation of retained English wording to its source."@en .
+msh:translationMethod a owl:DatatypeProperty ; rdfs:label "translation method"@en ;
+    rdfs:comment "An English description of how evidence was translated; public metadata does not include private reviewer or authorization text."@en .
+msh:translationVersion a owl:DatatypeProperty ; rdfs:label "translation version"@en ;
+    rdfs:comment "A neutral translation revision identifier; a correction requires renewed review and does not erase earlier evidence versions."@en .
+msh:translatedAt a owl:DatatypeProperty ; rdfs:label "translated at"@en ;
+    rdfs:comment "The neutral typed date-time of translation, distinct from source retrieval and human review time."@en .
+msh:applicability a owl:DatatypeProperty ; rdfs:label "applicability"@en ;
+    rdfs:comment "English conditions and limits under which a Provision or interpretation applies; season membership alone does not establish applicability."@en .
+msh:discretion a owl:DatatypeProperty ; rdfs:label "discretion"@en ;
+    rdfs:comment "English evidence or limitations concerning officials' discretion and decisions; missing decision evidence is not evidence that no decision exists."@en .
+msh:exception a owl:DatatypeProperty ; rdfs:label "exception"@en ;
+    rdfs:comment "An English exception or limitation that must remain attached to a Provision or interpretation; absence does not establish an exhaustive exception inventory."@en .
+msh:effectiveFrom a owl:DatatypeProperty ; rdfs:label "effective from"@en ;
+    rdfs:comment "A sourced neutral typed start date for applicability, omitted when unknown; never invented from an issue date or season."@en .
+msh:effectiveUntil a owl:DatatypeProperty ; rdfs:label "effective until"@en ;
+    rdfs:comment "A sourced neutral typed end date for applicability, omitted when unknown; omission does not establish perpetual validity."@en .
+msh:topic a owl:DatatypeProperty ; rdfs:label "topic"@en ;
+    rdfs:comment "The neutral profile category code: eligibility, format, scoring, tyres, pit-stops, sporting or technical."@en .
+msh:knowledgeState a owl:DatatypeProperty ; rdfs:label "knowledge state"@en ;
+    rdfs:comment "A neutral code known, unknown, not-published or not-applicable. Missing evidence is unknown, not false; not-published and not-applicable require supporting evidence."@en .
+msh:normalizedValue a owl:DatatypeProperty ; rdfs:label "normalized value"@en ;
+    rdfs:comment "An English evidence-linked interpretation for a known profile topic, preserving applicability, uncertainty, exceptions and discretion."@en .
+msh:year a owl:DatatypeProperty ; rdfs:label "year"@en ;
+    rdfs:comment "A neutral integer season year; it does not imply complete regulation coverage or historical applicability of a document version."@en .

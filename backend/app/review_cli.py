@@ -7,7 +7,7 @@ from pathlib import Path
 from filelock import Timeout
 
 from app.publication import PublicationModule
-from app.review import ReviewService
+from app.review import ReviewService, show_review_item
 from app.stores import GraphDbProjection, PostgresOperationalStore
 
 
@@ -27,7 +27,14 @@ def main(arguments: list[str] | None = None, *, service: ReviewService | None = 
     commands.add_parser("publication").add_argument("item_id")
     options = parser.parse_args(arguments)
     try:
+        if service is None and options.command == "show":
+            result = show_review_item(options.reviews_dir, options.item_id)
+            print(json.dumps(result, indent=2, ensure_ascii=True))
+            return 0
         if service is None:
+            missing = [name for name in ("DATABASE_URL", "GRAPHDB_URL") if not os.environ.get(name)]
+            if missing:
+                raise ValueError("Missing required environment settings: " + ", ".join(missing))
             store = PostgresOperationalStore(os.environ["DATABASE_URL"])
             graph = GraphDbProjection(
                 os.environ["GRAPHDB_URL"], os.environ.get("GRAPHDB_REPOSITORY", "motorsport"),

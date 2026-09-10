@@ -10,11 +10,31 @@ season or replay its captured factual fixture before review.
 ## Prerequisites
 
 Use the existing Python 3.12 virtual environment with
-`backend/requirements-dev.txt` installed. Start the local Compose stores first.
-In the operator terminal, set `PYTHONPATH=backend`, `DATABASE_URL` and
+`backend/requirements-dev.txt` installed and set `PYTHONPATH=backend`.
+The `show ITEM_ID` command reads the local queue under its file lock; it requires
+no database or GraphDB settings and no running stores. It displays the saved
+preview, without refreshing it or verifying the current publication baseline.
+
+For other commands, start the local Compose stores first.
+In the operator terminal, set `DATABASE_URL` and
 `GRAPHDB_URL`; optionally set `GRAPHDB_REPOSITORY` (default `motorsport`).
 Connection values must be configured locally, never pasted into chat. Commands
-do not create repositories, install dependencies, or run deployment.
+report missing required setting names without displaying their values. They do
+not create repositories, install dependencies, or run deployment.
+
+For secured GraphDB, the host process also needs `GRAPHDB_MAINTENANCE_USER` and
+`GRAPHDB_MAINTENANCE_PASSWORD`. Compose reads its local environment file, but
+`python -m app.review_cli` does not. To load that file without printing secrets,
+use this alternative prefix with the same subcommand and arguments:
+
+```powershell
+.venv\Scripts\python -c "from dotenv import load_dotenv; load_dotenv('.env'); from app.review_cli import main; raise SystemExit(main())"
+```
+
+Existing terminal settings take precedence. Keep database and GraphDB connection
+settings configured for the host, not container-only service names. After an
+HTTP failure, inspect the queue, receipt and current publication before retrying;
+a staged candidate is not a published version.
 
 From the repository root, the command prefix on Windows is:
 
