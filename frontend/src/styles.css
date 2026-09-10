@@ -337,6 +337,83 @@ select, input {
   font-size: 12px;
 }
 
+.meeting-kind {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.shared-circuit, .field-provenance {
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.shared-circuit h3, .field-provenance summary {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.shared-circuit ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.shared-circuit li, .field-provenance dd {
+  display: grid;
+  gap: 4px;
+}
+
+.shared-circuit a, .field-provenance a {
+  color: var(--accent);
+  text-underline-offset: 4px;
+}
+
+.shared-circuit span, .field-provenance dd, .field-provenance dt span {
+  color: var(--secondary);
+  font-size: 14px;
+}
+
+.field-provenance summary {
+  cursor: pointer;
+}
+
+.field-provenance summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.field-provenance dl > div {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.field-provenance dt span {
+  margin-left: 12px;
+}
+
+.field-provenance dd {
+  margin: 8px 0 0;
+}
+
+.field-provenance p {
+  margin: 0;
+}
+
+.field-provenance .assertion-value {
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.detail-heading h2 {
+  overflow-wrap: anywhere;
+}
+
 .meeting-list {
   width: 100%;
 }

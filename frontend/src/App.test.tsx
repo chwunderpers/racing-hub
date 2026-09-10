@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
 import App from "./App";
@@ -136,4 +136,34 @@ it.each(["/", "/?from=2026-2-01", "/?from=2026-02-30"])("preserves filters throu
   expect(window.location.search).toContain("circuit=Albert+Park");
   expect(screen.getByLabelText("From date")).toHaveValue("2026-03-06");
   expect(screen.getByLabelText("Through date")).toHaveValue("2026-03-08");
+});
+
+it("filters shared Circuits by identity and navigates across Competitions without numbering prologues", async () => {
+  const common = { season: 2026, status: "scheduled", startDate: "2026-05-19", endDate: "2026-05-20", retrievedAt: "2026-09-10T09:47:31Z", publicationVersion: "test", sessions: [] };
+  const meetings = [
+    { ...common, id: "f1-spa", name: "Belgian Grand Prix", competition: "Formula One", competitionId: "competition:formula-one", circuit: "Circuit de Spa-Francorchamps", circuitId: "circuit:f1-circuit-7", round: 12, kind: "championship", sourceUrl: "https://www.formula1.com/en/racing/2026/belgium" },
+    { ...common, id: "gt-spa", name: "Spa Prologue", competition: "GT World Challenge Europe", competitionId: "competition:gt-world-challenge-europe", circuit: "Spa-Francorchamps", circuitId: "circuit:f1-circuit-7", round: null, roundId: null, kind: "prologue", sourceUrl: "https://www.gt-world-challenge-europe.com/event/245/crowdstrike-24-hours-of-spa--test-days", fieldAssertions: [{ field: "kind", value: "Round 3", source_url: "https://www.gt-world-challenge-europe.com/calendar", retrieved_at: "2026-09-10T09:47:31Z", locator: "Event.description", rule: "Calendar classification takes precedence", preferred: false }] },
+    { ...common, id: "other", name: "Different circuit", competition: "GT World Challenge Europe", competitionId: "competition:gt-world-challenge-europe", circuit: "Spa-Francorchamps", circuitId: "circuit:unrelated", round: 2, sourceUrl: "https://www.gt-world-challenge-europe.com/calendar" },
+  ];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => Response.json(String(input).endsWith("/api/health") ? { status: "ok", database: "ok" } : { meetings }));
+  render(<App />);
+  await screen.findByText("System ready");
+  fireEvent.change(screen.getByRole("combobox", { name: "Circuit" }), { target: { value: "circuit:f1-circuit-7" } });
+  expect(screen.getByRole("link", { name: "Belgian Grand Prix" })).toBeVisible();
+  expect(screen.getByRole("link", { name: "Spa Prologue" })).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Different circuit" })).not.toBeInTheDocument();
+  const row = screen.getByRole("link", { name: "Spa Prologue" }).closest("article")!;
+  expect(within(row).getByLabelText("Prologue")).toBeVisible();
+  expect(within(row).queryByLabelText(/Round|Schedule position/)).not.toBeInTheDocument();
+  fireEvent.change(screen.getByRole("combobox", { name: "Competition" }), { target: { value: "competition:formula-one" } });
+  fireEvent.click(screen.getByRole("link", { name: "Belgian Grand Prix" }));
+  const related = screen.getByRole("region", { name: "Shared circuit" });
+  fireEvent.click(within(related).getByRole("link", { name: /Spa Prologue/ }));
+  expect(screen.getByRole("heading", { name: "Spa Prologue" })).toBeVisible();
+  fireEvent.click(screen.getByText("Source assertions (1)"));
+  expect(screen.getByText("Round 3")).toBeVisible();
+  expect(screen.getByText("Event.description")).toBeVisible();
+  fireEvent.click(screen.getByRole("link", { name: "Back to schedule" }));
+  expect(screen.getByRole("combobox", { name: "Circuit" })).toHaveValue("circuit:f1-circuit-7");
+  expect(screen.getByRole("combobox", { name: "Competition" })).toHaveValue("competition:formula-one");
 });

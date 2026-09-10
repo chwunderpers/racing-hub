@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ExternalLink,
   Flag,
+  FlaskConical,
   Gauge,
   MapPin,
   Trophy,
@@ -89,8 +90,14 @@ function App() {
   const from = validFilterDate(rawFrom) ? rawFrom : "";
   const through = validFilterDate(rawThrough) ? rawThrough : "";
   const invalidDates = Boolean(from && through && from > through);
-  const filtered = meetings.filter((meeting) => !invalidDates && (!competition || meeting.competition === competition)
-    && (!circuit || meeting.circuit === circuit) && (!from || meeting.endDate >= from) && (!through || meeting.startDate <= through));
+  const competitionOptions = new Map(meetings.map((meeting) => [meeting.competitionId || meeting.competition, meeting.competition]));
+  const circuitOptions = new Map<string, string>();
+  for (const meeting of meetings) {
+    const identity = meeting.circuitId || meeting.circuit;
+    if (!circuitOptions.has(identity)) circuitOptions.set(identity, meeting.circuit);
+  }
+  const filtered = meetings.filter((meeting) => !invalidDates && (!competition || (meeting.competitionId || meeting.competition) === competition)
+    && (!circuit || (meeting.circuitId || meeting.circuit) === circuit) && (!from || meeting.endDate >= from) && (!through || meeting.startDate <= through));
   const selectedId = query.get("meeting");
   const selected = meetings.find((meeting) => meeting.id === selectedId);
 
@@ -156,14 +163,14 @@ function App() {
             <Trophy size={17} aria-hidden="true" />
             <select aria-label="Competition" value={competition} onChange={(event) => changeQuery("competition", event.target.value)}>
               <option value="">All competitions</option>
-              {[...new Set(meetings.map((meeting) => meeting.competition))].sort().map((name) => <option key={name}>{name}</option>)}
+              {[...competitionOptions].sort((first, second) => first[1].localeCompare(second[1])).map(([identity, name]) => <option key={identity} value={identity}>{name}</option>)}
             </select>
           </label>
           <label className="filter-field">
             <MapPin size={17} aria-hidden="true" />
             <select aria-label="Circuit" value={circuit} onChange={(event) => changeQuery("circuit", event.target.value)}>
               <option value="">All circuits</option>
-              {[...new Set(meetings.map((meeting) => meeting.circuit))].sort().map((name) => <option key={name}>{name}</option>)}
+              {[...circuitOptions].sort((first, second) => first[1].localeCompare(second[1])).map(([identity, name]) => <option key={identity} value={identity}>{name}</option>)}
             </select>
           </label>
           <div className="filter-field date-filter">
@@ -176,7 +183,7 @@ function App() {
         {viewState === "ready" && freshness?.stale && <p className="stale-notice" role="status">Schedule may be outdated. {freshness.reason}{freshness.lastSuccessAt ? ` Last verified ${formatRetrieved(freshness.lastSuccessAt)}.` : ""}</p>}
         {invalidDates && <p className="stale-notice" role="alert">From date must not follow through date.</p>}
         {malformedDates && <p className="stale-notice" role="alert">Date filters must use valid YYYY-MM-DD dates.</p>}
-        {viewState === "ready" && selected && <MeetingDetails meeting={selected} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
+        {viewState === "ready" && selected && <MeetingDetails meeting={selected} meetings={meetings} meetingHref={(identity) => queryFor("meeting", identity)} onMeeting={(identity) => changeQuery("meeting", identity)} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
         {viewState === "ready" && selectedId && !selected && <div className="empty-state"><h2>Meeting not found</h2><a href={queryFor("meeting", "")} onClick={(event) => { event.preventDefault(); changeQuery("meeting", ""); }}>Back to schedule</a></div>}
 
         <section className="schedule-lane" aria-live="polite" hidden={viewState === "ready" && Boolean(selectedId)}>
@@ -202,14 +209,15 @@ function App() {
 
           {viewState === "ready" && meetings.length > 0 && (
             <div className="meeting-list">
-              {filtered.map((meeting, index) => (
+              {filtered.map((meeting) => (
                 <article className="meeting-row" key={meeting.id}>
-                  <div className="meeting-round" aria-label={meeting.round ? `Round ${meeting.round}` : `Schedule position ${index + 1}`}>
-                    {String(meeting.round || index + 1).padStart(2, "0")}
+                  <div className="meeting-round" aria-label={meeting.round ? `Round ${meeting.round}` : meeting.kind === "prologue" ? "Prologue" : meeting.kind === "test" ? "Test" : "Meeting"}>
+                    {meeting.round ? String(meeting.round).padStart(2, "0") : <FlaskConical size={24} aria-hidden="true" />}
                   </div>
                   <div className="meeting-primary">
                     <p>{meeting.competition}</p>
                     <h2><a href={queryFor("meeting", meeting.id)} onClick={(event) => { if (!event.ctrlKey && !event.metaKey) { event.preventDefault(); changeQuery("meeting", meeting.id); } }}>{meeting.name}</a></h2>
+                    {meeting.kind && meeting.kind !== "championship" && <span className="meeting-kind">{meeting.kind === "prologue" ? "Prologue" : "Test"}</span>}
                     {meeting.status === "cancelled" && <strong>Cancelled</strong>}
                     <span className="meeting-circuit">
                       <MapPin size={16} aria-hidden="true" />

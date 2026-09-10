@@ -42,6 +42,29 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** FieldAssertion */
+        FieldAssertion: {
+            /** Field */
+            field: string;
+            /** Value */
+            value: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Locator */
+            locator: string;
+            /** Rule */
+            rule: string;
+            /**
+             * Preferred
+             * @default false
+             */
+            preferred: boolean;
+        };
         /** FreshnessResponse */
         FreshnessResponse: {
             /** Stale */
@@ -52,6 +75,8 @@ export interface components {
             checkedAt?: string | null;
             /** Lastsuccessat */
             lastSuccessAt?: string | null;
+            /** Sources */
+            sources?: components["schemas"]["SourceFreshnessResponse"][];
         };
         /** HealthResponse */
         HealthResponse: {
@@ -86,6 +111,10 @@ export interface components {
             season: number;
             /** Circuit */
             circuit: string;
+            /** Competitionid */
+            competitionId?: string | null;
+            /** Circuitid */
+            circuitId?: string | null;
             /** Startdate */
             startDate: string;
             /** Enddate */
@@ -98,6 +127,10 @@ export interface components {
             round?: number | null;
             /** Roundid */
             roundId?: string | null;
+            /** Kind */
+            kind?: ("championship" | "test" | "prologue") | null;
+            /** Fieldassertions */
+            fieldAssertions?: components["schemas"]["FieldAssertion"][];
             /** Eventtimezone */
             eventTimezone?: string | null;
             /** Sessions */
@@ -122,6 +155,19 @@ export interface components {
             status: "scheduled" | "completed" | "cancelled";
             start: components["schemas"]["TimeResponse"];
             end: components["schemas"]["TimeResponse"] | null;
+        };
+        /** SourceFreshnessResponse */
+        SourceFreshnessResponse: {
+            /** Sourcefamily */
+            sourceFamily: string;
+            /** Stale */
+            stale: boolean;
+            /** Reason */
+            reason?: string | null;
+            /** Checkedat */
+            checkedAt?: string | null;
+            /** Lastsuccessat */
+            lastSuccessAt?: string | null;
         };
         /** TimeResponse */
         TimeResponse: {

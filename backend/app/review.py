@@ -27,7 +27,7 @@ class DecisionRequest(BaseModel):
 class ReviewStore(Protocol):
     def visible_meetings(self) -> list[dict[str, object]]: ...
 
-    def publication_envelope(self, version: str) -> CandidateEnvelope: ...
+    def publication_envelope(self, version: str) -> PublicationCandidate: ...
 
 
 def serialized(method):
@@ -157,7 +157,7 @@ class ReviewService:
         self._write(self.directory / "queue.yaml", queue)
         return receipt
 
-    def _accepted_candidate(self, item: dict) -> tuple[dict, CandidateEnvelope]:
+    def _accepted_candidate(self, item: dict) -> tuple[dict, PublicationCandidate]:
         decision_id = item.get("acceptedDecision")
         if not decision_id:
             raise ValueError("An accepted decision is required")
@@ -174,9 +174,9 @@ class ReviewService:
         if preview["validationErrors"] or preview["conflicts"] or decision["preview"]["conflicts"]:
             raise ValueError("Candidate has validation errors or publication conflicts")
         for field in set(preview["unresolvedIdentities"] + decision["preview"]["unresolvedIdentities"]):
-            if isinstance(envelope, SeasonCandidateEnvelope):
+            if not isinstance(envelope, CandidateEnvelope):
                 source_id, identity_field = field.rsplit("/", 1)
-                entry = next((entry for entry in envelope.meetings if entry.source_identity == source_id), None)
+                entry = next((entry for entry in candidate_meetings(envelope) if entry.source_identity == source_id), None)
                 identity = getattr(entry.meeting, identity_field, None) if entry else None
             else:
                 identity = item["candidate"]["meeting"].get(field)
@@ -207,7 +207,7 @@ class ReviewService:
             candidate = parse_candidate(candidate).model_dump(mode="json")
         except ValidationError as error:
             errors = [f"{'.'.join(map(str, entry['loc']))}: {entry['msg']}" for entry in error.errors()]
-        if "meetings" in candidate or isinstance(baseline, SeasonCandidateEnvelope):
+        if "meetings" in candidate or "seasons" in candidate or (baseline is not None and not isinstance(baseline, CandidateEnvelope)):
             return self._season_preview(candidate, baseline, baseline_version, errors)
         source_identity = candidate.get("source_identity")
         same_meeting = baseline is not None and source_identity == baseline.source_identity
@@ -255,22 +255,29 @@ class ReviewService:
         if not errors:
             proposed = {entry.source_identity: entry.model_dump(mode="json") for entry in candidate_meetings(parse_candidate(candidate))}
         conflicts = []
-        if "meetings" not in candidate:
+        if "meetings" not in candidate and "seasons" not in candidate:
             conflicts.append("A season publication requires a complete season candidate")
         if not errors:
             missing = sorted(set(previous) - set(proposed))
             if missing:
                 conflicts.append("Missing published Meetings; retain them with explicit sourced cancellation: " + ", ".join(missing))
         changes = {}
-        unresolved = []
+        unresolved = [
+            f"{identity}/circuit_identity" for identity in sorted(set(proposed) - set(previous))
+            if proposed[identity]["meeting"]["competition_identity"] == "gt-world-challenge-europe"
+        ]
         for identity in previous.keys() & proposed.keys():
             before, after = previous[identity], proposed[identity]
+            prior_observations = sum(assertion["field"] == "timetable" for assertion in before.get("field_assertions", []))
+            next_observations = sum(assertion["field"] == "timetable" for assertion in after.get("field_assertions", []))
+            if next_observations < prior_observations:
+                conflicts.append("Missing published timetable observations; retain the evidence or provide a corrected candidate: " + identity)
             prior_sessions = {session["identity"] for session in before["meeting"].get("sessions", [])}
             next_sessions = {session["identity"] for session in after["meeting"].get("sessions", [])}
             if prior_sessions - next_sessions:
                 conflicts.append("Missing published Sessions; retain them with explicit sourced cancellation: " + ", ".join(sorted(prior_sessions - next_sessions)))
             fields = {key: {"before": before["meeting"].get(key), "after": value} for key, value in after["meeting"].items() if before["meeting"].get(key) != value}
-            for field in ("source_url", "retrieved_at", "evidence"):
+            for field in ("source_url", "retrieved_at", "evidence", "field_assertions"):
                 if before.get(field) != after.get(field):
                     fields[field] = {"before": before.get(field), "after": after.get(field)}
             if fields:

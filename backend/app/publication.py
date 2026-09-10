@@ -10,7 +10,7 @@ from threading import RLock
 from typing import Literal, Protocol
 
 import tzdata
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator, model_serializer
 
 
 class CandidateMeeting(BaseModel):
@@ -118,20 +118,56 @@ class CandidateSession(BaseModel):
 
 
 class ScheduledMeeting(CandidateMeeting):
-    round_number: int = Field(gt=0)
+    round_number: int | None = Field(gt=0)
+    kind: Literal["championship", "test", "prologue"] = "championship"
     event_timezone: str | None = None
     sessions: list[CandidateSession]
 
+    @model_serializer(mode="wrap")
+    def compatible_dump(self, handler):
+        value = handler(self)
+        if self.kind == "championship":
+            value.pop("kind", None)
+        return value
+
     @model_validator(mode="after")
     def distinct_sessions(self) -> "ScheduledMeeting":
+        if (self.kind == "championship") != (self.round_number is not None):
+            raise ValueError("Only championship Meetings have Round numbers")
         identities = [session.identity for session in self.sessions]
         if len(identities) != len(set(identities)):
             raise ValueError("Duplicate session identity")
         return self
 
 
+class FieldAssertion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    field: str = Field(min_length=1)
+    value: str
+    source_url: str
+    retrieved_at: AwareDatetime
+    locator: str = Field(min_length=1)
+    rule: str = Field(min_length=1)
+    preferred: bool = False
+
+    @field_validator("source_url")
+    @classmethod
+    def valid_url(cls, value: str) -> str:
+        HttpUrl(value)
+        return value
+
+
 class ScheduledEnvelope(CandidateEnvelope):
     meeting: ScheduledMeeting
+    field_assertions: list[FieldAssertion] = Field(default_factory=list)
+
+    @model_serializer(mode="wrap")
+    def compatible_dump(self, handler):
+        value = handler(self)
+        if not self.field_assertions:
+            value.pop("field_assertions", None)
+        return value
 
 
 class SeasonCandidateEnvelope(BaseModel):
@@ -157,14 +193,45 @@ class SeasonCandidateEnvelope(BaseModel):
         return self
 
 
-PublicationCandidate = CandidateEnvelope | SeasonCandidateEnvelope
+class PublicationSnapshot(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_identity: Literal["racing-hub:snapshot"] = "racing-hub:snapshot"
+    source_language: Literal["en"] = "en"
+    seasons: list[SeasonCandidateEnvelope] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def distinct_scopes(self) -> "PublicationSnapshot":
+        scopes = [(season.competition_identity, season.season_year) for season in self.seasons]
+        meetings = [entry.source_identity for season in self.seasons for entry in season.meetings]
+        sessions = [session.identity for season in self.seasons for entry in season.meetings for session in entry.meeting.sessions]
+        if len(scopes) != len(set(scopes)) or len(meetings) != len(set(meetings)) or len(sessions) != len(set(sessions)):
+            raise ValueError("Duplicate Season, Meeting or Session identity in publication")
+        return self
+
+
+PublicationCandidate = CandidateEnvelope | SeasonCandidateEnvelope | PublicationSnapshot
+
+
+def merge_season(previous: PublicationCandidate | None, incoming: SeasonCandidateEnvelope) -> PublicationCandidate:
+    if previous is None or isinstance(previous, CandidateEnvelope):
+        return incoming
+    seasons = previous.seasons if isinstance(previous, PublicationSnapshot) else [previous]
+    retained = [season for season in seasons if (season.competition_identity, season.season_year) != (incoming.competition_identity, incoming.season_year)]
+    if not retained:
+        return incoming
+    return PublicationSnapshot(seasons=sorted([*retained, incoming], key=lambda season: (season.competition_identity, season.season_year)))
 
 
 def parse_candidate(value: dict) -> PublicationCandidate:
+    if "seasons" in value:
+        return PublicationSnapshot.model_validate(value)
     return SeasonCandidateEnvelope.model_validate(value) if "meetings" in value else CandidateEnvelope.model_validate(value)
 
 
 def candidate_meetings(candidate: PublicationCandidate) -> list[CandidateEnvelope]:
+    if isinstance(candidate, PublicationSnapshot):
+        return [entry for season in candidate.seasons for entry in season.meetings]
     return list(candidate.meetings) if isinstance(candidate, SeasonCandidateEnvelope) else [candidate]
 
 
@@ -208,8 +275,11 @@ def publication_version(envelope: PublicationCandidate) -> str:
 
 def meeting_view(envelope: CandidateEnvelope) -> dict[str, object]:
     meeting = envelope.meeting
+    identities = canonical_resource_ids(envelope)
     view = {
         "id": canonical_meeting_id(envelope.source_identity),
+        "competitionId": identities["competitions"],
+        "circuitId": identities["circuits"],
         "status": meeting.status,
         "name": meeting.meeting_name,
         "competition": meeting.competition_name,
@@ -225,13 +295,16 @@ def meeting_view(envelope: CandidateEnvelope) -> dict[str, object]:
             return {**clock.model_dump(), "instant": clock.instant.isoformat().replace("+00:00", "Z") if clock.instant else None} if clock else None
         view.update({
             "round": meeting.round_number,
-            "roundId": f"round:{envelope.source_identity}",
+            "roundId": f"round:{envelope.source_identity}" if meeting.round_number is not None else None,
+            "kind": meeting.kind,
             "eventTimezone": meeting.event_timezone,
             "sessions": [{
                 "id": session.identity, "name": session.name, "status": session.status,
                 "start": clock_view(session.start), "end": clock_view(session.end),
             } for session in meeting.sessions],
         })
+    if isinstance(envelope, ScheduledEnvelope) and envelope.field_assertions:
+        view["fieldAssertions"] = [assertion.model_dump(mode="json") for assertion in envelope.field_assertions]
     return view
 
 
@@ -309,15 +382,16 @@ class InMemoryOperationalStore:
         self._staged: dict[str, PublicationCandidate] = {}
         self._resources = InMemoryCanonicalResources()
         self._publication_lock = RLock()
-        self._source_attempt: dict | None = None
+        self._source_attempts: dict[str, dict] = {}
 
-    def record_source_attempt(self, checked_at: datetime, success: bool, pending: bool = False) -> None:
-        previous = self._source_attempt or {}
-        self._source_attempt = {"checkedAt": checked_at.isoformat(), "success": success, "pending": pending, "lastSuccessAt": checked_at.isoformat() if success else previous.get("lastSuccessAt")}
+    def record_source_attempt(self, checked_at: datetime, success: bool, pending: bool = False, source_family: str = "formula-one") -> None:
+        previous = self._source_attempts.get(source_family, {})
+        self._source_attempts[source_family] = {"checkedAt": checked_at.isoformat(), "success": success, "pending": pending, "lastSuccessAt": checked_at.isoformat() if success else previous.get("lastSuccessAt")}
 
     def source_freshness(self) -> dict:
-        from app.freshness import freshness_view
-        return freshness_view(self._source_attempt)
+        from app.freshness import source_freshness_view
+        competitions = {entry.meeting.competition_identity for entry in candidate_meetings(self._staged[self.current_version])} if self.current_version else set()
+        return source_freshness_view(self._source_attempts, competitions)
 
     def publication_lock(self) -> AbstractContextManager:
         return self._publication_lock

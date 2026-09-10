@@ -1,0 +1,20 @@
+{
+  "season": 2026,
+  "source_url": "https://www.gt-world-challenge-europe.com/calendar",
+  "retrieved_at": "2026-09-10T09:47:31Z",
+  "coverage": "Meeting dates and calendar classification; timetable observations require separate Session identity review",
+  "meetings": [
+    {"id": "244", "slug": "official-test-days", "name": "Official Test Days - Prologue", "start": "2026-04-08", "end": "2026-04-09", "classification": "Test Day", "place": "Paul Ricard", "description": ", Round 1, Official Test Days - Prologue, France"},
+    {"id": "246", "slug": "circuit-paul-ricard", "name": "Circuit Paul Ricard", "start": "2026-04-10", "end": "2026-04-12", "classification": "Round 1", "place": "Paul Ricard"},
+    {"id": "247", "slug": "brands-hatch", "name": "Brands Hatch", "start": "2026-05-02", "end": "2026-05-03", "classification": "Round 2", "place": "Brands Hatch"},
+    {"id": "245", "slug": "crowdstrike-24-hours-of-spa--test-days", "name": "CrowdStrike 24 Hours of Spa - Prologue", "start": "2026-05-19", "end": "2026-05-20", "classification": "Test Day", "place": "Spa-Francorchamps"},
+    {"id": "248", "slug": "monza", "name": "Monza", "start": "2026-05-28", "end": "2026-05-31", "classification": "Round 3", "place": "Autodromo Nazionale, Italy"},
+    {"id": "249", "slug": "crowdstrike-24-hours-of-spa", "name": "CrowdStrike 24 Hours of Spa", "start": "2026-06-23", "end": "2026-06-28", "classification": "Round 4", "place": "Spa-Francorchamps"},
+    {"id": "250", "slug": "misano", "name": "Misano", "start": "2026-07-16", "end": "2026-07-19", "classification": "Round 5", "place": "Misano World Circuit, Italy, Italy"},
+    {"id": "251", "slug": "magny-cours", "name": "Magny-Cours", "start": "2026-07-30", "end": "2026-08-02", "classification": "Round 6", "place": "Circuit de Nevers Magny-Cours"},
+    {"id": "252", "slug": "n%C3%BCrburgring", "name": "N&uuml;rburgring ", "start": "2026-08-28", "end": "2026-08-30", "classification": "Round 7", "place": ", Germany"},
+    {"id": "253", "slug": "zandvoort", "name": "Zandvoort", "start": "2026-09-18", "end": "2026-09-20", "classification": "Round 8", "place": "Circuit Park Zandvoort, Netherlands"},
+    {"id": "254", "slug": "barcelona", "name": "Barcelona", "start": "2026-10-02", "end": "2026-10-04", "classification": "Round 9", "place": "Circuit de Barcelona - Catalunya, Spain"},
+    {"id": "255", "slug": "portimao", "name": "Portimao", "start": "2026-10-16", "end": "2026-10-18", "classification": "Round 10", "place": "Portimao Circuit"}
+  ]
+}

@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.stores import PostgresOperationalStore
+from app.publication import FieldAssertion
 
 
 class HealthResponse(BaseModel):
@@ -38,14 +39,26 @@ class MeetingResponse(BaseModel):
     competition: str
     season: int
     circuit: str
+    competitionId: str | None = None
+    circuitId: str | None = None
     startDate: str
     endDate: str
     sourceUrl: str
     retrievedAt: str
     round: int | None = None
     roundId: str | None = None
+    kind: Literal["championship", "test", "prologue"] | None = None
+    fieldAssertions: list[FieldAssertion] = Field(default_factory=list)
     eventTimezone: str | None = None
     sessions: list[SessionResponse] = Field(default_factory=list)
+
+
+class SourceFreshnessResponse(BaseModel):
+    sourceFamily: str
+    stale: bool
+    reason: str | None = None
+    checkedAt: str | None = None
+    lastSuccessAt: str | None = None
 
 
 class FreshnessResponse(BaseModel):
@@ -53,6 +66,7 @@ class FreshnessResponse(BaseModel):
     reason: str | None = None
     checkedAt: str | None = None
     lastSuccessAt: str | None = None
+    sources: list[SourceFreshnessResponse] = Field(default_factory=list)
 
 
 class ScheduleResponse(BaseModel):

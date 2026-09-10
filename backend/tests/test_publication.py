@@ -45,6 +45,8 @@ def test_publish_promotes_only_after_operational_and_graph_versions_agree() -> N
         {
             "publicationVersion": result.version,
             "id": "meeting:f1:2026:australia",
+            "competitionId": "competition:formula-one",
+            "circuitId": "circuit:albert-park-grand-prix-circuit",
             "status": "scheduled",
             "name": "Australian Grand Prix",
             "competition": "Formula One",

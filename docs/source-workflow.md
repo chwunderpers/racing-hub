@@ -27,6 +27,8 @@ requirements as part of operator setup. Run from the repository root:
 ```powershell
 .venv\Scripts\python -m app.source_workflow --season 2026
 .venv\Scripts\python -m app.source_workflow --fixture backend/fixtures/f1-2026-source.json
+.venv\Scripts\python -m app.source_workflow --source-family gt-world-challenge-europe --season 2026
+.venv\Scripts\python -m app.source_workflow --source-family gt-world-challenge-europe --fixture backend/fixtures/gtwce-2026-source.json
 ```
 
 The first command uses ordinary sequential HTTPS GETs, parses HTML/JavaScript
@@ -67,6 +69,10 @@ statuses, identity or provenance evidence create a pending review. Freshness exp
 24 hours after the last successful source verification; failures and pending newer
 revisions mark the public schedule stale immediately. After publication, a matching
 fetch clears the pending-revision marker. No successful fetch means unverified.
+Checks are isolated by source family in `source_checks`; initialization copies legacy
+F1 attempts without deleting them. The schedule is stale when any included or checked
+source is stale. A GT success cannot clear an F1 failure. API freshness includes
+per-source details. The current 24-hour policy is applied independently to both families.
 
 ## Coverage
 
@@ -76,6 +82,62 @@ coverage. The separately reported Saudi Arabian cancellation is not reconstructe
 into this F1-only fixture. The Adapter pins the observed Meeting-key inventory and
 Round order and regular/Sprint session-code sets; a changed calendar fails closed until investigation verifies the new
 membership and updates that manifest and fixture. New membership changes must also
-be assessed against the current published baseline and human-reviewed as a whole season. Multi-Competition
-ingestion, source scheduling, historical backfill and formal OWL/SHACL are outside
-this slice. Existing RDF identifiers remain stable through the Racing Hub rename.
+be assessed against the current published baseline and human-reviewed as a whole season.
+Source scheduling, historical backfill and formal OWL/SHACL remain outside this slice.
+Existing RDF identifiers remain stable through the Racing Hub rename.
+
+## GT World Challenge Europe
+
+The [verified source inventory](sources/gt-world-challenge-europe.md) covers 12
+Meetings: ten championship Rounds and two unnumbered prologues. The Adapter uses
+calendar classification, not conflicting JSON-LD Round descriptions. It parses
+bounded public HTML and JSON-LD without script execution. Unknown inventory,
+classification or schema, missing Meetings, redirects and access controls stop acquisition.
+Missing timetable tables/rows also stop acquisition. A decrease in previously
+published timetable observation counts blocks review until the evidence is retained
+or a corrected candidate supplies the missing observations.
+
+Coverage is **Meeting dates**, not canonical GT Sessions. All 104 observed timetable
+rows remain field-level source observations, including five unnamed Barcelona rows,
+non-driving entries and dates outside Meeting bounds. No Session identity, duration,
+timezone or UTC-date rollover is fabricated. The fixture is a minimal factual
+date-level regression sample; live acquisition additionally retains address, operator,
+cup and timetable evidence. Fixture replay therefore is not a lossless live refresh.
+
+The versioned `gtwce-circuits-2026-v1` crosswalk uses explicit source Meeting keys.
+Monza, Spa, Barcelona and Zandvoort reuse existing F1 Circuit identities. Other
+Circuits have separate GT identities; Nurburgring layout remains unresolved and
+must not be merged with a future NLS course by name. Every new GT Meeting requires
+an explicit `source_identity/circuit_identity` resolution in the human decision.
+Raw provider labels and competing classifications remain `field_assertions` with
+source URL, retrieval time, locator, preference and transformation rule. Acceptance
+of the candidate selects these rules; it never erases the retained alternatives.
+
+`PublicationSnapshot` contains separately validated Competition/Season envelopes.
+Fetching one season retains other published seasons unchanged. Review rejects
+missing previously published Meetings or Sessions. Publication promotes all seasons
+under one hash only after exact GraphDB agreement. Existing F1 candidate serialization,
+publication hashes and persisted IRIs remain unchanged. Canonical IDs in schedule
+responses are derived from the accepted envelope, never display-label joins.
+
+The browser filters Circuits by `circuitId`, shows prologues without Round numbers,
+and links Meetings across Competitions at a shared Circuit. Source assertions are
+expandable in GT detail views. Query the exact schedule `publicationVersion`:
+
+```sparql
+PREFIX msh: <https://w3id.org/motorsport-hub/ontology/>
+SELECT DISTINCT ?circuit WHERE {
+   GRAPH <https://w3id.org/motorsport-hub/graph/publication/VERSION> {
+      ?f1 a msh:Meeting ;
+         msh:competition <https://w3id.org/motorsport-hub/resource/competition/formula-one> ;
+         msh:circuit ?circuit .
+      ?gt a msh:Meeting ;
+         msh:competition <https://w3id.org/motorsport-hub/resource/competition/gt-world-challenge-europe> ;
+         msh:circuit ?circuit .
+   }
+}
+```
+
+The source command queues a combined candidate, not a decision. Separate exact human
+decision and publication confirmations remain mandatory. Do not mark Issue 6's
+approved-season publication criterion complete until its publication receipt exists.

@@ -54,6 +54,54 @@
   },
   "components": {
     "schemas": {
+      "FieldAssertion": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Field"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "retrieved_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Retrieved At"
+          },
+          "locator": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Locator"
+          },
+          "rule": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Rule"
+          },
+          "preferred": {
+            "type": "boolean",
+            "title": "Preferred",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "field",
+          "value",
+          "source_url",
+          "retrieved_at",
+          "locator",
+          "rule"
+        ],
+        "title": "FieldAssertion"
+      },
       "FreshnessResponse": {
         "properties": {
           "stale": {
@@ -92,6 +140,13 @@
               }
             ],
             "title": "Lastsuccessat"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceFreshnessResponse"
+            },
+            "type": "array",
+            "title": "Sources"
           }
         },
         "type": "object",
@@ -161,6 +216,28 @@
             "type": "string",
             "title": "Circuit"
           },
+          "competitionId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Competitionid"
+          },
+          "circuitId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Circuitid"
+          },
           "startDate": {
             "type": "string",
             "title": "Startdate"
@@ -198,6 +275,29 @@
               }
             ],
             "title": "Roundid"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "championship",
+                  "test",
+                  "prologue"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "fieldAssertions": {
+            "items": {
+              "$ref": "#/components/schemas/FieldAssertion"
+            },
+            "type": "array",
+            "title": "Fieldassertions"
           },
           "eventTimezone": {
             "anyOf": [
@@ -301,6 +401,57 @@
           "end"
         ],
         "title": "SessionResponse"
+      },
+      "SourceFreshnessResponse": {
+        "properties": {
+          "sourceFamily": {
+            "type": "string",
+            "title": "Sourcefamily"
+          },
+          "stale": {
+            "type": "boolean",
+            "title": "Stale"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "checkedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkedat"
+          },
+          "lastSuccessAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastsuccessat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sourceFamily",
+          "stale"
+        ],
+        "title": "SourceFreshnessResponse"
       },
       "TimeResponse": {
         "properties": {

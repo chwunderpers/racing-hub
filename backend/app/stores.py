@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 from contextlib import contextmanager
 from collections.abc import Iterator
 from urllib.parse import quote
@@ -9,7 +10,7 @@ from psycopg.rows import dict_row
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.compare import isomorphic
 
-from app.publication import CandidateEnvelope, PublicationCandidate, SeasonCandidateEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view
+from app.publication import CandidateEnvelope, PublicationCandidate, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view
 
 
 MOTORSPORT = Namespace("https://w3id.org/motorsport-hub/ontology/")
@@ -24,6 +25,16 @@ CREATE TABLE IF NOT EXISTS source_attempts (
     pending BOOLEAN NOT NULL DEFAULT FALSE
 );
 ALTER TABLE source_attempts ADD COLUMN IF NOT EXISTS pending BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE TABLE IF NOT EXISTS source_checks (
+    source_family TEXT NOT NULL,
+    checked_at TIMESTAMPTZ NOT NULL,
+    success BOOLEAN NOT NULL,
+    pending BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (source_family, checked_at)
+);
+INSERT INTO source_checks (source_family, checked_at, success, pending)
+SELECT 'formula-one', checked_at, success, pending FROM source_attempts
+ON CONFLICT DO NOTHING;
 CREATE TABLE IF NOT EXISTS competitions (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL
@@ -82,19 +93,21 @@ class PostgresOperationalStore:
         with psycopg.connect(self._database_url, connect_timeout=5) as connection:
             connection.execute(SCHEMA_SQL)
 
-    def record_source_attempt(self, checked_at, success: bool, pending: bool = False) -> None:
+    def record_source_attempt(self, checked_at, success: bool, pending: bool = False, source_family: str = "formula-one") -> None:
         with psycopg.connect(self._database_url, connect_timeout=5) as connection:
-            connection.execute("INSERT INTO source_attempts (checked_at, success, pending) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING", (checked_at, success, pending))
+            connection.execute("INSERT INTO source_checks (source_family, checked_at, success, pending) VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING", (source_family, checked_at, success, pending))
 
     def source_freshness(self) -> dict:
-        from app.freshness import freshness_view
+        from app.freshness import source_freshness_view
         with psycopg.connect(self._database_url, connect_timeout=5) as connection:
             try:
-                row = connection.execute("SELECT checked_at, success, (SELECT max(checked_at) FROM source_attempts WHERE success), pending FROM source_attempts ORDER BY checked_at DESC LIMIT 1").fetchone()
+                rows = connection.execute("SELECT DISTINCT ON (source_family) source_family, checked_at, success, max(checked_at) FILTER (WHERE success) OVER (PARTITION BY source_family), pending FROM source_checks ORDER BY source_family, checked_at DESC").fetchall()
             except psycopg.errors.UndefinedTable:
-                row = None
-        attempt = {"checkedAt": row[0].isoformat(), "success": row[1], "lastSuccessAt": row[2].isoformat() if row[2] else None, "pending": row[3]} if row else None
-        return freshness_view(attempt)
+                rows = []
+        attempts = {row[0]: {"checkedAt": row[1].isoformat(), "success": row[2], "lastSuccessAt": row[3].isoformat() if row[3] else None, "pending": row[4]} for row in rows}
+        version = self.current_publication_version()
+        competitions = {entry.meeting.competition_identity for entry in candidate_meetings(self.publication_envelope(version))} if version else set()
+        return source_freshness_view(attempts, competitions)
 
     @contextmanager
     def publication_lock(self) -> Iterator[None]:
@@ -208,7 +221,10 @@ class PostgresOperationalStore:
                 WHERE ps.singleton = TRUE AND p.status = 'complete'
                 ORDER BY pm.payload->>'startDate', pm.meeting_id"""
             ).fetchall()
-        return [{**row["payload"], "publicationVersion": row["version"]} for row in rows]
+        if not rows:
+            return []
+        identities = {canonical_resource_ids(entry)["meetings"]: canonical_resource_ids(entry) for entry in candidate_meetings(self.publication_envelope(rows[0]["version"]))}
+        return [{**row["payload"], "competitionId": identities[row["payload"]["id"]]["competitions"], "circuitId": identities[row["payload"]["id"]]["circuits"], "publicationVersion": row["version"]} for row in rows]
 
     def canonical_resource_counts(self) -> dict[str, int]:
         tables = ("competitions", "seasons", "meetings", "circuits", "provenance")
@@ -286,9 +302,9 @@ class GraphDbProjection:
         return bool(response.json()["boolean"])
 
     def _build_graph(self, version: str, envelope: PublicationCandidate) -> Graph:
-        if isinstance(envelope, SeasonCandidateEnvelope):
+        if not isinstance(envelope, CandidateEnvelope):
             graph = Graph()
-            for entry in envelope.meetings:
+            for entry in candidate_meetings(envelope):
                 graph += self._build_graph(version, entry)
             return graph
         ids = canonical_resource_ids(envelope)
@@ -326,12 +342,29 @@ class GraphDbProjection:
         graph.add((publication_iri, RDF.type, MOTORSPORT.Publication))
         graph.add((publication_iri, MOTORSPORT.version, Literal(version)))
         graph.add((publication_iri, MOTORSPORT.includesMeeting, meeting_iri))
+        if isinstance(envelope, ScheduledEnvelope):
+            for assertion in envelope.field_assertions:
+                digest = hashlib.sha256(assertion.model_dump_json().encode("utf-8")).hexdigest()
+                assertion_iri = self._resource_iri(f"assertion:{envelope.source_identity}:{digest}")
+                graph.add((meeting_iri, MOTORSPORT.fieldAssertion, assertion_iri))
+                graph.add((assertion_iri, RDF.type, MOTORSPORT.SourceAssertion))
+                graph.add((assertion_iri, MOTORSPORT.subject, circuit_iri if assertion.field.startswith("circuit_") else meeting_iri))
+                graph.add((assertion_iri, MOTORSPORT.field, Literal(assertion.field)))
+                graph.add((assertion_iri, MOTORSPORT.value, Literal(assertion.value)))
+                graph.add((assertion_iri, MOTORSPORT.locator, Literal(assertion.locator)))
+                graph.add((assertion_iri, MOTORSPORT.rule, Literal(assertion.rule)))
+                graph.add((assertion_iri, MOTORSPORT.preferred, Literal(assertion.preferred)))
+                graph.add((assertion_iri, MOTORSPORT.sourceUrl, URIRef(assertion.source_url)))
+                graph.add((assertion_iri, MOTORSPORT.retrievedAt, Literal(assertion.retrieved_at, datatype=XSD.dateTime)))
         if isinstance(meeting, ScheduledMeeting):
-            round_iri = self._resource_iri(f"round:{envelope.source_identity}")
-            graph.add((round_iri, RDF.type, MOTORSPORT.Round))
-            graph.add((round_iri, MOTORSPORT.meeting, meeting_iri))
-            graph.add((round_iri, MOTORSPORT.season, season_iri))
-            graph.add((round_iri, MOTORSPORT.number, Literal(meeting.round_number, datatype=XSD.integer)))
+            round_iri = self._resource_iri(f"round:{envelope.source_identity}") if meeting.round_number is not None else None
+            if meeting.kind != "championship":
+                graph.add((meeting_iri, MOTORSPORT.kind, Literal(meeting.kind)))
+            if round_iri is not None:
+                graph.add((round_iri, RDF.type, MOTORSPORT.Round))
+                graph.add((round_iri, MOTORSPORT.meeting, meeting_iri))
+                graph.add((round_iri, MOTORSPORT.season, season_iri))
+                graph.add((round_iri, MOTORSPORT.number, Literal(meeting.round_number, datatype=XSD.integer)))
             if meeting.event_timezone:
                 graph.add((meeting_iri, MOTORSPORT.timeZone, Literal(meeting.event_timezone)))
             for session in meeting.sessions:
@@ -339,7 +372,8 @@ class GraphDbProjection:
                 graph.add((session_iri, RDF.type, MOTORSPORT.Session))
                 graph.add((session_iri, RDFS.label, Literal(session.name, lang="en")))
                 graph.add((session_iri, MOTORSPORT.meeting, meeting_iri))
-                graph.add((session_iri, MOTORSPORT.round, round_iri))
+                if round_iri is not None:
+                    graph.add((session_iri, MOTORSPORT.round, round_iri))
                 graph.add((session_iri, MOTORSPORT.status, Literal(session.status)))
                 graph.add((session_iri, MOTORSPORT.provenance, provenance_iri))
                 for label, clock in (("start", session.start), ("end", session.end)):

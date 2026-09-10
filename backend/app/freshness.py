@@ -1,6 +1,16 @@
 from datetime import UTC, datetime, timedelta
 
 
+def source_freshness_view(attempts: dict[str, dict | None], competitions: set[str]) -> dict:
+    families = set(attempts) | ({"formula-one"} if "formula-one" in competitions else set()) | ({"gt-world-challenge-europe"} if "gt-world-challenge-europe" in competitions else set())
+    if not families:
+        return freshness_view(None)
+    sources = [{"sourceFamily": family, **freshness_view(attempts.get(family))} for family in sorted(families)]
+    stale = [source for source in sources if source["stale"]]
+    selected = (stale or sources)[0]
+    return {**{key: value for key, value in selected.items() if key != "sourceFamily"}, "sources": sources}
+
+
 def freshness_view(attempt: dict | None, now: datetime | None = None) -> dict:
     now = now or datetime.now(UTC)
     if attempt is None:
