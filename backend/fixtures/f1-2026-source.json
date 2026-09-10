@@ -1,0 +1,380 @@
+{
+  "source_url": "https://www.formula1.com/en/racing/2026",
+  "retrieved_utc": "2026-09-10T08:34:12.2355199+00:00",
+  "season": 2026,
+  "meetings": [
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/australia",
+      "retrieved_utc": "2026-09-10T08:35:35.2147847+00:00",
+      "race": {
+        "meetingNumber": "1",
+        "meetingKey": "1279",
+        "meetingName": "Australian Grand Prix",
+        "meetingStartDate": "2026-03-06T00:00:00Z",
+        "meetingEndDate": "2026-03-08T23:59:59.999Z",
+        "circuitKey": "10",
+        "circuitOfficialName": "Albert Park Grand Prix Circuit",
+        "meetingTimezone": "Australia/Melbourne",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11227, "startTime": "2026-03-06T12:30:00", "endTime": "2026-03-06T13:30:00", "gmtOffset": "+11:00", "timezone": "Australia/Melbourne", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11228, "startTime": "2026-03-06T16:00:00", "endTime": "2026-03-06T17:00:00", "gmtOffset": "+11:00", "timezone": "Australia/Melbourne", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11229, "startTime": "2026-03-07T12:30:00", "endTime": "2026-03-07T13:30:00", "gmtOffset": "+11:00", "timezone": "Australia/Melbourne", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11230, "startTime": "2026-03-07T16:00:00", "endTime": "2026-03-07T17:00:00", "gmtOffset": "+11:00", "timezone": "Australia/Melbourne", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11234, "startTime": "2026-03-08T15:00:00", "endTime": "2026-03-08T17:00:00", "gmtOffset": "+11:00", "timezone": "Australia/Melbourne", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/china",
+      "retrieved_utc": "2026-09-10T08:37:54.0556600+00:00",
+      "race": {
+        "meetingNumber": "2", "meetingKey": "1280", "meetingName": "Chinese Grand Prix",
+        "meetingStartDate": "2026-03-13T00:00:00Z", "meetingEndDate": "2026-03-15T23:59:59.999Z",
+        "circuitKey": "49", "circuitOfficialName": "Shanghai International Circuit", "meetingTimezone": "Asia/Shanghai",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11235, "startTime": "2026-03-13T11:30:00", "endTime": "2026-03-13T12:30:00", "gmtOffset": "+08:00", "timezone": "Asia/Shanghai", "state": "completed"},
+          {"session": "ss", "meetingSessionKey": 11236, "startTime": "2026-03-13T15:30:00", "endTime": "2026-03-13T16:14:00", "gmtOffset": "+08:00", "timezone": "Asia/Shanghai", "state": "completed"},
+          {"session": "s", "meetingSessionKey": 11240, "startTime": "2026-03-14T11:00:00", "endTime": "2026-03-14T12:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Shanghai", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11241, "startTime": "2026-03-14T15:00:00", "endTime": "2026-03-14T16:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Shanghai", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11245, "startTime": "2026-03-15T15:00:00", "endTime": "2026-03-15T17:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Shanghai", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/japan",
+      "retrieved_utc": "2026-09-10T08:37:55.1052290+00:00",
+      "race": {
+        "meetingNumber": "3", "meetingKey": "1281", "meetingName": "Japanese Grand Prix",
+        "meetingStartDate": "2026-03-27T00:00:00Z", "meetingEndDate": "2026-03-29T23:59:59.999Z",
+        "circuitKey": "46", "circuitOfficialName": "Suzuka Circuit", "meetingTimezone": "Asia/Tokyo",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11246, "startTime": "2026-03-27T11:30:00", "endTime": "2026-03-27T12:30:00", "gmtOffset": "+09:00", "timezone": "Asia/Tokyo", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11247, "startTime": "2026-03-27T15:00:00", "endTime": "2026-03-27T16:00:00", "gmtOffset": "+09:00", "timezone": "Asia/Tokyo", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11248, "startTime": "2026-03-28T11:30:00", "endTime": "2026-03-28T12:30:00", "gmtOffset": "+09:00", "timezone": "Asia/Tokyo", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11249, "startTime": "2026-03-28T15:00:00", "endTime": "2026-03-28T16:00:00", "gmtOffset": "+09:00", "timezone": "Asia/Tokyo", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11253, "startTime": "2026-03-29T14:00:00", "endTime": "2026-03-29T16:00:00", "gmtOffset": "+09:00", "timezone": "Asia/Tokyo", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/miami",
+      "retrieved_utc": "2026-09-10T08:37:56.0696636+00:00",
+      "race": {
+        "meetingNumber": "4", "meetingKey": "1284", "meetingName": "Miami Grand Prix",
+        "meetingStartDate": "2026-05-01T00:00:00Z", "meetingEndDate": "2026-05-03T23:59:59.999Z",
+        "circuitKey": "151", "circuitOfficialName": "Miami International Autodrome", "meetingTimezone": "America/New_York",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11270, "startTime": "2026-05-01T12:00:00", "endTime": "2026-05-01T13:30:00", "gmtOffset": "-04:00", "timezone": "America/New_York", "state": "completed"},
+          {"session": "ss", "meetingSessionKey": 11271, "startTime": "2026-05-01T16:30:00", "endTime": "2026-05-01T17:14:00", "gmtOffset": "-04:00", "timezone": "America/New_York", "state": "completed"},
+          {"session": "s", "meetingSessionKey": 11275, "startTime": "2026-05-02T12:00:00", "endTime": "2026-05-02T13:00:00", "gmtOffset": "-04:00", "timezone": "America/New_York", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11276, "startTime": "2026-05-02T16:00:00", "endTime": "2026-05-02T17:00:00", "gmtOffset": "-04:00", "timezone": "America/New_York", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11280, "startTime": "2026-05-03T13:00:00", "endTime": "2026-05-03T15:00:00", "gmtOffset": "-04:00", "timezone": "America/New_York", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/canada",
+      "retrieved_utc": "2026-09-10T08:37:57.0887644+00:00",
+      "race": {
+        "meetingNumber": "5", "meetingKey": "1285", "meetingName": "Canadian Grand Prix",
+        "meetingStartDate": "2026-05-22T00:00:00Z", "meetingEndDate": "2026-05-24T23:59:59.999Z",
+        "circuitKey": "23", "circuitOfficialName": "Circuit Gilles-Villeneuve", "meetingTimezone": "America/Toronto",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11281, "startTime": "2026-05-22T12:30:00", "endTime": "2026-05-22T13:30:00", "gmtOffset": "-04:00", "timezone": "America/Toronto", "state": "completed"},
+          {"session": "ss", "meetingSessionKey": 11282, "startTime": "2026-05-22T16:30:00", "endTime": "2026-05-22T17:14:00", "gmtOffset": "-04:00", "timezone": "America/Toronto", "state": "completed"},
+          {"session": "s", "meetingSessionKey": 11286, "startTime": "2026-05-23T12:00:00", "endTime": "2026-05-23T13:00:00", "gmtOffset": "-04:00", "timezone": "America/Toronto", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11287, "startTime": "2026-05-23T16:00:00", "endTime": "2026-05-23T17:00:00", "gmtOffset": "-04:00", "timezone": "America/Toronto", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11291, "startTime": "2026-05-24T16:00:00", "endTime": "2026-05-24T18:00:00", "gmtOffset": "-04:00", "timezone": "America/Toronto", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/monaco",
+      "retrieved_utc": "2026-09-10T08:37:58.0857502+00:00",
+      "race": {
+        "meetingNumber": "6", "meetingKey": "1286", "meetingName": "Monaco Grand Prix",
+        "meetingStartDate": "2026-06-05T00:00:00Z", "meetingEndDate": "2026-06-07T23:59:59.999Z",
+        "circuitKey": "22", "circuitOfficialName": "Circuit de Monaco", "meetingTimezone": "Europe/Monaco",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11292, "startTime": "2026-06-05T13:30:00", "endTime": "2026-06-05T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Monaco", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11293, "startTime": "2026-06-05T17:00:00", "endTime": "2026-06-05T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Monaco", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11294, "startTime": "2026-06-06T12:30:00", "endTime": "2026-06-06T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Monaco", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11295, "startTime": "2026-06-06T16:00:00", "endTime": "2026-06-06T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Monaco", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11299, "startTime": "2026-06-07T15:00:00", "endTime": "2026-06-07T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Monaco", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/barcelona-catalunya",
+      "retrieved_utc": "2026-09-10T08:37:59.1203525+00:00",
+      "race": {
+        "meetingNumber": "7", "meetingKey": "1287", "meetingName": "Barcelona Grand Prix",
+        "meetingStartDate": "2026-06-12T00:00:00Z", "meetingEndDate": "2026-06-14T23:59:59.999Z",
+        "circuitKey": "15", "circuitOfficialName": "Circuit de Barcelona-Catalunya", "meetingTimezone": "Europe/Madrid",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11300, "startTime": "2026-06-12T13:30:00", "endTime": "2026-06-12T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11301, "startTime": "2026-06-12T17:00:00", "endTime": "2026-06-12T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11302, "startTime": "2026-06-13T12:30:00", "endTime": "2026-06-13T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11303, "startTime": "2026-06-13T16:00:00", "endTime": "2026-06-13T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11307, "startTime": "2026-06-14T15:00:00", "endTime": "2026-06-14T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/austria",
+      "retrieved_utc": "2026-09-10T08:38:00.1724764+00:00",
+      "race": {
+        "meetingNumber": "8", "meetingKey": "1288", "meetingName": "Austrian Grand Prix",
+        "meetingStartDate": "2026-06-26T00:00:00Z", "meetingEndDate": "2026-06-28T23:59:59.999Z",
+        "circuitKey": "19", "circuitOfficialName": "Red Bull Ring", "meetingTimezone": "Europe/Vienna",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11308, "startTime": "2026-06-26T13:30:00", "endTime": "2026-06-26T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Vienna", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11309, "startTime": "2026-06-26T17:00:00", "endTime": "2026-06-26T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Vienna", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11310, "startTime": "2026-06-27T12:30:00", "endTime": "2026-06-27T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Vienna", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11311, "startTime": "2026-06-27T16:00:00", "endTime": "2026-06-27T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Vienna", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11315, "startTime": "2026-06-28T15:00:00", "endTime": "2026-06-28T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Vienna", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/great-britain",
+      "retrieved_utc": "2026-09-10T08:38:01.2792507+00:00",
+      "race": {
+        "meetingNumber": "9", "meetingKey": "1289", "meetingName": "British Grand Prix",
+        "meetingStartDate": "2026-07-03T00:00:00Z", "meetingEndDate": "2026-07-05T23:59:59.999Z",
+        "circuitKey": "2", "circuitOfficialName": "Silverstone Circuit", "meetingTimezone": "Europe/London",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11316, "startTime": "2026-07-03T12:30:00", "endTime": "2026-07-03T13:30:00", "gmtOffset": "+01:00", "timezone": "Europe/London", "state": "completed"},
+          {"session": "ss", "meetingSessionKey": 11317, "startTime": "2026-07-03T16:30:00", "endTime": "2026-07-03T17:14:00", "gmtOffset": "+01:00", "timezone": "Europe/London", "state": "completed"},
+          {"session": "s", "meetingSessionKey": 11321, "startTime": "2026-07-04T12:00:00", "endTime": "2026-07-04T13:00:00", "gmtOffset": "+01:00", "timezone": "Europe/London", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11322, "startTime": "2026-07-04T16:00:00", "endTime": "2026-07-04T17:00:00", "gmtOffset": "+01:00", "timezone": "Europe/London", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11326, "startTime": "2026-07-05T15:00:00", "endTime": "2026-07-05T17:00:00", "gmtOffset": "+01:00", "timezone": "Europe/London", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/belgium",
+      "retrieved_utc": "2026-09-10T08:38:02.3311644+00:00",
+      "race": {
+        "meetingNumber": "10", "meetingKey": "1290", "meetingName": "Belgian Grand Prix",
+        "meetingStartDate": "2026-07-17T00:00:00Z", "meetingEndDate": "2026-07-19T23:59:59.999Z",
+        "circuitKey": "7", "circuitOfficialName": "Circuit de Spa-Francorchamps", "meetingTimezone": "Europe/Brussels",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11327, "startTime": "2026-07-17T13:30:00", "endTime": "2026-07-17T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Brussels", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11328, "startTime": "2026-07-17T17:00:00", "endTime": "2026-07-17T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Brussels", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11329, "startTime": "2026-07-18T12:30:00", "endTime": "2026-07-18T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Brussels", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11330, "startTime": "2026-07-18T16:00:00", "endTime": "2026-07-18T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Brussels", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11334, "startTime": "2026-07-19T15:00:00", "endTime": "2026-07-19T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Brussels", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/hungary",
+      "retrieved_utc": "2026-09-10T08:38:03.4197596+00:00",
+      "race": {
+        "meetingNumber": "11", "meetingKey": "1291", "meetingName": "Hungarian Grand Prix",
+        "meetingStartDate": "2026-07-24T00:00:00Z", "meetingEndDate": "2026-07-26T23:59:59.999Z",
+        "circuitKey": "4", "circuitOfficialName": "Hungaroring", "meetingTimezone": "Europe/Budapest",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11335, "startTime": "2026-07-24T13:30:00", "endTime": "2026-07-24T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Budapest", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11336, "startTime": "2026-07-24T17:00:00", "endTime": "2026-07-24T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Budapest", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11337, "startTime": "2026-07-25T12:30:00", "endTime": "2026-07-25T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Budapest", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11338, "startTime": "2026-07-25T16:00:00", "endTime": "2026-07-25T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Budapest", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11342, "startTime": "2026-07-26T15:00:00", "endTime": "2026-07-26T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Budapest", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/netherlands",
+      "retrieved_utc": "2026-09-10T08:38:04.4288212+00:00",
+      "race": {
+        "meetingNumber": "12", "meetingKey": "1292", "meetingName": "Dutch Grand Prix",
+        "meetingStartDate": "2026-08-21T00:00:00Z", "meetingEndDate": "2026-08-23T23:59:59.999Z",
+        "circuitKey": "55", "circuitOfficialName": "Circuit Zandvoort", "meetingTimezone": "Europe/Amsterdam",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11343, "startTime": "2026-08-21T12:30:00", "endTime": "2026-08-21T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Amsterdam", "state": "completed"},
+          {"session": "ss", "meetingSessionKey": 11344, "startTime": "2026-08-21T16:30:00", "endTime": "2026-08-21T17:14:00", "gmtOffset": "+02:00", "timezone": "Europe/Amsterdam", "state": "completed"},
+          {"session": "s", "meetingSessionKey": 11348, "startTime": "2026-08-22T12:00:00", "endTime": "2026-08-22T13:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Amsterdam", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11349, "startTime": "2026-08-22T16:00:00", "endTime": "2026-08-22T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Amsterdam", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11353, "startTime": "2026-08-23T15:00:00", "endTime": "2026-08-23T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Amsterdam", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/italy",
+      "retrieved_utc": "2026-09-10T08:38:05.5404588+00:00",
+      "race": {
+        "meetingNumber": "13", "meetingKey": "1293", "meetingName": "Italian Grand Prix",
+        "meetingStartDate": "2026-09-04T00:00:00Z", "meetingEndDate": "2026-09-06T23:59:59.999Z",
+        "circuitKey": "39", "circuitOfficialName": "Autodromo Nazionale Monza", "meetingTimezone": "Europe/Rome",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11354, "startTime": "2026-09-04T12:30:00", "endTime": "2026-09-04T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Rome", "state": "completed"},
+          {"session": "p2", "meetingSessionKey": 11355, "startTime": "2026-09-04T16:00:00", "endTime": "2026-09-04T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Rome", "state": "completed"},
+          {"session": "p3", "meetingSessionKey": 11356, "startTime": "2026-09-05T12:30:00", "endTime": "2026-09-05T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Rome", "state": "completed"},
+          {"session": "q", "meetingSessionKey": 11357, "startTime": "2026-09-05T16:00:00", "endTime": "2026-09-05T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Rome", "state": "completed"},
+          {"session": "r", "meetingSessionKey": 11361, "startTime": "2026-09-06T15:00:00", "endTime": "2026-09-06T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Rome", "state": "completed"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/spain",
+      "retrieved_utc": "2026-09-10T08:38:06.6157304+00:00",
+      "race": {
+        "meetingNumber": "14", "meetingKey": "1294", "meetingName": "Spanish Grand Prix",
+        "meetingStartDate": "2026-09-11T00:00:00Z", "meetingEndDate": "2026-09-13T23:59:59.999Z",
+        "circuitKey": "153", "circuitOfficialName": "Madring", "meetingTimezone": "Europe/Madrid",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11362, "startTime": "2026-09-11T13:30:00", "endTime": "2026-09-11T14:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11363, "startTime": "2026-09-11T17:00:00", "endTime": "2026-09-11T18:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11364, "startTime": "2026-09-12T12:30:00", "endTime": "2026-09-12T13:30:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11365, "startTime": "2026-09-12T16:00:00", "endTime": "2026-09-12T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11369, "startTime": "2026-09-13T15:00:00", "endTime": "2026-09-13T17:00:00", "gmtOffset": "+02:00", "timezone": "Europe/Madrid", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/azerbaijan",
+      "retrieved_utc": "2026-09-10T08:38:07.6105680+00:00",
+      "race": {
+        "meetingNumber": "15", "meetingKey": "1295", "meetingName": "Azerbaijan Grand Prix",
+        "meetingStartDate": "2026-09-24T00:00:00Z", "meetingEndDate": "2026-09-26T23:59:59.999Z",
+        "circuitKey": "144", "circuitOfficialName": "Baku City Circuit", "meetingTimezone": "Asia/Baku",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11370, "startTime": "2026-09-24T12:30:00", "endTime": "2026-09-24T13:30:00", "gmtOffset": "+04:00", "timezone": "Asia/Baku", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11371, "startTime": "2026-09-24T16:00:00", "endTime": "2026-09-24T17:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Baku", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11372, "startTime": "2026-09-25T12:30:00", "endTime": "2026-09-25T13:30:00", "gmtOffset": "+04:00", "timezone": "Asia/Baku", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11373, "startTime": "2026-09-25T16:00:00", "endTime": "2026-09-25T17:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Baku", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11377, "startTime": "2026-09-26T15:00:00", "endTime": "2026-09-26T17:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Baku", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/bahrain",
+      "retrieved_utc": "2026-09-10T08:38:08.6468469+00:00",
+      "race": {
+        "meetingNumber": "16", "meetingKey": "1308", "meetingName": "Bahrain Grand Prix",
+        "meetingStartDate": "2026-10-02T00:00:00Z", "meetingEndDate": "2026-10-04T23:59:59.999Z",
+        "circuitKey": "12", "circuitOfficialName": "Sepang International Circuit", "meetingTimezone": "Asia/Kuala_Lumpur",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11727, "startTime": "2026-10-02T12:30:00", "endTime": "2026-10-02T13:30:00", "gmtOffset": "+08:00", "timezone": "Asia/Kuala_Lumpur", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11728, "startTime": "2026-10-02T16:00:00", "endTime": "2026-10-02T17:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Kuala_Lumpur", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11729, "startTime": "2026-10-03T12:30:00", "endTime": "2026-10-03T13:30:00", "gmtOffset": "+08:00", "timezone": "Asia/Kuala_Lumpur", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11730, "startTime": "2026-10-03T16:00:00", "endTime": "2026-10-03T17:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Kuala_Lumpur", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11731, "startTime": "2026-10-04T15:00:00", "endTime": "2026-10-04T17:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Kuala_Lumpur", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/singapore",
+      "retrieved_utc": "2026-09-10T08:38:09.6477141+00:00",
+      "race": {
+        "meetingNumber": "17", "meetingKey": "1296", "meetingName": "Singapore Grand Prix",
+        "meetingStartDate": "2026-10-09T00:00:00Z", "meetingEndDate": "2026-10-11T23:59:59.999Z",
+        "circuitKey": "61", "circuitOfficialName": "Marina Bay Street Circuit", "meetingTimezone": "Asia/Singapore",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11378, "startTime": "2026-10-09T16:30:00", "endTime": "2026-10-09T17:30:00", "gmtOffset": "+08:00", "timezone": "Asia/Singapore", "state": "upcoming"},
+          {"session": "ss", "meetingSessionKey": 11379, "startTime": "2026-10-09T20:30:00", "endTime": "2026-10-09T21:14:00", "gmtOffset": "+08:00", "timezone": "Asia/Singapore", "state": "upcoming"},
+          {"session": "s", "meetingSessionKey": 11383, "startTime": "2026-10-10T17:00:00", "endTime": "2026-10-10T18:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Singapore", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11384, "startTime": "2026-10-10T21:00:00", "endTime": "2026-10-10T22:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Singapore", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11388, "startTime": "2026-10-11T20:00:00", "endTime": "2026-10-11T22:00:00", "gmtOffset": "+08:00", "timezone": "Asia/Singapore", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/united-states",
+      "retrieved_utc": "2026-09-10T08:38:10.6246087+00:00",
+      "race": {
+        "meetingNumber": "18", "meetingKey": "1297", "meetingName": "United States Grand Prix",
+        "meetingStartDate": "2026-10-23T00:00:00Z", "meetingEndDate": "2026-10-25T23:59:59.999Z",
+        "circuitKey": "9", "circuitOfficialName": "Circuit of The Americas", "meetingTimezone": "US/Central",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11389, "startTime": "2026-10-23T12:30:00", "endTime": "2026-10-23T13:30:00", "gmtOffset": "-05:00", "timezone": "US/Central", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11390, "startTime": "2026-10-23T16:00:00", "endTime": "2026-10-23T17:00:00", "gmtOffset": "-05:00", "timezone": "US/Central", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11391, "startTime": "2026-10-24T12:30:00", "endTime": "2026-10-24T13:30:00", "gmtOffset": "-05:00", "timezone": "US/Central", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11392, "startTime": "2026-10-24T16:00:00", "endTime": "2026-10-24T17:00:00", "gmtOffset": "-05:00", "timezone": "US/Central", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11396, "startTime": "2026-10-25T15:00:00", "endTime": "2026-10-25T17:00:00", "gmtOffset": "-05:00", "timezone": "US/Central", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/mexico",
+      "retrieved_utc": "2026-09-10T08:38:35.5002089+00:00",
+      "race": {
+        "meetingNumber": "19", "meetingKey": "1298", "meetingName": "Mexico City Grand Prix",
+        "meetingStartDate": "2026-10-30T00:00:00Z", "meetingEndDate": "2026-11-01T23:59:59.999Z",
+        "circuitKey": "65", "circuitOfficialName": "Aut\u00f3dromo Hermanos Rodr\u00edguez", "meetingTimezone": "America/Mexico_City",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11397, "startTime": "2026-10-30T12:30:00", "endTime": "2026-10-30T13:30:00", "gmtOffset": "-06:00", "timezone": "America/Mexico_City", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11398, "startTime": "2026-10-30T16:00:00", "endTime": "2026-10-30T17:00:00", "gmtOffset": "-06:00", "timezone": "America/Mexico_City", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11399, "startTime": "2026-10-31T11:30:00", "endTime": "2026-10-31T12:30:00", "gmtOffset": "-06:00", "timezone": "America/Mexico_City", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11400, "startTime": "2026-10-31T15:00:00", "endTime": "2026-10-31T16:00:00", "gmtOffset": "-06:00", "timezone": "America/Mexico_City", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11404, "startTime": "2026-11-01T14:00:00", "endTime": "2026-11-01T16:00:00", "gmtOffset": "-06:00", "timezone": "America/Mexico_City", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/brazil",
+      "retrieved_utc": "2026-09-10T08:38:36.5248186+00:00",
+      "race": {
+        "meetingNumber": "20", "meetingKey": "1299", "meetingName": "S\u00e3o Paulo Grand Prix",
+        "meetingStartDate": "2026-11-06T00:00:00Z", "meetingEndDate": "2026-11-08T23:59:59.999Z",
+        "circuitKey": "14", "circuitOfficialName": "Aut\u00f3dromo Jos\u00e9 Carlos Pace", "meetingTimezone": "America/Sao_Paulo",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11405, "startTime": "2026-11-06T12:30:00", "endTime": "2026-11-06T13:30:00", "gmtOffset": "-03:00", "timezone": "America/Sao_Paulo", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11406, "startTime": "2026-11-06T16:00:00", "endTime": "2026-11-06T17:00:00", "gmtOffset": "-03:00", "timezone": "America/Sao_Paulo", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11407, "startTime": "2026-11-07T11:30:00", "endTime": "2026-11-07T12:30:00", "gmtOffset": "-03:00", "timezone": "America/Sao_Paulo", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11408, "startTime": "2026-11-07T15:00:00", "endTime": "2026-11-07T16:00:00", "gmtOffset": "-03:00", "timezone": "America/Sao_Paulo", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11412, "startTime": "2026-11-08T14:00:00", "endTime": "2026-11-08T16:00:00", "gmtOffset": "-03:00", "timezone": "America/Sao_Paulo", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/las-vegas",
+      "retrieved_utc": "2026-09-10T08:38:13.6308299+00:00",
+      "race": {
+        "meetingNumber": "21", "meetingKey": "1300", "meetingName": "Las Vegas Grand Prix",
+        "meetingStartDate": "2026-11-19T00:00:00Z", "meetingEndDate": "2026-11-21T23:59:59.999Z",
+        "circuitKey": "152", "circuitOfficialName": "Las Vegas Strip Circuit", "meetingTimezone": "America/Los_Angeles",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11413, "startTime": "2026-11-19T16:30:00", "endTime": "2026-11-19T17:30:00", "gmtOffset": "-08:00", "timezone": "America/Los_Angeles", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11414, "startTime": "2026-11-19T20:00:00", "endTime": "2026-11-19T21:00:00", "gmtOffset": "-08:00", "timezone": "America/Los_Angeles", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11415, "startTime": "2026-11-20T16:30:00", "endTime": "2026-11-20T17:30:00", "gmtOffset": "-08:00", "timezone": "America/Los_Angeles", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11416, "startTime": "2026-11-20T20:00:00", "endTime": "2026-11-20T21:00:00", "gmtOffset": "-08:00", "timezone": "America/Los_Angeles", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11420, "startTime": "2026-11-21T20:00:00", "endTime": "2026-11-21T22:00:00", "gmtOffset": "-08:00", "timezone": "America/Los_Angeles", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/qatar",
+      "retrieved_utc": "2026-09-10T08:38:14.6699494+00:00",
+      "race": {
+        "meetingNumber": "22", "meetingKey": "1301", "meetingName": "Qatar Grand Prix",
+        "meetingStartDate": "2026-11-27T00:00:00Z", "meetingEndDate": "2026-11-29T23:59:59.999Z",
+        "circuitKey": "150", "circuitOfficialName": "Lusail International Circuit", "meetingTimezone": "Asia/Qatar",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11421, "startTime": "2026-11-27T16:30:00", "endTime": "2026-11-27T17:30:00", "gmtOffset": "+03:00", "timezone": "Asia/Qatar", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11422, "startTime": "2026-11-27T20:00:00", "endTime": "2026-11-27T21:00:00", "gmtOffset": "+03:00", "timezone": "Asia/Qatar", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11423, "startTime": "2026-11-28T17:30:00", "endTime": "2026-11-28T18:30:00", "gmtOffset": "+03:00", "timezone": "Asia/Qatar", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11424, "startTime": "2026-11-28T21:00:00", "endTime": "2026-11-28T22:00:00", "gmtOffset": "+03:00", "timezone": "Asia/Qatar", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11428, "startTime": "2026-11-29T19:00:00", "endTime": "2026-11-29T21:00:00", "gmtOffset": "+03:00", "timezone": "Asia/Qatar", "state": "upcoming"}
+        ]
+      }
+    },
+    {
+      "source_url": "https://www.formula1.com/en/racing/2026/united-arab-emirates",
+      "retrieved_utc": "2026-09-10T08:38:15.6848479+00:00",
+      "race": {
+        "meetingNumber": "23", "meetingKey": "1302", "meetingName": "Abu Dhabi Grand Prix",
+        "meetingStartDate": "2026-12-04T00:00:00Z", "meetingEndDate": "2026-12-06T23:59:59.999Z",
+        "circuitKey": "70", "circuitOfficialName": "Yas Marina Circuit", "meetingTimezone": "Asia/Dubai",
+        "meetingSessions": [
+          {"session": "p1", "meetingSessionKey": 11429, "startTime": "2026-12-04T13:30:00", "endTime": "2026-12-04T14:30:00", "gmtOffset": "+04:00", "timezone": "Asia/Dubai", "state": "upcoming"},
+          {"session": "p2", "meetingSessionKey": 11430, "startTime": "2026-12-04T17:00:00", "endTime": "2026-12-04T18:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Dubai", "state": "upcoming"},
+          {"session": "p3", "meetingSessionKey": 11431, "startTime": "2026-12-05T14:30:00", "endTime": "2026-12-05T15:30:00", "gmtOffset": "+04:00", "timezone": "Asia/Dubai", "state": "upcoming"},
+          {"session": "q", "meetingSessionKey": 11432, "startTime": "2026-12-05T18:00:00", "endTime": "2026-12-05T19:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Dubai", "state": "upcoming"},
+          {"session": "r", "meetingSessionKey": 11436, "startTime": "2026-12-06T17:00:00", "endTime": "2026-12-06T19:00:00", "gmtOffset": "+04:00", "timezone": "Asia/Dubai", "state": "upcoming"}
+        ]
+      }
+    }
+  ]
+}

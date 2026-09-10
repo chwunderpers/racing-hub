@@ -42,6 +42,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** FreshnessResponse */
+        FreshnessResponse: {
+            /** Stale */
+            stale: boolean;
+            /** Reason */
+            reason?: string | null;
+            /** Checkedat */
+            checkedAt?: string | null;
+            /** Lastsuccessat */
+            lastSuccessAt?: string | null;
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -83,11 +94,45 @@ export interface components {
             sourceUrl: string;
             /** Retrievedat */
             retrievedAt: string;
+            /** Round */
+            round?: number | null;
+            /** Roundid */
+            roundId?: string | null;
+            /** Eventtimezone */
+            eventTimezone?: string | null;
+            /** Sessions */
+            sessions?: components["schemas"]["SessionResponse"][];
         };
         /** ScheduleResponse */
         ScheduleResponse: {
             /** Meetings */
             meetings: components["schemas"]["MeetingResponse"][];
+            freshness?: components["schemas"]["FreshnessResponse"] | null;
+        };
+        /** SessionResponse */
+        SessionResponse: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "scheduled" | "completed" | "cancelled";
+            start: components["schemas"]["TimeResponse"];
+            end: components["schemas"]["TimeResponse"] | null;
+        };
+        /** TimeResponse */
+        TimeResponse: {
+            /** Local */
+            local: string;
+            /** Offset */
+            offset: string | null;
+            /** Zone */
+            zone: string | null;
+            /** Instant */
+            instant: string | null;
         };
     };
     responses: never;

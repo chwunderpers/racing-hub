@@ -11,6 +11,7 @@ import {
 
 import { getHealth, getSchedule } from "./api/client";
 import type { components } from "./api/schema";
+import { MeetingDetails } from "./MeetingDetails";
 import "./styles.css";
 
 type Meeting = components["schemas"]["MeetingResponse"];
@@ -56,6 +57,32 @@ function formatRetrieved(retrievedAt: string): string {
 function App() {
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [freshness, setFreshness] = useState<components["schemas"]["FreshnessResponse"] | null>(null);
+  const [query, setQuery] = useState(() => new URLSearchParams(window.location.search));
+  const queryFor = (key: string, value: string) => {
+    const next = new URLSearchParams(query);
+    if (value) next.set(key, value); else next.delete(key);
+    return `?${next.toString()}`;
+  };
+  const changeQuery = (key: string, value: string) => {
+    const url = queryFor(key, value);
+    window.history.pushState({}, "", url);
+    setQuery(new URLSearchParams(window.location.search));
+  };
+  useEffect(() => {
+    const restore = () => setQuery(new URLSearchParams(window.location.search));
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+  const competition = query.get("competition") || "";
+  const circuit = query.get("circuit") || "";
+  const from = query.get("from") || "";
+  const through = query.get("through") || "";
+  const invalidDates = Boolean(from && through && from > through);
+  const filtered = meetings.filter((meeting) => !invalidDates && (!competition || meeting.competition === competition)
+    && (!circuit || meeting.circuit === circuit) && (!from || meeting.endDate >= from) && (!through || meeting.startDate <= through));
+  const selectedId = query.get("meeting");
+  const selected = meetings.find((meeting) => meeting.id === selectedId);
 
   useEffect(() => {
     let active = true;
@@ -64,6 +91,7 @@ function App() {
       .then(([health, schedule]) => {
         if (active) {
           setMeetings(schedule.meetings);
+          setFreshness(schedule.freshness || null);
           setViewState(health.status !== "ok" ? "database-unavailable" : "ready");
         }
       })
@@ -114,21 +142,33 @@ function App() {
         </section>
 
         <section className="filter-strip" aria-label="Schedule filters">
-          <button type="button" disabled title="Competition filter">
+          <label className="filter-field">
             <Trophy size={17} aria-hidden="true" />
-            <span>All competitions</span>
-          </button>
-          <button type="button" disabled title="Circuit filter">
+            <select aria-label="Competition" value={competition} onChange={(event) => changeQuery("competition", event.target.value)}>
+              <option value="">All competitions</option>
+              {[...new Set(meetings.map((meeting) => meeting.competition))].sort().map((name) => <option key={name}>{name}</option>)}
+            </select>
+          </label>
+          <label className="filter-field">
             <MapPin size={17} aria-hidden="true" />
-            <span>All circuits</span>
-          </button>
-          <button type="button" disabled title="Date filter">
+            <select aria-label="Circuit" value={circuit} onChange={(event) => changeQuery("circuit", event.target.value)}>
+              <option value="">All circuits</option>
+              {[...new Set(meetings.map((meeting) => meeting.circuit))].sort().map((name) => <option key={name}>{name}</option>)}
+            </select>
+          </label>
+          <div className="filter-field date-filter">
             <CalendarDays size={17} aria-hidden="true" />
-            <span>All dates</span>
-          </button>
+            <div><label>From<input aria-label="From date" type="date" value={from} onChange={(event) => changeQuery("from", event.target.value)} /></label>
+              <label>Through<input aria-label="Through date" type="date" value={through} onChange={(event) => changeQuery("through", event.target.value)} /></label></div>
+          </div>
         </section>
 
-        <section className="schedule-lane" aria-live="polite">
+        {viewState === "ready" && freshness?.stale && <p className="stale-notice" role="status">Schedule may be outdated. {freshness.reason}{freshness.lastSuccessAt ? ` Last verified ${formatRetrieved(freshness.lastSuccessAt)}.` : ""}</p>}
+        {invalidDates && <p className="stale-notice" role="alert">From date must not follow through date.</p>}
+        {viewState === "ready" && selected && <MeetingDetails meeting={selected} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
+        {viewState === "ready" && selectedId && !selected && <div className="empty-state"><h2>Meeting not found</h2><a href={queryFor("meeting", "")} onClick={(event) => { event.preventDefault(); changeQuery("meeting", ""); }}>Back to schedule</a></div>}
+
+        <section className="schedule-lane" aria-live="polite" hidden={viewState === "ready" && Boolean(selectedId)}>
           {viewState === "loading" && (
             <div className="loading-state">
               <span className="loading-line" />
@@ -151,14 +191,14 @@ function App() {
 
           {viewState === "ready" && meetings.length > 0 && (
             <div className="meeting-list">
-              {meetings.map((meeting, index) => (
+              {filtered.map((meeting, index) => (
                 <article className="meeting-row" key={meeting.id}>
-                  <div className="meeting-round" aria-label={`Schedule position ${index + 1}`}>
-                    {String(index + 1).padStart(2, "0")}
+                  <div className="meeting-round" aria-label={meeting.round ? `Round ${meeting.round}` : `Schedule position ${index + 1}`}>
+                    {String(meeting.round || index + 1).padStart(2, "0")}
                   </div>
                   <div className="meeting-primary">
                     <p>{meeting.competition}</p>
-                    <h2>{meeting.name}</h2>
+                    <h2><a href={queryFor("meeting", meeting.id)} onClick={(event) => { if (!event.ctrlKey && !event.metaKey) { event.preventDefault(); changeQuery("meeting", meeting.id); } }}>{meeting.name}</a></h2>
                     {meeting.status === "cancelled" && <strong>Cancelled</strong>}
                     <span className="meeting-circuit">
                       <MapPin size={16} aria-hidden="true" />
@@ -181,6 +221,7 @@ function App() {
               ))}
             </div>
           )}
+          {viewState === "ready" && meetings.length > 0 && filtered.length === 0 && <div className="empty-state"><h2>No meetings match these filters</h2></div>}
 
           {(viewState === "database-unavailable" || viewState === "unavailable") && (
             <div className="failure-state">
@@ -205,7 +246,7 @@ function App() {
           {viewState === "ready"
             ? meetings.length === 0
               ? "Awaiting first publication"
-              : `${meetings.length} meeting published`
+              : `${filtered.length} of ${meetings.length} meetings published`
             : "Service status"}
         </span>
       </footer>

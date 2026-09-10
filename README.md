@@ -90,10 +90,18 @@ records the exact human decision, then asks separately for publication approval.
 See [the review workflow](docs/review-workflow.md) for commands, candidate and
 decision formats, audit files and failure recovery. Acceptance alone never publishes.
 
-This tracer supports one Meeting per publication, including date corrections,
-explicit identity resolutions and visible cancellation status. Multi-Meeting
-snapshot merging and source acquisition/normalization are later slices. Replacing
-a different Meeting is previewed as a conflict and blocked, not silently published.
+Select **Racing Source** to investigate official sources, fetch Formula One into
+private review, or replay the captured 2026 season (23 numbered Meetings and 115
+available Sessions). See [the source workflow](docs/source-workflow.md) for commands,
+coverage, time semantics and limitations. This adds no automated publication gate.
+
+Season publications include Rounds, Sessions, revision/status and provenance in
+PostgreSQL and the exact versioned GraphDB projection. The browser provides
+Competition/Circuit/date filters, shareable detail URLs, and browser-local,
+event-local, UTC or selected IANA time displays. Unresolved dates and clocks retain
+their source precision. Failed/expired source checks and newer candidates awaiting
+review visibly mark the last valid schedule stale. Existing single-Meeting
+publications remain compatible and are not replaced by installation or fetch.
 
 ## Run for development
 

@@ -5,7 +5,7 @@ import psycopg
 from fastapi import Depends, FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.stores import PostgresOperationalStore
 
@@ -13,6 +13,21 @@ from app.stores import PostgresOperationalStore
 class HealthResponse(BaseModel):
     status: Literal["ok", "degraded"]
     database: Literal["ok", "unavailable"]
+
+
+class TimeResponse(BaseModel):
+    local: str
+    offset: str | None
+    zone: str | None
+    instant: str | None
+
+
+class SessionResponse(BaseModel):
+    id: str
+    name: str
+    status: Literal["scheduled", "completed", "cancelled"]
+    start: TimeResponse
+    end: TimeResponse | None
 
 
 class MeetingResponse(BaseModel):
@@ -27,10 +42,22 @@ class MeetingResponse(BaseModel):
     endDate: str
     sourceUrl: str
     retrievedAt: str
+    round: int | None = None
+    roundId: str | None = None
+    eventTimezone: str | None = None
+    sessions: list[SessionResponse] = Field(default_factory=list)
+
+
+class FreshnessResponse(BaseModel):
+    stale: bool
+    reason: str | None = None
+    checkedAt: str | None = None
+    lastSuccessAt: str | None = None
 
 
 class ScheduleResponse(BaseModel):
     meetings: list[MeetingResponse]
+    freshness: FreshnessResponse | None = None
 
 
 def database_url() -> str:
@@ -78,8 +105,9 @@ def health(database: str = Depends(database_status)) -> Response:
     )
 
 
-@app.get("/api/schedule", response_model=ScheduleResponse)
+@app.get("/api/schedule", response_model=ScheduleResponse, response_model_exclude_unset=True)
 def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> ScheduleResponse:
     return ScheduleResponse(
-        meetings=[MeetingResponse.model_validate(meeting) for meeting in store.visible_meetings()]
+        meetings=[MeetingResponse.model_validate(meeting) for meeting in store.visible_meetings()],
+        **({"freshness": FreshnessResponse.model_validate(store.source_freshness())} if hasattr(store, "source_freshness") else {}),
     )

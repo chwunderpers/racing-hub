@@ -4,7 +4,8 @@ Select **Racing Review** in the VS Code Chat agent picker and give it a
 structured candidate JSON file or a pending Review Item ID. This is a local
 operator workflow, not a new web interface. The agent reads the file, presents
 the deterministic preview, conducts the decision conversation and invokes the
-private command. Arbitrary document acquisition/normalization is a later slice.
+private command. Use [Racing Source](source-workflow.md) to fetch a Formula One
+season or replay its captured factual fixture before review.
 
 ## Prerequisites
 
@@ -123,9 +124,12 @@ After promotion, a receipt-write interruption can be retried using the same dige
 without republishing. Audit files belong in operator-controlled version control;
 they are not signed, and a local user with filesystem/database access is trusted.
 
-The current publication model still contains one Meeting. Preview lists additions
-but blocks replacing a different Meeting because that would silently discard the
-existing schedule. Creating the first Meeting, revising it, explicitly resolving
-its changed identities and marking it cancelled are supported. Multi-Meeting
-snapshot merging and a formal ontology/SHACL validation layer are later slices.
+Publication accepts legacy single-Meeting candidates or a complete season with
+Meeting envelopes under `meetings`. A season is staged and projected as one version.
+Preview lists per-Meeting changes, additions and cancellations. Missing published
+Meetings block publication; retain their sourced cancellation records instead of
+silently removing them. Changed season identities use resolution keys of the form
+`SOURCE_ID/circuit_identity` or `SOURCE_ID/competition_identity`. Competition/Season
+replacement is blocked. Single-Meeting candidates cannot replace a published season.
+The original single-Meeting flow remains compatible. Formal OWL/SHACL is a later slice.
 Projection checks operate on the versioned graph, never the union of histories.

@@ -10,7 +10,7 @@ import yaml
 from filelock import FileLock
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from app.publication import CandidateEnvelope, PublicationModule, publication_version
+from app.publication import CandidateEnvelope, PublicationCandidate, SeasonCandidateEnvelope, PublicationModule, parse_candidate, candidate_meetings, publication_version
 
 
 class DecisionRequest(BaseModel):
@@ -73,7 +73,7 @@ class ReviewService:
         if (request.outcome == "corrected") != (request.corrected_candidate is not None):
             raise ValueError("A correction requires exactly one corrected candidate")
         if request.corrected_candidate is not None:
-            CandidateEnvelope.model_validate(request.corrected_candidate)
+            parse_candidate(request.corrected_candidate)
         queue = self._queue()
         item = next(entry for entry in queue["items"] if entry["id"] == item_id)
         decision = {
@@ -167,14 +167,19 @@ class ReviewService:
         if decision["candidate"] != item["candidate"] or decision["baselineVersion"] != item["baselineVersion"]:
             raise ValueError("The accepted candidate or baseline has changed")
         current = self._preview(item["candidate"])
-        envelope = CandidateEnvelope.model_validate(item["candidate"])
+        envelope = parse_candidate(item["candidate"])
         if current["baselineVersion"] not in (item["baselineVersion"], publication_version(envelope)):
             raise ValueError("Publication baseline is stale; preview and review again")
         preview = current["preview"]
         if preview["validationErrors"] or preview["conflicts"] or decision["preview"]["conflicts"]:
             raise ValueError("Candidate has validation errors or publication conflicts")
         for field in set(preview["unresolvedIdentities"] + decision["preview"]["unresolvedIdentities"]):
-            identity = item["candidate"]["meeting"].get(field)
+            if isinstance(envelope, SeasonCandidateEnvelope):
+                source_id, identity_field = field.rsplit("/", 1)
+                entry = next((entry for entry in envelope.meetings if entry.source_identity == source_id), None)
+                identity = getattr(entry.meeting, identity_field, None) if entry else None
+            else:
+                identity = item["candidate"]["meeting"].get(field)
             if not identity or decision["identityResolutions"].get(field) != identity:
                 raise ValueError("Candidate has unresolved identities")
         return decision, envelope
@@ -199,9 +204,11 @@ class ReviewService:
         baseline = self.store.publication_envelope(baseline_version) if baseline_version else None
         errors = []
         try:
-            candidate = CandidateEnvelope.model_validate(candidate).model_dump(mode="json")
+            candidate = parse_candidate(candidate).model_dump(mode="json")
         except ValidationError as error:
             errors = [f"{'.'.join(map(str, entry['loc']))}: {entry['msg']}" for entry in error.errors()]
+        if "meetings" in candidate or isinstance(baseline, SeasonCandidateEnvelope):
+            return self._season_preview(candidate, baseline, baseline_version, errors)
         source_identity = candidate.get("source_identity")
         same_meeting = baseline is not None and source_identity == baseline.source_identity
         previous = baseline.meeting.model_dump(mode="json") if same_meeting else {}
@@ -239,5 +246,42 @@ class ReviewService:
                 "conflicts": conflicts,
                 "unresolvedIdentities": unresolved,
                 "validationErrors": errors,
+            },
+        }
+
+    def _season_preview(self, candidate: dict, baseline: PublicationCandidate | None, baseline_version: str | None, errors: list) -> dict:
+        previous = {entry.source_identity: entry.model_dump(mode="json") for entry in candidate_meetings(baseline)} if baseline else {}
+        proposed = {}
+        if not errors:
+            proposed = {entry.source_identity: entry.model_dump(mode="json") for entry in candidate_meetings(parse_candidate(candidate))}
+        conflicts = []
+        if "meetings" not in candidate:
+            conflicts.append("A season publication requires a complete season candidate")
+        if not errors:
+            missing = sorted(set(previous) - set(proposed))
+            if missing:
+                conflicts.append("Missing published Meetings; retain them with explicit sourced cancellation: " + ", ".join(missing))
+        changes = {}
+        unresolved = []
+        for identity in previous.keys() & proposed.keys():
+            before, after = previous[identity], proposed[identity]
+            fields = {key: {"before": before["meeting"].get(key), "after": value} for key, value in after["meeting"].items() if before["meeting"].get(key) != value}
+            for field in ("source_url", "retrieved_at", "evidence"):
+                if before.get(field) != after.get(field):
+                    fields[field] = {"before": before.get(field), "after": after.get(field)}
+            if fields:
+                changes[identity] = fields
+            for field in ("competition_identity", "circuit_identity"):
+                if before["meeting"][field] != after["meeting"][field]:
+                    unresolved.append(f"{identity}/{field}")
+            if before["meeting"]["competition_identity"] != after["meeting"]["competition_identity"] or before["meeting"]["season_year"] != after["meeting"]["season_year"]:
+                conflicts.append("Published Competition/Season identity cannot be replaced")
+        return {
+            "id": str(uuid4()), "createdAt": datetime.now(UTC).isoformat(), "status": "open",
+            "baselineVersion": baseline_version, "candidate": candidate,
+            "preview": {
+                "additions": sorted(set(proposed) - set(previous)), "changes": changes,
+                "cancellations": [identity for identity, entry in proposed.items() if entry["meeting"]["status"] == "cancelled" and previous.get(identity, {}).get("meeting", {}).get("status") != "cancelled"],
+                "conflicts": conflicts, "unresolvedIdentities": unresolved, "validationErrors": errors,
             },
         }

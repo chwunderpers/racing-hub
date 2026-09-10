@@ -54,6 +54,52 @@
   },
   "components": {
     "schemas": {
+      "FreshnessResponse": {
+        "properties": {
+          "stale": {
+            "type": "boolean",
+            "title": "Stale"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "checkedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkedat"
+          },
+          "lastSuccessAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lastsuccessat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stale"
+        ],
+        "title": "FreshnessResponse"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -130,6 +176,46 @@
           "retrievedAt": {
             "type": "string",
             "title": "Retrievedat"
+          },
+          "round": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Round"
+          },
+          "roundId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roundid"
+          },
+          "eventTimezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eventtimezone"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionResponse"
+            },
+            "type": "array",
+            "title": "Sessions"
           }
         },
         "type": "object",
@@ -155,6 +241,16 @@
             },
             "type": "array",
             "title": "Meetings"
+          },
+          "freshness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FreshnessResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -162,6 +258,98 @@
           "meetings"
         ],
         "title": "ScheduleResponse"
+      },
+      "SessionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "start": {
+            "$ref": "#/components/schemas/TimeResponse"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status",
+          "start",
+          "end"
+        ],
+        "title": "SessionResponse"
+      },
+      "TimeResponse": {
+        "properties": {
+          "local": {
+            "type": "string",
+            "title": "Local"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offset"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zone"
+          },
+          "instant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local",
+          "offset",
+          "zone",
+          "instant"
+        ],
+        "title": "TimeResponse"
       }
     }
   }
