@@ -81,13 +81,13 @@ function App() {
   return (
     <div className="app-shell">
       <header className="masthead">
-        <a className="brand" href="/" aria-label="Motorsport Hub home">
+        <a className="brand" href="/" aria-label="Racing Hub home">
           <span className="brand-mark" aria-hidden="true">
             <span />
             <span />
             <span />
           </span>
-          <span>Motorsport Hub</span>
+          <span>Racing Hub</span>
         </a>
 
         <div className={`system-status system-status--${viewState}`} role="status">

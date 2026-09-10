@@ -1,4 +1,8 @@
-# Motorsport Hub
+# Racing Hub
+
+Repository: <https://github.com/chwunderpers/racing-hub>.
+See [the repository rename record](docs/repository-rename.md) for preserved
+GitHub history and stable data identifiers.
 
 Local-first proof of concept for publishing a curated motorsport schedule.
 The first publication contains the approved English Formula One Australian
@@ -80,7 +84,7 @@ SELECT ?meeting ?name WHERE {
 }
 ```
 
-For schedule changes, select **Motorsport Review** in VS Code Chat and provide a
+For schedule changes, select **Racing Review** in VS Code Chat and provide a
 structured candidate JSON file. The private agent previews one Review Item,
 records the exact human decision, then asks separately for publication approval.
 See [the review workflow](docs/review-workflow.md) for commands, candidate and

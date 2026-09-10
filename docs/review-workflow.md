@@ -1,6 +1,6 @@
 # Private schedule review
 
-Select **Motorsport Review** in the VS Code Chat agent picker and give it a
+Select **Racing Review** in the VS Code Chat agent picker and give it a
 structured candidate JSON file or a pending Review Item ID. This is a local
 operator workflow, not a new web interface. The agent reads the file, presents
 the deterministic preview, conducts the decision conversation and invokes the

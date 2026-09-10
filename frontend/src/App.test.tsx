@@ -22,6 +22,7 @@ it("shows a ready empty schedule when the backend is healthy", async () => {
   render(<App />);
 
   expect(await screen.findByText("System ready")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Racing Hub home" })).toHaveTextContent("Racing Hub");
   expect(screen.getByText("No meetings published yet")).toBeVisible();
 });
 

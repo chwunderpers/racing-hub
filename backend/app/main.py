@@ -53,7 +53,7 @@ def database_status() -> str:
         return "unavailable"
 
 
-app = FastAPI(title="Motorsport Hub", version="0.1.0")
+app = FastAPI(title="Racing Hub", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.environ.get(

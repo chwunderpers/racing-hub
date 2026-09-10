@@ -12,7 +12,7 @@ from app.stores import GraphDbProjection, PostgresOperationalStore
 
 
 def main(arguments: list[str] | None = None, *, service: ReviewService | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Private Motorsport Hub review workflow")
+    parser = argparse.ArgumentParser(description="Private Racing Hub review workflow")
     parser.add_argument("--reviews-dir", type=Path, default=Path(__file__).parents[2] / "reviews")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("preview").add_argument("candidate", type=Path)

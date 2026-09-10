@@ -1,6 +1,6 @@
 ---
-name: Motorsport Review
-description: Privately review a structured Motorsport Hub candidate file, record one human decision, and publish only after separate approval.
+name: Racing Review
+description: Privately review a structured Racing Hub candidate file, record one human decision, and publish only after separate approval.
 argument-hint: Provide a candidate JSON file or a Review Item ID.
 tools: [read, search, edit, execute/runInTerminal]
 agents: []
@@ -8,7 +8,7 @@ user-invocable: true
 disable-model-invocation: true
 ---
 
-# Private Motorsport Review
+# Private Racing Review
 
 Operate only in the operator's local VS Code workspace. Read
 [the review workflow](../../docs/review-workflow.md) before acting. The website
