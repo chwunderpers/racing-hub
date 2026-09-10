@@ -82,6 +82,15 @@
       },
       "MeetingResponse": {
         "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "cancelled"
+            ],
+            "title": "Status",
+            "default": "scheduled"
+          },
           "publicationVersion": {
             "type": "string",
             "title": "Publicationversion"

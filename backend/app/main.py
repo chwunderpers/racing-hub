@@ -16,6 +16,7 @@ class HealthResponse(BaseModel):
 
 
 class MeetingResponse(BaseModel):
+    status: Literal["scheduled", "cancelled"] = "scheduled"
     publicationVersion: str
     id: str
     name: str

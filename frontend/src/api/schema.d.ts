@@ -57,6 +57,12 @@ export interface components {
         };
         /** MeetingResponse */
         MeetingResponse: {
+            /**
+             * Status
+             * @default scheduled
+             * @enum {string}
+             */
+            status: "scheduled" | "cancelled";
             /** Publicationversion */
             publicationVersion: string;
             /** Id */

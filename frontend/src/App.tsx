@@ -159,6 +159,7 @@ function App() {
                   <div className="meeting-primary">
                     <p>{meeting.competition}</p>
                     <h2>{meeting.name}</h2>
+                    {meeting.status === "cancelled" && <strong>Cancelled</strong>}
                     <span className="meeting-circuit">
                       <MapPin size={16} aria-hidden="true" />
                       {meeting.circuit}
