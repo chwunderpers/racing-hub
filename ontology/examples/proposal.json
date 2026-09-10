@@ -1,0 +1,7 @@
+{
+  "title": "Validate the private ontology baseline",
+  "rationale": "Prove class, inverse and shared-Circuit semantics on synthetic knowledge before human review.",
+  "compatibility_notes": "No change to the live Publication or website query contract. This vocabulary is a private review baseline.",
+  "migration_notes": "No identity migration is needed for this example. Synthetic resources are never published.",
+  "renames": {}
+}

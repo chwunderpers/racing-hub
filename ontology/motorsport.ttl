@@ -1,0 +1,34 @@
+@prefix msh: <https://w3id.org/motorsport-hub/ontology/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://w3id.org/motorsport-hub/ontology/> a owl:Ontology ;
+    rdfs:label "Racing Hub ontology"@en ;
+    rdfs:comment "Private review vocabulary for sourced motorsport knowledge."@en .
+
+msh:Competition a owl:Class ; rdfs:label "Competition"@en .
+msh:Championship a owl:Class ; rdfs:label "Championship"@en ; rdfs:subClassOf msh:Competition .
+msh:Cup a owl:Class ; rdfs:label "Cup"@en ; rdfs:subClassOf msh:Competition .
+msh:Season a owl:Class ; rdfs:label "Season"@en .
+msh:Meeting a owl:Class ; rdfs:label "Meeting"@en .
+msh:Round a owl:Class ; rdfs:label "Round"@en .
+msh:Session a owl:Class ; rdfs:label "Session"@en .
+msh:Venue a owl:Class ; rdfs:label "Venue"@en .
+msh:Circuit a owl:Class ; rdfs:label "Circuit"@en .
+msh:Layout a owl:Class ; rdfs:label "Layout"@en .
+msh:Publication a owl:Class ; rdfs:label "Publication"@en .
+msh:SourceAssertion a owl:Class ; rdfs:label "Source Assertion"@en .
+
+msh:circuit a owl:ObjectProperty ; rdfs:label "circuit"@en ;
+    owl:inverseOf msh:isCircuitOf .
+msh:isCircuitOf a owl:ObjectProperty ; rdfs:label "is circuit of"@en .
+msh:sharesCircuitWith a owl:ObjectProperty ; rdfs:label "shares circuit with"@en ;
+    rdfs:comment "Resources linked to the same canonical Circuit, including self-pairs; not proof of a shared Layout."@en ;
+    owl:propertyChainAxiom ( msh:circuit msh:isCircuitOf ) .
+msh:competition a owl:ObjectProperty ; rdfs:label "competition"@en .
+msh:season a owl:ObjectProperty ; rdfs:label "season"@en .
+msh:meeting a owl:ObjectProperty ; rdfs:label "meeting"@en .
+msh:startDate a owl:DatatypeProperty ; rdfs:label "start date"@en .
+msh:endDate a owl:DatatypeProperty ; rdfs:label "end date"@en .
+msh:identity a owl:DatatypeProperty ; rdfs:label "identity"@en ;
+    rdfs:comment "An optional canonical identity key; labels never establish identity."@en .

@@ -1,0 +1,18 @@
+@prefix msh: <https://w3id.org/motorsport-hub/ontology/> .
+@prefix resource: <https://w3id.org/motorsport-hub/resource/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+resource:example-championship-a a msh:Championship ; rdfs:label "Example championship A"@en .
+resource:example-championship-b a msh:Championship ; rdfs:label "Example championship B"@en .
+resource:example-circuit a msh:Circuit ; rdfs:label "Example circuit"@en ; msh:identity "example-circuit" .
+resource:unrelated-circuit a msh:Circuit ; rdfs:label "Example circuit"@en ; msh:identity "unrelated-circuit" .
+resource:example-meeting-a a msh:Meeting ; rdfs:label "Example meeting A"@en ;
+    msh:competition resource:example-championship-a ; msh:circuit resource:example-circuit ;
+    msh:startDate "2026-04-01"^^xsd:date ; msh:endDate "2026-04-03"^^xsd:date .
+resource:example-meeting-b a msh:Meeting ; rdfs:label "Example meeting B"@en ;
+    msh:competition resource:example-championship-b ; msh:circuit resource:example-circuit ;
+    msh:startDate "2026-05-01"^^xsd:date ; msh:endDate "2026-05-03"^^xsd:date .
+resource:unrelated-meeting a msh:Meeting ; rdfs:label "Unrelated meeting"@en ;
+    msh:competition resource:example-championship-b ; msh:circuit resource:unrelated-circuit ;
+    msh:startDate "2026-06-01"^^xsd:date ; msh:endDate "2026-06-03"^^xsd:date .
