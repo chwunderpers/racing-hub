@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.assistant import AssistantAnswer, AssistantService
 from app.assistant_provider import configured_provider
 from app.assistant_store import AssistantReadStore
+from app.graph_config import configured_graph_factory
 from app.freshness import FreshnessResponse
 from app.stores import PostgresOperationalStore
 from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, CoverageAssessment, coverage_view
@@ -179,7 +180,8 @@ class AssistantSessionResponse(BaseModel):
 @lru_cache
 def assistant_service() -> AssistantService:
     read_url = os.environ.get("ASSISTANT_DATABASE_URL")
-    return AssistantService(AssistantReadStore(read_url) if read_url else None, configured_provider() if read_url else None)
+    return AssistantService(AssistantReadStore(read_url) if read_url else None, configured_provider() if read_url else None,
+                            graph_factory=configured_graph_factory())
 
 
 def assistant_origin(request: Request, response: Response):

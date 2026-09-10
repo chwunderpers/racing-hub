@@ -22,9 +22,9 @@
             graphdb:fts-indexes ("default" "iri") ;
             graphdb:fts-string-literals-index "default" ;
             graphdb:fts-iris-index "none" ;
-            graphdb:query-timeout "30" ;
+            graphdb:query-timeout "10" ;
             graphdb:throw-QueryEvaluationException-on-timeout "true" ;
-            graphdb:query-limit-results "10000" ;
+            graphdb:query-limit-results "1000" ;
             graphdb:base-URL "https://w3id.org/motorsport-hub/" ;
             graphdb:defaultNS "" ;
             graphdb:imports "" ;

@@ -44,6 +44,8 @@ services:
       DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
       GRAPHDB_URL: http://graphdb:7200
       GRAPHDB_REPOSITORY: motorsport
+      GRAPHDB_MAINTENANCE_USER: ${GRAPHDB_MAINTENANCE_USER:-}
+      GRAPHDB_MAINTENANCE_PASSWORD: ${GRAPHDB_MAINTENANCE_PASSWORD:-}
     depends_on:
       database:
         condition: service_healthy
@@ -60,6 +62,11 @@ services:
       DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
       GRAPHDB_URL: http://graphdb:7200
       GRAPHDB_REPOSITORY: motorsport
+      GRAPHDB_MAINTENANCE_USER: ${GRAPHDB_MAINTENANCE_USER:-}
+      GRAPHDB_MAINTENANCE_PASSWORD: ${GRAPHDB_MAINTENANCE_PASSWORD:-}
+      GRAPHDB_MCP_URL: http://graphdb:7200/mcp
+      GRAPHDB_ASSISTANT_USER: ${GRAPHDB_ASSISTANT_USER:-}
+      GRAPHDB_ASSISTANT_PASSWORD: ${GRAPHDB_ASSISTANT_PASSWORD:-}
       ASSISTANT_DATABASE_URL: ${ASSISTANT_DOCKER_DATABASE_URL:-}
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
       AZURE_OPENAI_BASE_URL: ${AZURE_OPENAI_BASE_URL:-https://admin-4138-resource.services.ai.azure.com/openai/v1/}

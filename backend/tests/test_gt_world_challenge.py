@@ -239,7 +239,8 @@ def test_shared_circuits_are_queryable_by_identity_and_api_preserves_assertions(
     prefix = 'PREFIX msh: <https://w3id.org/motorsport-hub/ontology/> '
     if real:
         query = prefix + f'SELECT DISTINCT ?circuit WHERE {{ GRAPH <{PUBLICATION_GRAPH}{receipt["version"]}> {{ {pattern} }} }}'
-        response = httpx.post(projection.repository_url, data={"query": query}, headers={"Accept": "application/sparql-results+json"})
+        from app.graph_config import maintenance_auth
+        response = httpx.post(projection.repository_url, data={"query": query}, headers={"Accept": "application/sparql-results+json"}, auth=maintenance_auth())
         response.raise_for_status()
         circuits = {entry["circuit"]["value"].rsplit("/", 1)[1] for entry in response.json()["results"]["bindings"]}
     else:

@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from app.main import app, operational_store
 from app.publication import CandidateEnvelope, PublicationModule
 from app.review import ReviewService
+from app.graph_config import maintenance_auth
 
 
 DATABASE_URL = os.environ.get("TEST_DATABASE_URL")
@@ -21,6 +22,7 @@ def assert_graph_matches_meeting(graph, meeting) -> None:
     version = meeting["publicationVersion"]
     response = httpx.post(
         graph.repository_url,
+        auth=maintenance_auth(),
         data={"query": f"""
             PREFIX msh: <https://w3id.org/motorsport-hub/ontology/>
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -175,6 +177,7 @@ def test_private_review_agrees_in_public_and_graph_reads_or_remains_open(
             original_project(version, candidate)
             response = httpx.post(
                 f"{graph.repository_url}/statements",
+                auth=maintenance_auth(),
                 data={"update": f"""
                     PREFIX msh: <https://w3id.org/motorsport-hub/ontology/>
                     DELETE WHERE {{ GRAPH <https://w3id.org/motorsport-hub/graph/publication/{version}> {{

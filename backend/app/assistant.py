@@ -40,6 +40,11 @@ class IriQuery(BaseModel):
     iri: str = Field(min_length=1, max_length=600, pattern=r"^https://w3id\.org/motorsport-hub/resource/")
 
 
+class GraphQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    query: str = Field(min_length=1, max_length=12000)
+
+
 class Citation(BaseModel):
     id: str
     iri: str
@@ -65,10 +70,11 @@ class AssistantAnswer(BaseModel):
 
 
 class ReadTools:
-    def __init__(self, store, version: str | None, zone: str):
+    def __init__(self, store, version: str | None, zone: str, graph=None):
         self.store = store
         self.version = version
         self.zone = zone
+        self.graph = graph
         self.citations: dict[str, Citation] = {}
         self.calls = 0
         self.bytes = 0
@@ -140,6 +146,44 @@ class ReadTools:
         references = [self._cite(record["iri"], record["title"], source["url"], source["retrievedAt"]) for source in record["sources"][:3]]
         return {key: record[key] for key in ("iri", "title", "rdfTypes", "language")} | {"excerpt": record["markdown"][:6000], "truncated": len(record["markdown"]) > 6000, "citations": references}
 
+    async def shared_circuits(self):
+        from app.graph_queries import shared_circuits_query
+        self._begin()
+        if self.graph is None or self.version is None:
+            raise RuntimeError("Graph tools unavailable")
+        result = await self.graph.query(shared_circuits_query(self.version))
+        circuits = {}
+        for row in result["rows"]:
+            iri = row["circuit"]["value"]
+            circuit = circuits.setdefault(iri, {"iri": iri, "name": row["circuitName"]["value"], "competitions": {}})
+            for suffix in ("A", "B"):
+                competition = row["competition" + suffix]["value"]
+                entry = circuit["competitions"].setdefault(competition, {"iri": competition, "name": row["name" + suffix]["value"], "citations": []})
+                if not entry["citations"]:
+                    entry["citations"].append(self._cite(iri, circuit["name"] + " / " + entry["name"], row["source" + suffix]["value"], row["retrieved" + suffix]["value"]))
+        for circuit in circuits.values():
+            circuit["competitions"] = list(circuit["competitions"].values())
+        return self._bounded({"circuits": list(circuits.values()), "limited": result["limited"],
+            "publicationVersion": self.version, "relationshipKind": "derived", "premiseKind": "asserted",
+            "scope": "Shared canonical Circuit identities in this publication; not necessarily identical Layouts or complete season coverage"})
+
+    async def graph_query(self, request: GraphQuery):
+        self._begin()
+        if self.graph is None:
+            raise RuntimeError("Graph tools unavailable")
+        result = await self.graph.query(request.query)
+        iris = set()
+        for row in result.get("rows", []):
+            iris.update(term["value"] for term in row.values() if term.get("type") == "uri")
+        for triple in result.get("triples", []):
+            iris.add(triple["subject"])
+        references = []
+        for iri in sorted(iris)[:12]:
+            record = self.store.lookup_document(iri, self.version)
+            if record:
+                references.extend(self._document(record)["citations"])
+        return self._bounded({**result, "citations": references})
+
 
 class AnswerProvider(Protocol):
     async def answer(self, history: list[dict], question: str, tools: ReadTools) -> AnswerDraft: ...
@@ -155,10 +199,11 @@ class TabSession:
 
 
 class AssistantService:
-    def __init__(self, store, provider: AnswerProvider | None, clock=time.monotonic):
+    def __init__(self, store, provider: AnswerProvider | None, clock=time.monotonic, graph_factory=None):
         self.store = store
         self.provider = provider
         self.clock = clock
+        self.graph_factory = graph_factory
         self.sessions: dict[str, TabSession] = {}
 
     def _expire(self):
@@ -204,7 +249,7 @@ class AssistantService:
         session.task = asyncio.current_task()
         try:
             version = self.store.current_publication_version()
-            tools = ReadTools(self.store, version, zone)
+            tools = ReadTools(self.store, version, zone, self.graph_factory(version) if self.graph_factory and version else None)
             async with asyncio.timeout(60):
                 draft = await self.provider.answer(list(session.history), question, tools)
             if self.store.current_publication_version() != version:
