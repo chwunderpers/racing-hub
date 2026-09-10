@@ -82,6 +82,11 @@ Isolated service tests additionally use `TEST_GRAPHDB_USER` and
 credentials for disposable repository creation/deletion. Never grant these
 privileges to the assistant identity.
 
+On this Windows host, use `127.0.0.1` rather than `localhost` in service-test
+connection URLs: localhost PostgreSQL reader connections stalled during validation,
+while the same test and full suite passed with literal IPv4. This does not change
+Docker-internal service names or the browser URL.
+
 ### Query Policy And Inference
 
 The backend parses the entire SPARQL query and allowlists its algebra, not keywords.
