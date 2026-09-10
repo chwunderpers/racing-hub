@@ -55,12 +55,33 @@ export interface components {
              */
             database: "ok" | "unavailable";
         };
+        /** MeetingResponse */
+        MeetingResponse: {
+            /** Publicationversion */
+            publicationVersion: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Competition */
+            competition: string;
+            /** Season */
+            season: number;
+            /** Circuit */
+            circuit: string;
+            /** Startdate */
+            startDate: string;
+            /** Enddate */
+            endDate: string;
+            /** Sourceurl */
+            sourceUrl: string;
+            /** Retrievedat */
+            retrievedAt: string;
+        };
         /** ScheduleResponse */
         ScheduleResponse: {
             /** Meetings */
-            meetings: {
-                [key: string]: unknown;
-            }[];
+            meetings: components["schemas"]["MeetingResponse"][];
         };
     };
     responses: never;

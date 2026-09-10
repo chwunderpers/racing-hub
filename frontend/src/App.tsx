@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Activity,
   CalendarDays,
+  ExternalLink,
   Flag,
   Gauge,
   MapPin,
@@ -9,17 +10,52 @@ import {
 } from "lucide-react";
 
 import { getHealth, getSchedule } from "./api/client";
+import type { components } from "./api/schema";
 import "./styles.css";
 
+type Meeting = components["schemas"]["MeetingResponse"];
 type ViewState =
   | "loading"
   | "ready"
-  | "unsupported-schedule"
   | "database-unavailable"
   | "unavailable";
 
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+});
+
+const retrievalFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+function formatDateRange(startDate: string, endDate: string): string {
+  const start = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+  if (
+    start.getUTCMonth() === end.getUTCMonth() &&
+    start.getUTCFullYear() === end.getUTCFullYear()
+  ) {
+    return `${start.getUTCDate()}-${dateFormatter.format(end)}`;
+  }
+  return `${dateFormatter.format(start)} - ${dateFormatter.format(end)}`;
+}
+
+function formatRetrieved(retrievedAt: string): string {
+  return `${retrievalFormatter.format(new Date(retrievedAt)).replace(" at ", ", ")} UTC`;
+}
+
 function App() {
   const [viewState, setViewState] = useState<ViewState>("loading");
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -27,13 +63,8 @@ function App() {
     Promise.all([getHealth(), getSchedule()])
       .then(([health, schedule]) => {
         if (active) {
-          setViewState(
-            health.status !== "ok"
-              ? "database-unavailable"
-              : schedule.meetings.length === 0
-                ? "ready"
-                : "unsupported-schedule",
-          );
+          setMeetings(schedule.meetings);
+          setViewState(health.status !== "ok" ? "database-unavailable" : "ready");
         }
       })
       .catch(() => {
@@ -64,7 +95,6 @@ function App() {
           <span>
             {viewState === "loading" && "Connecting"}
             {viewState === "ready" && "System ready"}
-            {viewState === "unsupported-schedule" && "Schedule update required"}
             {viewState === "database-unavailable" && "Database unavailable"}
             {viewState === "unavailable" && "Backend unavailable"}
           </span>
@@ -106,7 +136,7 @@ function App() {
             </div>
           )}
 
-          {viewState === "ready" && (
+          {viewState === "ready" && meetings.length === 0 && (
             <div className="empty-state">
               <div className="flag-box" aria-hidden="true">
                 <Flag size={30} strokeWidth={1.5} />
@@ -119,13 +149,35 @@ function App() {
             </div>
           )}
 
-          {viewState === "unsupported-schedule" && (
-            <div className="failure-state">
-              <div className="failure-light" aria-hidden="true" />
-              <div>
-                <h2>Published schedule unavailable</h2>
-                <p>This application version cannot display published meetings.</p>
-              </div>
+          {viewState === "ready" && meetings.length > 0 && (
+            <div className="meeting-list">
+              {meetings.map((meeting, index) => (
+                <article className="meeting-row" key={meeting.id}>
+                  <div className="meeting-round" aria-label={`Schedule position ${index + 1}`}>
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                  <div className="meeting-primary">
+                    <p>{meeting.competition}</p>
+                    <h2>{meeting.name}</h2>
+                    <span className="meeting-circuit">
+                      <MapPin size={16} aria-hidden="true" />
+                      {meeting.circuit}
+                    </span>
+                  </div>
+                  <div className="meeting-timing">
+                    <span className="meeting-dates">
+                      {formatDateRange(meeting.startDate, meeting.endDate)}
+                    </span>
+                    <a href={meeting.sourceUrl} target="_blank" rel="noreferrer">
+                      <ExternalLink size={15} aria-hidden="true" />
+                      <span>{meeting.competition} source</span>
+                    </a>
+                    <span className="retrieved-at">
+                      Retrieved {formatRetrieved(meeting.retrievedAt)}
+                    </span>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
 
@@ -148,7 +200,13 @@ function App() {
       <footer>
         <span>Local proof of concept</span>
         <span className="footer-rule" />
-        <span>{viewState === "ready" ? "Awaiting first publication" : "Service status"}</span>
+        <span>
+          {viewState === "ready"
+            ? meetings.length === 0
+              ? "Awaiting first publication"
+              : `${meetings.length} meeting published`
+            : "Service status"}
+        </span>
       </footer>
     </div>
   );

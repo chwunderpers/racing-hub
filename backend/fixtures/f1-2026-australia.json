@@ -1,0 +1,17 @@
+{
+  "source_identity": "f1:2026:australia",
+  "source_url": "https://www.formula1.com/en/racing/2026/australia",
+  "retrieved_at": "2026-01-15T12:00:00Z",
+  "source_language": "en",
+  "evidence": "FORMULA 1 QATAR AIRWAYS AUSTRALIAN GRAND PRIX 2026",
+  "meeting": {
+    "competition_identity": "formula-one",
+    "circuit_identity": "albert-park-grand-prix-circuit",
+    "competition_name": "Formula One",
+    "season_year": 2026,
+    "meeting_name": "Australian Grand Prix",
+    "circuit_name": "Albert Park Grand Prix Circuit",
+    "start_date": "2026-03-06",
+    "end_date": "2026-03-08"
+  }
+}

@@ -102,7 +102,6 @@ a:focus-visible {
   box-shadow: 0 0 0 4px rgba(86, 216, 223, 0.12);
 }
 
-.system-status--unsupported-schedule::before,
 .system-status--database-unavailable::before,
 .system-status--unavailable::before {
   background: #e34538;
@@ -186,6 +185,86 @@ h1 {
   background:
     linear-gradient(90deg, transparent 0 72%, rgba(86, 216, 223, 0.035) 72%),
     repeating-linear-gradient(135deg, transparent 0 14px, rgba(255, 255, 255, 0.015) 14px 15px);
+}
+
+.meeting-list {
+  width: 100%;
+}
+
+.meeting-row {
+  min-height: 190px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) minmax(260px, 0.55fr);
+  align-items: center;
+  gap: clamp(20px, 3vw, 42px);
+  padding: 30px 4px;
+  border-bottom: 1px solid #34393c;
+}
+
+.meeting-row:last-child {
+  border-bottom: 0;
+}
+
+.meeting-round {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  color: #0b0d0e;
+  background: #56d8df;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.meeting-primary p {
+  margin-bottom: 8px;
+  color: #e34538;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meeting-primary h2 {
+  margin-bottom: 16px;
+  font-size: 32px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.meeting-circuit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a9b0b4;
+  font-size: 15px;
+}
+
+.meeting-timing {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.meeting-dates {
+  color: #f2f4ef;
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+
+.meeting-timing a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #56d8df;
+  font-size: 14px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.retrieved-at {
+  color: #70797d;
+  font-size: 13px;
 }
 
 .empty-state,
@@ -321,6 +400,27 @@ footer {
 
   .empty-state {
     grid-template-columns: auto 1fr;
+  }
+
+  .meeting-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .meeting-round {
+    min-height: 88px;
+  }
+
+  .meeting-timing {
+    grid-column: 2;
+  }
+
+  .meeting-primary h2 {
+    font-size: 25px;
+  }
+
+  .meeting-dates {
+    font-size: 19px;
   }
 
   .empty-code {
