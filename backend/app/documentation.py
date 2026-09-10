@@ -71,7 +71,7 @@ def canonical_documents(graph: Graph, version: str) -> list[dict]:
                 if urlsplit(str(url)).scheme in {"https", "http"}:
                     retrieved = next(graph.objects(assertion, ONTOLOGY.retrievedAt), None)
                     sources.add((str(url), str(retrieved) if retrieved else None))
-        excluded = {"translationReviewer", "translationAuthorization", "rule", "responseSha256", "sourceIdentity"}
+        excluded = {"evidence", "translationReviewer", "translationAuthorization", "rule", "responseSha256", "sourceIdentity"}
         for predicate, value in sorted(graph.predicate_objects(subject), key=lambda pair: (str(pair[0]), str(pair[1]))):
             field = str(predicate).rsplit("/", 1)[-1].rsplit("#", 1)[-1]
             if predicate in {RDF.type, RDFS.label} or field in excluded:

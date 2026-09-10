@@ -7,6 +7,39 @@ from app.documentation import canonical_documents, project_markdown
 from app.publication import CandidateEnvelope, PublicationModule
 
 
+def test_nls_public_documents_exclude_operator_authorization():
+    from app.nls import AUTHORIZATION, adapt_season, reviewed_source
+    from app.publication import publication_version
+    from app.stores import GraphDbProjection
+    envelope = adapt_season(reviewed_source())
+    version = publication_version(envelope)
+    documents = canonical_documents(GraphDbProjection.build_graph(version, envelope), version)
+    assert documents
+    for document in documents:
+        assert AUTHORIZATION not in document["markdown"]
+        assert "docs/sources/nls.md" not in document["markdown"]
+        assert "translationReviewer" not in document["markdown"]
+    assert any("race-control-bulletin" in document["markdown"] for document in documents)
+
+
+def test_nls_reader_preserves_public_assertion_sources(isolated_services):
+    from app.assistant import ReadTools, ScheduleQuery
+    from app.nls import AUTHORIZATION, adapt_season, reviewed_source
+    store, graph = isolated_services
+    published = PublicationModule(store, graph).publish(adapt_season(reviewed_source()))
+    reader = store.assistant_reader()
+    tools = ReadTools(reader, published.version, "UTC")
+    result = tools.schedule(ScheduleQuery(name="Qualifiers"))
+    assertions = result["meetings"][0]["assertions"]
+    status = next(assertion for assertion in assertions if assertion["field"] == "status")
+    assert status["subject_identity"] == "nls:2026:round:4"
+    assert "abandoned" in status["value"]
+    assert "race-control-bulletin" in tools.citations[status["citation"]].sourceUrl
+    assert any(assertion["preferred"] is False for assertion in assertions)
+    assert AUTHORIZATION not in str(reader.visible_meetings(published.version))
+    assert reader.search_documents("authorization", published.version) == []
+
+
 def test_published_meeting_has_searchable_english_documentation(isolated_services):
     store, graph = isolated_services
     envelope = CandidateEnvelope.model_validate_json(
@@ -40,24 +73,37 @@ def test_assistant_read_views_exclude_maintenance_fields(isolated_services):
     assert reader.lookup_document(document["iri"], published.version) == document
 
 
-def test_search_projection_failure_preserves_previous_publication(isolated_services):
+def test_search_projection_failure_preserves_previous_publication(isolated_services, isolated_database_url):
     store, graph = isolated_services
     candidate = CandidateEnvelope.model_validate_json((Path(__file__).parents[1] / "fixtures/f1-2026-australia.json").read_text("utf-8"))
     publisher = PublicationModule(store, graph)
     first = publisher.publish(candidate)
     revised = candidate.model_copy(update={"meeting": candidate.meeting.model_copy(update={"meeting_name": "Revised Australian Meeting"})})
     from app.publication import publication_version
+    from app.stores import PostgresOperationalStore
+    from app.assistant import ReadTools, ScheduleQuery
     revision = publication_version(revised)
-    store.stage(revision, revised)
-    assert store.search_documents("Revised", revision) == []
-    store.replace_search_documents(revision, [])
+
+    class MissingSearchStore(PostgresOperationalStore):
+        def stage(self, version, envelope):
+            super().stage(version, envelope)
+            self.replace_search_documents(version, [])
+
     with pytest.raises(RuntimeError, match="Search projection"):
-        store.promote(revision)
+        PublicationModule(MissingSearchStore(isolated_database_url), graph).publish(revised)
     assert store.current_publication_version() == first.version
     assert store.search_documents("Australian", first.version)
+    assert store.search_documents("Revised", revision) == []
+    assert graph.agrees(first.version, "meeting:" + candidate.source_identity, candidate)
+    reader = store.assistant_reader()
+    assert reader.current_publication_version() == first.version
+    assert ReadTools(reader, first.version, "UTC").schedule(ScheduleQuery())["meetings"][0]["name"] == candidate.meeting.meeting_name
     publisher.publish(revised)
     assert store.current_publication_version() == revision
     assert store.search_documents("Revised", revision)
+    assert reader.current_publication_version() == revision
+    assert ReadTools(reader, revision, "UTC").schedule(ScheduleQuery())["meetings"][0]["name"] == revised.meeting.meeting_name
+    assert graph.agrees(revision, "meeting:" + revised.source_identity, revised)
 
 
 @pytest.mark.parametrize("invalid", ["duplicate", "iri", "type", "language", "reference"])

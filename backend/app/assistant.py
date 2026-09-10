@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.publication import coverage_view
+from app.freshness import FreshnessResponse
 
 
 class ScheduleQuery(BaseModel):
@@ -60,7 +61,7 @@ class AssistantAnswer(BaseModel):
     classification: Literal["stated", "derived", "unsupported"]
     displayTimeZone: str
     publicationVersion: str | None
-    freshness: dict
+    freshness: FreshnessResponse
 
 
 class ReadTools:
@@ -116,6 +117,11 @@ class ReadTools:
                 value["sessions"].append(entry)
             iri = "https://w3id.org/motorsport-hub/resource/meeting/" + quote(meeting["id"].removeprefix("meeting:"), safe="")
             value["citation"] = self._cite(iri, meeting["name"], meeting["sourceUrl"], meeting["retrievedAt"])
+            value["assertions"] = []
+            for assertion in meeting.get("publicAssertions", meeting.get("fieldAssertions", [])):
+                public = {key: assertion.get(key) for key in ("field", "value", "subject_identity", "effective_local", "preferred")}
+                public["citation"] = self._cite(iri, meeting["name"] + ": " + assertion["field"], assertion["source_url"], assertion["retrieved_at"])
+                value["assertions"].append(public)
             meetings.append(value)
         return self._bounded({"meetings": meetings[:request.limit], "truncated": truncated, "displayTimeZone": self.zone,
                               "coverage": (self.store.coverage(self.version) if hasattr(self.store, "coverage") else coverage_view(self.store.publication_envelope(self.version))) if self.version else []})

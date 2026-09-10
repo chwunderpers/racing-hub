@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.assistant import AssistantAnswer, AssistantService
 from app.assistant_provider import configured_provider
 from app.assistant_store import AssistantReadStore
+from app.freshness import FreshnessResponse
 from app.stores import PostgresOperationalStore
 from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, CoverageAssessment, coverage_view
 
@@ -77,22 +78,6 @@ class MeetingResponse(BaseModel):
     fieldAssertions: list[FieldAssertion] = Field(default_factory=list)
     eventTimezone: str | None = None
     sessions: list[SessionResponse] = Field(default_factory=list)
-
-
-class SourceFreshnessResponse(BaseModel):
-    sourceFamily: str
-    stale: bool
-    reason: str | None = None
-    checkedAt: str | None = None
-    lastSuccessAt: str | None = None
-
-
-class FreshnessResponse(BaseModel):
-    stale: bool
-    reason: str | None = None
-    checkedAt: str | None = None
-    lastSuccessAt: str | None = None
-    sources: list[SourceFreshnessResponse] = Field(default_factory=list)
 
 
 class ScheduleResponse(BaseModel):

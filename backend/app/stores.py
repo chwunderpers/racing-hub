@@ -102,7 +102,12 @@ SELECT ps.current_version, jsonb_build_object('seasons', COALESCE((
 ), '[]'::jsonb)) AS scope
 FROM publication_state ps LEFT JOIN publication_envelopes e ON e.publication_version = ps.current_version;
 CREATE OR REPLACE VIEW assistant_public.meetings AS
-SELECT pm.publication_version, pm.payload - 'fieldAssertions' AS payload
+SELECT pm.publication_version, (pm.payload - 'fieldAssertions') || jsonb_build_object('publicAssertions', COALESCE((
+    SELECT jsonb_agg(jsonb_build_object('field', assertion->'field', 'value', assertion->'value',
+        'subject_identity', assertion->'subject_identity', 'effective_local', assertion->'effective_local',
+        'preferred', assertion->'preferred', 'source_url', assertion->'source_url', 'retrieved_at', assertion->'retrieved_at'))
+    FROM jsonb_array_elements(COALESCE(pm.payload->'fieldAssertions', '[]'::jsonb)) assertion
+), '[]'::jsonb)) AS payload
 FROM publication_meetings pm JOIN publication_state ps ON ps.current_version = pm.publication_version
 JOIN publications p ON p.version = pm.publication_version WHERE p.status = 'complete';
 CREATE OR REPLACE VIEW assistant_public.documents AS

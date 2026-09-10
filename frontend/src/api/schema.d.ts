@@ -108,10 +108,7 @@ export interface components {
             displayTimeZone: string;
             /** Publicationversion */
             publicationVersion: string | null;
-            /** Freshness */
-            freshness: {
-                [key: string]: unknown;
-            };
+            freshness: components["schemas"]["FreshnessResponse"];
         };
         /** AssistantMessage */
         AssistantMessage: {

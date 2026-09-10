@@ -28,7 +28,7 @@ def test_assistant_answers_from_typed_schedule_with_citation_and_zone():
     assert answer.publicationVersion == published.version
     assert answer.citations[0].sourceUrl == candidate.source_url
     assert answer.citations[0].iri == "https://w3id.org/motorsport-hub/resource/meeting/f1%3A2026%3Aaustralia"
-    assert answer.freshness["stale"] is True
+    assert answer.freshness.stale is True
 
 
 def test_sessions_are_isolated_ephemeral_and_expire():
