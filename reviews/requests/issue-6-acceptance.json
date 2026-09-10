@@ -1,0 +1,23 @@
+{
+  "outcome": "accepted",
+  "person": "Chris",
+  "rationale": "Approve the verified season and crosswalk for the local PoC, retaining source conflicts and unresolved timetable observations.",
+  "evidence": [
+    "https://www.gt-world-challenge-europe.com/calendar",
+    "docs/sources/gt-world-challenge-europe.md"
+  ],
+  "identity_resolutions": {
+    "gtwce:meeting:244/circuit_identity": "gtwce:paul-ricard",
+    "gtwce:meeting:245/circuit_identity": "f1-circuit-7",
+    "gtwce:meeting:246/circuit_identity": "gtwce:paul-ricard",
+    "gtwce:meeting:247/circuit_identity": "gtwce:brands-hatch",
+    "gtwce:meeting:248/circuit_identity": "f1-circuit-39",
+    "gtwce:meeting:249/circuit_identity": "f1-circuit-7",
+    "gtwce:meeting:250/circuit_identity": "gtwce:misano",
+    "gtwce:meeting:251/circuit_identity": "gtwce:magny-cours",
+    "gtwce:meeting:252/circuit_identity": "gtwce:nurburgring",
+    "gtwce:meeting:253/circuit_identity": "f1-circuit-55",
+    "gtwce:meeting:254/circuit_identity": "f1-circuit-15",
+    "gtwce:meeting:255/circuit_identity": "gtwce:portimao"
+  }
+}

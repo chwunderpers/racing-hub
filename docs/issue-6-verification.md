@@ -59,24 +59,39 @@ and covered by the final 19-test GT run. No scope creep was identified. Date-lev
 GT coverage is intentional: stable Session identities, end times and unambiguous
 UTC-date conversion remain unverified. No invented values were introduced.
 
-## Human Publication Gate
+## Approved Publication
 
 Live acquisition queued Review Item **`12e94701-d4b1-4bb5-8795-46c89952bb24`**.
-Its combined candidate retains all 23 F1 Meetings/115 Sessions and adds 12 GT
-Meetings. Preview: 12 additions, 12 explicit Circuit mapping resolutions, no
-validation errors or publication conflicts. The full candidate and provenance
-are retained in [the private review queue](../reviews/queue.yaml).
+Chris explicitly accepted its candidate and all 12 Circuit mappings, confirmed the
+exact decision, then separately approved publication of the exact proposed version.
+The combined candidate retains all 23 F1 Meetings/115 Sessions and adds 12 GT
+Meetings. Preview: 12 additions, no validation errors or publication conflicts.
+The full candidate and provenance are retained in the immutable
+[decision record](../reviews/decisions/f53248fa-d06f-4882-b473-078fc9fb3cad.yaml).
 
-The live approved publication remains:
+Decision **`f53248fa-d06f-4882-b473-078fc9fb3cad`** was recorded at
+`2026-09-10T10:27:54.811595+00:00`. Publication succeeded at
+`2026-09-10T10:28:44.846353+00:00`; see the
+[publication receipt](../reviews/publications/f53248fa-d06f-4882-b473-078fc9fb3cad.yaml).
 
+The live approved publication is:
+
+`6effd015b1502e70ddf8f1b2f9d237d2fb8fd477672282d0c83f98f5e5c205d1`
+
+It supersedes F1-only baseline
 `5ceaf34cc28a433b064dd26a766647d36a3d6e0708fc96469adb7d81b1109590`
+without changing the retained F1 season. A post-publication GT fetch returned
+`unchanged` and cleared the pending-review freshness marker.
 
-Its parsed candidate still hashes to that exact value, and the rebuilt API still
-serves 23 Meetings with canonical identities. F1 freshness remains independently
-verified; GT is marked pending review. No GT decision or publication was approved,
-and no GT publication receipt exists. Acceptance criterion 1 remains incomplete
-until the human accepts the exact candidate/mappings and separately confirms its
-publication. Issue 6 must remain open until that receipt and live verification exist.
+Live verification passed: API returns 35 Meetings, 12 GT Meetings, ten GT Rounds,
+two prologues with null Round number/identity, and 115 F1 Sessions under the exact
+published version. Freshness reports `stale: false`. SPARQL against that version's
+named graph returns the four shared Circuit identities `f1-circuit-7`,
+`f1-circuit-15`, `f1-circuit-39` and `f1-circuit-55`.
 
-Use [the private review procedure](review-workflow.md) for the next step. The
-implementation authorization is not a substitute for either data-publication gate.
+Browser verification used the actual live API without overrides: all 12 GT Meetings
+visible under the Competition filter; Spa Prologue links to the GT Spa Meeting and
+F1 Belgian Grand Prix, displays 14 source assertions and the exact published version.
+No stale notice remains. All six Issue 6 acceptance criteria are now satisfied for
+the local date-level PoC. Future changes still require the
+[private review procedure](review-workflow.md) and separate publication approval.
