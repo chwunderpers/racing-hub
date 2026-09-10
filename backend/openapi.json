@@ -80,12 +80,64 @@
         ],
         "title": "HealthResponse"
       },
+      "MeetingResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "competition": {
+            "type": "string",
+            "title": "Competition"
+          },
+          "season": {
+            "type": "integer",
+            "title": "Season"
+          },
+          "circuit": {
+            "type": "string",
+            "title": "Circuit"
+          },
+          "startDate": {
+            "type": "string",
+            "title": "Startdate"
+          },
+          "endDate": {
+            "type": "string",
+            "title": "Enddate"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "title": "Sourceurl"
+          },
+          "retrievedAt": {
+            "type": "string",
+            "title": "Retrievedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "competition",
+          "season",
+          "circuit",
+          "startDate",
+          "endDate",
+          "sourceUrl",
+          "retrievedAt"
+        ],
+        "title": "MeetingResponse"
+      },
       "ScheduleResponse": {
         "properties": {
           "meetings": {
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/MeetingResponse"
             },
             "type": "array",
             "title": "Meetings"

@@ -7,14 +7,37 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.stores import PostgresOperationalStore
+
 
 class HealthResponse(BaseModel):
     status: Literal["ok", "degraded"]
     database: Literal["ok", "unavailable"]
 
 
+class MeetingResponse(BaseModel):
+    id: str
+    name: str
+    competition: str
+    season: int
+    circuit: str
+    startDate: str
+    endDate: str
+    sourceUrl: str
+    retrievedAt: str
+
+
 class ScheduleResponse(BaseModel):
-    meetings: list[dict[str, object]]
+    meetings: list[MeetingResponse]
+
+
+def operational_store() -> PostgresOperationalStore:
+    return PostgresOperationalStore(
+        os.environ.get(
+            "DATABASE_URL",
+            "postgresql://motorsport:motorsport@localhost:5432/motorsport",
+        )
+    )
 
 
 def database_status() -> str:
@@ -56,5 +79,7 @@ def health(database: str = Depends(database_status)) -> Response:
 
 
 @app.get("/api/schedule", response_model=ScheduleResponse)
-def schedule() -> ScheduleResponse:
-    return ScheduleResponse(meetings=[])
+def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> ScheduleResponse:
+    return ScheduleResponse(
+        meetings=[MeetingResponse.model_validate(meeting) for meeting in store.visible_meetings()]
+    )

@@ -45,17 +45,39 @@ it("shows an unavailable state when the backend health check fails", async () =>
 });
 
 
-it("does not show the empty state when meetings are returned", async () => {
+it("shows a published Formula One meeting with its provenance", async () => {
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
     const url = String(input);
     if (url.endsWith("/api/health")) {
       return Response.json({ status: "ok", database: "ok" });
     }
-    return Response.json({ meetings: [{ id: "meeting-1" }] });
+    return Response.json({
+      meetings: [
+        {
+          id: "meeting:f1:2026:australia",
+          name: "Australian Grand Prix",
+          competition: "Formula One",
+          season: 2026,
+          circuit: "Albert Park Grand Prix Circuit",
+          startDate: "2026-03-06",
+          endDate: "2026-03-08",
+          sourceUrl: "https://www.formula1.com/en/racing/2026/australia",
+          retrievedAt: "2026-01-15T12:00:00Z",
+        },
+      ],
+    });
   });
 
   render(<App />);
 
-  expect(await screen.findByText("Schedule update required")).toBeVisible();
+  expect(await screen.findByText("Australian Grand Prix")).toBeVisible();
+  expect(screen.getByText("Formula One")).toBeVisible();
+  expect(screen.getByText("Albert Park Grand Prix Circuit")).toBeVisible();
+  expect(screen.getByText("6-8 March 2026")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Formula One source" })).toHaveAttribute(
+    "href",
+    "https://www.formula1.com/en/racing/2026/australia",
+  );
+  expect(screen.getByText("Retrieved 15 January 2026, 12:00 UTC")).toBeVisible();
   expect(screen.queryByText("No meetings published yet")).not.toBeInTheDocument();
 });

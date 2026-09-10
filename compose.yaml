@@ -10,8 +10,41 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  graphdb:
+    image: ontotext/graphdb:10.8.10
+    environment:
+      GDB_JAVA_OPTS: -Xms512m -Xmx1g
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:7200/protocol"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:7200:7200"
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://packagefeedproxy.microsoft.io/pypi/simple/}
+    command: ["python", "-m", "app.bootstrap"]
+    environment:
+      DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
+      GRAPHDB_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY: motorsport
+    depends_on:
+      database:
+        condition: service_healthy
+      graphdb:
+        condition: service_healthy
 
   backend:
     build:
@@ -21,9 +54,11 @@ services:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://packagefeedproxy.microsoft.io/pypi/simple/}
     environment:
       DATABASE_URL: postgresql://motorsport:motorsport@database:5432/motorsport
+      GRAPHDB_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY: motorsport
     depends_on:
-      database:
-        condition: service_healthy
+      bootstrap:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -36,7 +71,7 @@ services:
       timeout: 3s
       retries: 10
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
   frontend:
     build:
@@ -46,7 +81,8 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
 
 volumes:
   postgres-data:
+  graphdb-data:

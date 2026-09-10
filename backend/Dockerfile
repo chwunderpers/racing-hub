@@ -11,6 +11,8 @@ COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir --index-url "$PIP_INDEX_URL" -r requirements.txt
 
 COPY backend/app ./app
+COPY backend/fixtures ./fixtures
+COPY graphdb/repository-config.ttl ./graphdb/repository-config.ttl
 
 EXPOSE 8000
 

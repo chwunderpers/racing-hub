@@ -1,6 +1,11 @@
 from fastapi.testclient import TestClient
 
-from app.main import app, database_status
+from app.main import app, database_status, operational_store
+
+
+class EmptyOperationalStore:
+    def visible_meetings(self) -> list[dict[str, object]]:
+        return []
 
 
 def test_health_reports_ready_when_database_is_available() -> None:
@@ -29,8 +34,11 @@ def test_health_reports_degraded_when_database_is_unavailable() -> None:
 
 
 def test_schedule_starts_with_no_meetings() -> None:
+    app.dependency_overrides[operational_store] = EmptyOperationalStore
+
     with TestClient(app) as client:
         response = client.get("/api/schedule")
 
+    app.dependency_overrides.clear()
     assert response.status_code == 200
     assert response.json() == {"meetings": []}
