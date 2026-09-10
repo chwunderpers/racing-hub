@@ -83,7 +83,14 @@ route evidence; retain explicit unassessed coverage in RDF; preserve inherited
 Session Layouts and lengths; remove contradictory first-publication wording for
 published empty scopes. No remaining concrete finding in those reviewed areas.
 
-## Remaining GraphDB Gate
+## GraphDB Follow-up
+
+The license gate described below was subsequently resolved using Chris's supplied
+local license. GraphDB 11.5.0 is now live, with exact stored-graph preservation,
+native MCP queries and 34 storage/NLS tests verified. Temporary copies were deleted.
+See the [completed migration record](graphdb-upgrade.md) for final results and the
+pre-existing oldest-seed regeneration limitation. The following records the
+initial NLS closeout state, before the license was supplied.
 
 The user also requested the GraphDB upgrade under this issue. The consistent-copy
 migration rehearsal preserved `motorsport` and completed native MCP initialization

@@ -11,7 +11,9 @@ the Meeting appears in the React schedule with its source and retrieval time.
 
 ## Run with Compose
 
-Prerequisite: Docker with Compose v2.
+Prerequisites: Docker with Compose v2 and a valid GraphDB license outside the
+repository. Set `GRAPHDB_LICENSE_FILE` to its absolute path in the shell or an
+ignored `.env` file. The license is mounted read-only; never commit its contents.
 
 The credentials in `compose.yaml` are development-only placeholders for this
 local proof of concept.
@@ -33,11 +35,12 @@ GraphDB Workbench is at <http://localhost:7200>. Compose provisions the
 one-shot bootstrap before starting the API. Service ports bind to loopback;
 these development credentials and unauthenticated services are not for hosting.
 
-The GraphDB 11.5 native-MCP migration was rehearsed on a temporary copy, but
-cutover requires a vendor-issued license. The default remains 10.8.10 to keep
-the local schedule usable. See [migration results and configuration](docs/graphdb-upgrade.md).
+GraphDB 11.5.0 is the default and the live local database. Native MCP is available
+at <http://localhost:7200/mcp>; initialization, tool discovery and a bounded
+publication query were verified. Assistant integration and query authorization
+remain separate work. See [migration results and configuration](docs/graphdb-upgrade.md).
 
-GraphDB 10.8 may enable anonymous usage statistics by default depending on
+GraphDB may enable anonymous usage statistics by default depending on
 the license. Disable them in Workbench under Setup > Repositories > Edit
 common settings. This stack does not claim to disable telemetry automatically.
 
