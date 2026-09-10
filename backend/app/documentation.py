@@ -83,4 +83,9 @@ def canonical_documents(graph: Graph, version: str) -> list[dict]:
             lines.append("- " + field + ": " + json.dumps(str(value), ensure_ascii=True))
         sources_by_iri[str(subject)] = [{"url": url, "retrievedAt": retrieved} for url, retrieved in sorted(sources, key=lambda item: (item[0], item[1] or ""))]
         documents.append("---\n" + yaml.safe_dump(metadata.model_dump(), sort_keys=True, allow_unicode=False) + "---\n" + "\n".join(lines) + "\n")
-    return [{**record, "sources": sources_by_iri[record["iri"]]} for record in project_markdown(documents, graph, version)]
+    records = [{**record, "sources": sources_by_iri[record["iri"]]} for record in project_markdown(documents, graph, version)]
+    from app.regulation_projection import profile_projection
+    for record in records:
+        if str(ONTOLOGY.CompetitionProfile) in record["rdfTypes"]:
+            record["regulationProfile"] = profile_projection(graph, URIRef(record["iri"]))
+    return records

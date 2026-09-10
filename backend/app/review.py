@@ -10,7 +10,7 @@ import yaml
 from filelock import FileLock
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from app.publication import CandidateEnvelope, PublicationCandidate, SeasonCandidateEnvelope, PublicationModule, parse_candidate, candidate_meetings, publication_version
+from app.publication import CandidateEnvelope, PublicationCandidate, PublicationSnapshot, SeasonCandidateEnvelope, PublicationModule, parse_candidate, candidate_meetings, publication_version
 
 
 class DecisionRequest(BaseModel):
@@ -22,6 +22,7 @@ class DecisionRequest(BaseModel):
     evidence: list[str] = Field(min_length=1)
     corrected_candidate: dict | None = None
     identity_resolutions: dict[str, str] = Field(default_factory=dict)
+    regulation_confirmations: list[str] = Field(default_factory=list)
 
 
 class ReviewStore(Protocol):
@@ -49,10 +50,16 @@ class ReviewService:
         self._lock = FileLock(self.directory / ".review.lock", timeout=0)
 
     @serialized
-    def preview(self, candidate: dict) -> dict:
+    def preview(self, candidate: dict, *, expected_baseline: str | None = None) -> dict:
         if candidate.get("source_language") != "en":
             raise ValueError("Only English candidate artifacts may be retained")
+        for bundle in candidate.get("regulations", []):
+            for passage in bundle.get("passages", []):
+                if passage.get("language") != "en":
+                    raise ValueError("Only English regulation evidence may be persisted; translate before preview")
         item = self._preview(candidate)
+        if expected_baseline is not None and item["baselineVersion"] != expected_baseline:
+            raise ValueError("Publication baseline changed during ingestion; prepare and review again")
         queue = self._queue()
         queue["items"].append(item)
         self._write(self.directory / "queue.yaml", queue)
@@ -67,10 +74,12 @@ class ReviewService:
         self, item_id: str, outcome: str, person: str, rationale: str,
         evidence: list[str], corrected_candidate: dict | None = None,
         identity_resolutions: dict[str, str] | None = None,
+        regulation_confirmations: list[str] | None = None,
     ) -> dict:
         request = DecisionRequest.model_validate({
             "outcome": outcome, "person": person, "rationale": rationale, "evidence": evidence,
             "corrected_candidate": corrected_candidate, "identity_resolutions": identity_resolutions or {},
+            "regulation_confirmations": regulation_confirmations or [],
         })
         if (request.outcome == "corrected") != (request.corrected_candidate is not None):
             raise ValueError("A correction requires exactly one corrected candidate")
@@ -85,6 +94,7 @@ class ReviewService:
             "candidate": item["candidate"], "baselineVersion": item["baselineVersion"],
             "preview": item["preview"], "correctedCandidate": request.corrected_candidate,
             "identityResolutions": request.identity_resolutions,
+            "regulationConfirmations": request.regulation_confirmations,
         }
         proposal = {"decision": decision, "confirmation": self._digest(decision)}
         item["proposal"] = proposal
@@ -175,6 +185,13 @@ class ReviewService:
         preview = current["preview"]
         if preview["validationErrors"] or preview["conflicts"] or decision["preview"]["conflicts"]:
             raise ValueError("Candidate has validation errors or publication conflicts")
+        required = decision["preview"].get("regulationConfirmations", [])
+        if not set(required).issubset(decision.get("regulationConfirmations", [])):
+            raise ValueError("Explicit regulation evidence, translation and identity confirmation is required")
+        if isinstance(envelope, PublicationSnapshot):
+            for bundle in envelope.regulations:
+                if any(passage.translation and passage.translation.review_state != "accepted" for passage in bundle.passages):
+                    raise ValueError("Regulation translations require explicit accepted human review")
         for field in set(preview["unresolvedIdentities"] + decision["preview"]["unresolvedIdentities"]):
             if not isinstance(envelope, CandidateEnvelope):
                 source_id, identity_field = field.rsplit("/", 1)
@@ -263,6 +280,16 @@ class ReviewService:
             if missing:
                 conflicts.append("Missing published Meetings; retain them with explicit sourced cancellation: " + ", ".join(missing))
         changes = {}
+        regulation_confirmations = []
+        previous_regulations = {f"{entry.competition_identity}:{entry.season_year}": entry.model_dump(mode="json") for entry in baseline.regulations} if isinstance(baseline, PublicationSnapshot) else {}
+        next_regulations = {f"{entry['competition_identity']}:{entry['season_year']}": entry for entry in candidate.get("regulations", [])} if not errors else {}
+        for scope in previous_regulations.keys() | next_regulations.keys():
+            before, after = previous_regulations.get(scope), next_regulations.get(scope)
+            if before != after:
+                changes["regulations/" + scope] = {"before": before, "after": after}
+                regulation_confirmations.append("regulations/" + scope + "/" + self._digest({"before": before, "after": after}))
+                if after is None:
+                    conflicts.append("Missing published regulation profile: " + scope)
         unresolved = [
             f"{identity}/circuit_identity" for identity in sorted(set(proposed) - set(previous))
             if proposed[identity]["meeting"]["competition_identity"] in ("gt-world-challenge-europe", "nls")
@@ -299,5 +326,6 @@ class ReviewService:
                 "additions": sorted(set(proposed) - set(previous)), "changes": changes,
                 "cancellations": [identity for identity, entry in proposed.items() if entry["meeting"]["status"] == "cancelled" and previous.get(identity, {}).get("meeting", {}).get("status") != "cancelled"],
                 "conflicts": conflicts, "unresolvedIdentities": unresolved, "validationErrors": errors,
+                "regulationConfirmations": regulation_confirmations,
             },
         }

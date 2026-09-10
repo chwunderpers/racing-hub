@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.publication import coverage_view
 from app.freshness import FreshnessResponse
+from app.regulations import Topic
 
 
 class ScheduleQuery(BaseModel):
@@ -43,6 +44,13 @@ class IriQuery(BaseModel):
 class GraphQuery(BaseModel):
     model_config = ConfigDict(extra="forbid")
     query: str = Field(min_length=1, max_length=12000)
+
+
+class RegulationQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    competition: str = Field(min_length=1, max_length=100)
+    season: int = Field(ge=1950, le=2100)
+    topic: Topic
 
 
 class Citation(BaseModel):
@@ -141,6 +149,24 @@ class ReadTools:
         self._begin()
         record = self.store.lookup_document(request.iri, self.version) if self.version else None
         return self._bounded({"document": self._document(record) if record else None})
+
+    def regulations(self, request: RegulationQuery) -> dict:
+        from app.regulation_projection import regulation_iri
+        self._begin()
+        iri = str(regulation_iri("competition-profile", f"{request.competition}:{request.season}"))
+        record = self.store.lookup_document(iri, self.version) if self.version else None
+        entries = [entry for entry in record.get("regulationProfile", []) if entry["topic"] == request.topic] if record else []
+        entries = json.loads(json.dumps(entries))
+        for entry in entries:
+            for provision in entry["provisions"]:
+                evidence = provision["evidence"]
+                provision["citation"] = self._cite(provision["iri"], evidence["documentVersion"] + " " + evidence["anchor"], evidence["sourceUrl"], evidence["retrievedAt"])
+        return self._bounded({
+            "status": "available" if entries and entries[0]["state"] != "unknown" else "insufficient-evidence",
+            "competition": request.competition, "season": request.season, "profile": entries,
+            "publicationVersion": self.version,
+            "scope": "Reviewed single-Competition profile, not event-specific results. Preserve applicability, amendments, exceptions and discretion. Unknown is not false; do not infer historical applicability from season alone.",
+        })
 
     def _document(self, record):
         references = [self._cite(record["iri"], record["title"], source["url"], source["retrievedAt"]) for source in record["sources"][:3]]

@@ -1,0 +1,47 @@
+{
+  "competition_identity": "formula-one",
+  "season_year": 2026,
+  "documents": [
+    {
+      "identity": "fia:2026:section-a:03",
+      "title": "FIA 2026 Formula One General Regulatory Provisions",
+      "version": "Section A Issue 03 (25 June 2026)",
+      "season_year": 2026,
+      "authority": "FIA",
+      "source_url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_03_-_2026-06-25.pdf",
+      "sha256": "6ce8c9420ddb8194e1b5ea8f678dbbdcb4bb2094780e636324b709ee70d276d6",
+      "retrieved_at": "2026-09-10T17:31:00.214784Z",
+      "issued_on": "2026-06-25",
+      "source_language": "en",
+      "sections": [{"anchor": "A2.2.1 opening condition", "page": 9}, {"anchor": "A2.2.1(d), table column 4, first position", "page": 10}, {"anchor": "A2.2.3", "page": 11}]
+    },
+    {
+      "identity": "fia:2026:section-b:08",
+      "title": "FIA 2026 Formula One Sporting Regulations",
+      "version": "Section B Issue 08 (5 August 2026)",
+      "season_year": 2026,
+      "authority": "FIA",
+      "source_url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_b_sporting_-_iss_08_-_2026-08-05_7.pdf",
+      "sha256": "cbe329807d7803a4db511f80d829de1212d0c6a1c3b327cddb1b841823baa9fd",
+      "retrieved_at": "2026-09-10T17:30:20.495720Z",
+      "issued_on": "2026-08-05",
+      "source_language": "en",
+      "sections": [{"anchor": "B2.5.5(c)", "page": 25}]
+    }
+  ],
+  "passages": [
+    {"identity": "a03-race-eligibility", "document_identity": "fia:2026:section-a:03", "anchor": "A2.2.1 opening condition", "language": "en", "kind": "paraphrase", "text": "Race points depend on final classification and the leader's officially counted laps. The leader must complete two entire consecutive laps without a Safety Car or Virtual Safety Car procedure for any points to be awarded."},
+    {"identity": "a03-full-points", "document_identity": "fia:2026:section-a:03", "anchor": "A2.2.1(d), table column 4, first position", "language": "en", "kind": "paraphrase", "text": "The full-points distance band begins at 75% of the Scheduled Race Distance. The first-position entry in that band is 25 points, subject to the article's opening eligibility condition."},
+    {"identity": "a03-dead-heat", "document_identity": "fia:2026:section-a:03", "anchor": "A2.2.3", "language": "en", "kind": "paraphrase", "text": "For a race dead heat, the points for the tied positions are pooled and divided equally among those sharing the tie."},
+    {"identity": "b08-classification", "document_identity": "fia:2026:section-b:08", "anchor": "B2.5.5(c)", "language": "en", "kind": "paraphrase", "text": "A published provisional race classification can be amended under the governing FIA rules; it is not by itself proof of the final points recipient."}
+  ],
+  "provisions": [
+    {"identity": "race-eligibility-a03", "passage_identity": "a03-race-eligibility", "topic": "scoring", "summary": "Race points require the prescribed consecutive leader laps and final classification.", "applicability": "Formula One 2026 race points under the fetched Section A Issue 03. Historical issue applicability and actual event lap evidence have not been established.", "exceptions": ["Fewer than two qualifying complete consecutive leader laps means no points under this condition."], "discretion": "No independent discretion to replace the points table is established by this passage; actual decisions require separate evidence.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "full-points-winner-a03", "passage_identity": "a03-full-points", "topic": "scoring", "summary": "A sole first-place finisher receives 25 points in the full-points distance band.", "applicability": "Formula One 2026 race, final sole first-place classification, leader distance at least 75% of Scheduled Race Distance and the required consecutive laps without SC/VSC. This is a conditional rule, not an event award.", "exceptions": ["Below 75% distance uses other bands, not this 25-point value.", "A dead heat requires A2.2.3 rather than the sole-winner value.", "Sprint allocation is outside this profile."], "discretion": "Penalties, appeals or decisions changing classification or an award need their own reviewed evidence. Missing decision evidence does not establish that none exists.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "race-dead-heat-a03", "passage_identity": "a03-dead-heat", "topic": "scoring", "summary": "Tied race positions share the combined points equally.", "applicability": "A race dead heat under the fetched 2026 Section A Issue 03; not a season standings tie-break.", "exceptions": ["The sole-winner 25-point answer cannot be applied unchanged to a tie."], "discretion": "The actual tie and classification require official event evidence.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "classification-b08", "passage_identity": "b08-classification", "topic": "scoring", "summary": "Provisional classification remains subject to amendment.", "applicability": "Formula One 2026 classification under fetched Section B Issue 08. It does not prove historical applicability to a named event.", "exceptions": ["A provisional finishing order may differ from the final result."], "discretion": "Review the applicable decision and final classification; this passage does not predict officials' decisions.", "amends": [], "effective_from": null, "effective_until": null}
+  ],
+  "profile": [
+    {"topic": "scoring", "state": "known", "value": "Conditional 2026 Formula One rule: a sole full-points race winner receives 25 points. Full points require at least 75% scheduled distance and the prescribed two consecutive complete leader laps without SC/VSC. Final classification, no dead heat, and applicable decisions must be established before applying this to an event. No historical issue applicability is inferred.", "provision_ids": ["race-eligibility-a03", "full-points-winner-a03", "race-dead-heat-a03", "classification-b08"]}
+  ]
+}

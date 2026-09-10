@@ -408,6 +408,10 @@ class GraphDbProjection:
             graph = Graph()
             for entry in candidate_meetings(envelope):
                 graph += cls.build_graph(version, entry)
+            if isinstance(envelope, PublicationSnapshot):
+                from app.regulation_projection import regulation_graph
+                for bundle in envelope.regulations:
+                    graph += regulation_graph(bundle, version)
             seasons = envelope.seasons if isinstance(envelope, PublicationSnapshot) else [envelope]
             for season in seasons:
                 if season.coverage is None:
