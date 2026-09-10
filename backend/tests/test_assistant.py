@@ -145,7 +145,7 @@ def test_responses_provider_uses_typed_tools_without_remote_history():
         assert "conversation" not in payload
         assert "previous_response_id" not in payload
         assert "test-only-key" not in json.dumps(payload)
-        assert {tool["name"] for tool in payload["tools"]} == {"schedule", "search_documentation", "lookup_iri"}
+        assert {tool["name"] for tool in payload["tools"]} == {"schedule", "search_documentation", "lookup_iri", "competition_regulations"}
 
 
 def test_nls_tools_preserve_abandonment_unknown_ends_and_unresolved_clocks():
@@ -219,6 +219,6 @@ def test_provider_shared_circuit_answer_has_sources_iris_and_asserted_premises()
     assert circuit in answer.text
     assert {citation.sourceUrl for citation in answer.citations} == {"https://example.org/f1", "https://example.org/gt"}
     for payload in captured:
-        assert {tool["name"] for tool in payload["tools"]} == {"schedule", "search_documentation", "lookup_iri", "graph_shared_circuits", "graph_query"}
+        assert {tool["name"] for tool in payload["tools"]} == {"schedule", "search_documentation", "lookup_iri", "competition_regulations", "graph_shared_circuits", "graph_query"}
         assert "server-only-password" not in json.dumps(payload)
         assert payload["store"] is False
