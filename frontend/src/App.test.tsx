@@ -179,6 +179,8 @@ it.each([
   render(<App />);
   await screen.findByText("System ready");
   expect(screen.getByText(label)).toBeVisible();
+  expect(screen.queryByText("No meetings published yet")).not.toBeInTheDocument();
+  expect(screen.queryByText("Awaiting first publication")).not.toBeInTheDocument();
   expect(screen.queryByText("The starting grid is clear for the first approved publication.")).not.toBeInTheDocument();
 });
 

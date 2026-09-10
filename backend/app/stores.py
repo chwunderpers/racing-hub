@@ -10,7 +10,7 @@ from psycopg.rows import dict_row
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.compare import isomorphic
 
-from app.publication import CandidateEnvelope, PublicationCandidate, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view, coverage_view
+from app.publication import CandidateEnvelope, CandidateLayout, PublicationCandidate, PublicationSnapshot, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view, coverage_view
 
 
 MOTORSPORT = Namespace("https://w3id.org/motorsport-hub/ontology/")
@@ -307,9 +307,11 @@ class GraphDbProjection:
             graph = Graph()
             for entry in candidate_meetings(envelope):
                 graph += self._build_graph(version, entry)
-            for assessment in coverage_view(envelope):
-                if assessment["state"] == "unassessed":
+            seasons = envelope.seasons if isinstance(envelope, PublicationSnapshot) else [envelope]
+            for season in seasons:
+                if season.coverage is None:
                     continue
+                assessment = coverage_view(season)[0]
                 season_iri = self._resource_iri(f"season:{assessment['competitionId']}:{assessment['season']}")
                 graph.add((season_iri, RDF.type, MOTORSPORT.Season))
                 graph.add((season_iri, MOTORSPORT.coverageState, Literal(assessment["state"])))
@@ -401,13 +403,8 @@ class GraphDbProjection:
                 graph.add((meeting_iri, MOTORSPORT.venue, venue_iri))
                 graph.add((circuit_iri, MOTORSPORT.venue, venue_iri))
             if meeting.layout:
-                layout_iri = self._resource_iri(f"layout:{meeting.layout.identity}")
-                graph.add((layout_iri, RDF.type, MOTORSPORT.Layout))
-                graph.add((layout_iri, RDFS.label, Literal(meeting.layout.name, lang="en")))
-                graph.add((layout_iri, MOTORSPORT.circuit, circuit_iri))
+                layout_iri = self._add_layout(graph, meeting.layout, circuit_iri)
                 graph.add((meeting_iri, MOTORSPORT.layout, layout_iri))
-                if meeting.layout.length_km is not None:
-                    graph.add((layout_iri, MOTORSPORT.lengthKm, Literal(meeting.layout.length_km)))
             if meeting.coverage:
                 graph.add((meeting_iri, MOTORSPORT.coverageState, Literal(meeting.coverage.state)))
                 graph.add((meeting_iri, MOTORSPORT.activity, Literal(meeting.coverage.activity)))
@@ -432,18 +429,16 @@ class GraphDbProjection:
                     graph.add((session_iri, MOTORSPORT.round, self._resource_iri(f"round:{session.round_identity}")))
                 if session.duration_minutes is not None:
                     graph.add((session_iri, MOTORSPORT.durationMinutes, Literal(session.duration_minutes, datatype=XSD.integer)))
+                session_circuit = circuit_iri
                 if session.circuit_identity:
                     session_circuit = self._resource_iri(f"circuit:{session.circuit_identity}")
                     graph.add((session_circuit, RDF.type, MOTORSPORT.Circuit))
                     graph.add((session_iri, MOTORSPORT.circuit, session_circuit))
                     if meeting.venue:
                         graph.add((session_circuit, MOTORSPORT.venue, venue_iri))
-                    if session.layout:
-                        session_layout = self._resource_iri(f"layout:{session.layout.identity}")
-                        graph.add((session_layout, RDF.type, MOTORSPORT.Layout))
-                        graph.add((session_layout, RDFS.label, Literal(session.layout.name, lang="en")))
-                        graph.add((session_layout, MOTORSPORT.circuit, session_circuit))
-                        graph.add((session_iri, MOTORSPORT.layout, session_layout))
+                if session.layout:
+                    session_layout = self._add_layout(graph, session.layout, session_circuit)
+                    graph.add((session_iri, MOTORSPORT.layout, session_layout))
                 graph.add((session_iri, MOTORSPORT.status, Literal(session.status)))
                 graph.add((session_iri, MOTORSPORT.provenance, provenance_iri))
                 for label, clock in (("start", session.start), ("end", session.end)):
@@ -457,6 +452,15 @@ class GraphDbProjection:
                     if clock.instant:
                         graph.add((session_iri, MOTORSPORT[label + "Instant"], Literal(clock.instant, datatype=XSD.dateTime)))
         return graph
+
+    def _add_layout(self, graph: Graph, layout: CandidateLayout, circuit: URIRef) -> URIRef:
+        layout_iri = self._resource_iri(f"layout:{layout.identity}")
+        graph.add((layout_iri, RDF.type, MOTORSPORT.Layout))
+        graph.add((layout_iri, RDFS.label, Literal(layout.name, lang="en")))
+        graph.add((layout_iri, MOTORSPORT.circuit, circuit))
+        if layout.length_km is not None:
+            graph.add((layout_iri, MOTORSPORT.lengthKm, Literal(layout.length_km)))
+        return layout_iri
 
     @staticmethod
     def _resource_iri(resource_id: str) -> URIRef:

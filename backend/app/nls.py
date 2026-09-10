@@ -175,6 +175,10 @@ def fetch_season(season: int, client: httpx.Client, now: datetime | None = None)
     document = BeautifulSoup(content, "html.parser")
     if not document.title or "2026" not in document.title.get_text():
         raise ValueError("NLS calendar season changed")
+    paragraph = document.select_one(".entry-content p")
+    normalized_route = " ".join(paragraph.get_text(" ", strip=True).split()) if paragraph else ""
+    if hashlib.sha256(normalized_route.encode()).hexdigest() != "5850340a6095c09257278a38c109d34f4f61ff9506f2c56329f13c376b2afd5a":
+        raise ValueError("NLS calendar route evidence changed; reassess the factual projection")
     rows = document.select(".entry-content table.table tr")
     if len(rows) != 9:
         raise ValueError("NLS calendar membership changed")

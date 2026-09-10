@@ -210,7 +210,7 @@ function App() {
                 <Flag size={30} strokeWidth={1.5} />
               </div>
               <div>
-                <h2>No meetings published yet</h2>
+                <h2>{coverage.length ? "No Meeting records in this publication" : "No meetings published yet"}</h2>
                 {!coverage.length && <p>Coverage unassessed</p>}
               </div>
               <span className="empty-code">00</span>
@@ -275,7 +275,7 @@ function App() {
         <span>
           {viewState === "ready"
             ? meetings.length === 0
-              ? "Awaiting first publication"
+              ? coverage.length ? "Coverage assessment published" : "Awaiting first publication"
               : `${filtered.length} of ${meetings.length} meetings published`
             : "Service status"}
         </span>

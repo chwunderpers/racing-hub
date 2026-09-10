@@ -242,3 +242,53 @@ def test_empty_publication_remains_the_review_baseline(tmp_path):
     result = publisher.publish(SeasonCandidateEnvelope.model_validate(source))
     item = ReviewService(tmp_path, store, publisher).preview(source)
     assert item["baselineVersion"] == result.version
+
+
+@pytest.mark.parametrize("override", [False, True])
+def test_session_layout_and_length_are_projected_with_inherited_or_overridden_circuit(monkeypatch, override):
+    from app.stores import GraphDbProjection, MOTORSPORT
+    source = qualifiers()
+    source["meeting"]["sessions"][0]["layout"] = {"identity": "synthetic-route", "name": "Synthetic route", "length_km": 25.378}
+    if override:
+        source["meeting"]["sessions"][0]["circuit_identity"] = "synthetic-course"
+    projected = Graph()
+    def put(url, **kwargs):
+        projected.parse(data=kwargs["content"], format="turtle")
+        return httpx.Response(204, request=httpx.Request("PUT", url))
+    monkeypatch.setattr(httpx, "put", put)
+    GraphDbProjection("http://unused", "unused", Path("unused")).project("test", ScheduledEnvelope.model_validate(source))
+    session = next(projected.subjects(RDF.type, MOTORSPORT.Session))
+    layout = projected.value(session, MOTORSPORT.layout)
+    assert layout is not None
+    assert float(projected.value(layout, MOTORSPORT.lengthKm)) == 25.378
+    course = projected.value(layout, MOTORSPORT.circuit)
+    expected = "synthetic-course" if override else "nls%3Anordschleife-combined"
+    assert str(course).endswith("/circuit/" + expected)
+
+
+def test_explicit_unassessed_empty_inventory_retains_coverage_in_rdf(monkeypatch):
+    from app.publication import SeasonCandidateEnvelope
+    from app.stores import GraphDbProjection, MOTORSPORT
+    candidate = SeasonCandidateEnvelope.model_validate({
+        "source_identity": "unknown:2026", "source_url": "https://example.org/calendar", "retrieved_at": "2026-09-10T11:00:00Z",
+        "source_language": "en", "competition_identity": "unknown", "season_year": 2026, "meetings": [],
+        "coverage": {"state": "unassessed", "activity": "unknown", "reason": "No source assessment yet", "source_url": "https://example.org/calendar"},
+    })
+    projected = Graph()
+    def put(url, **kwargs):
+        projected.parse(data=kwargs["content"], format="turtle")
+        return httpx.Response(204, request=httpx.Request("PUT", url))
+    monkeypatch.setattr(httpx, "put", put)
+    GraphDbProjection("http://unused", "unused", Path("unused")).project("test", candidate)
+    season = next(projected.subjects(RDF.type, MOTORSPORT.Season))
+    assert str(projected.value(season, MOTORSPORT.coverageState)) == "unassessed"
+    assert str(projected.value(season, MOTORSPORT.coverageReason)) == "No source assessment yet"
+    assert len(list(projected.subjects(RDF.type, MOTORSPORT.Publication))) == 1
+
+
+def test_changed_calendar_route_evidence_cannot_be_attributed_to_new_response_bytes():
+    from app.nls import fetch_season
+    markup = '<title>NLS 2026</title><div class="entry-content"><p>Route evidence changed</p></div>'
+    with httpx.Client(transport=httpx.MockTransport(lambda request: httpx.Response(200, text=markup, headers={"Content-Type": "text/html"}))) as client:
+        with pytest.raises(ValueError, match="route evidence changed"):
+            fetch_season(2026, client)
