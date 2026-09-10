@@ -1,10 +1,10 @@
-# Schedule And Documentation Assistant
+# Schedule, Documentation And Graph Assistant
 
-Issue #8 uses Python Microsoft Agent Framework with three backend-owned tools:
-`schedule`, `search_documentation`, and `lookup_iri`. PostgreSQL is the read
-authority. GraphDB native MCP integration remains Issue #9; no graph query tool,
-SQL execution tool, browsing tool, publication operation or maintenance command
-is exposed to the model.
+The Python Microsoft Agent Framework assistant composes PostgreSQL tools
+(`schedule`, `search_documentation`, `lookup_iri`) separately from native GraphDB
+MCP tools (`graph_shared_circuits`, `graph_query`). PostgreSQL selects the accepted
+Publication; graph queries are pinned to that Publication's named graph. No SQL
+execution, browsing, publication or maintenance capability is exposed to the model.
 
 ## Local Configuration
 
@@ -38,6 +38,93 @@ The provider packages are pinned to `agent-framework-core==1.17.0` and
 `agent-framework-openai==1.14.2`, the stable versions available on the configured
 package mirror. Responses API tool calls and structured output are covered by an
 offline HTTP-transport test and an authorized live deployment check.
+
+### Native GraphDB Setup
+
+GraphDB remains the separately installed, licensed 11.5.0 local dependency at
+`http://localhost:7200`; Docker-internal MCP uses `http://graphdb:7200/mcp`.
+The Python native MCP SDK is pinned to `mcp==1.24.0`. No REST query fallback is
+used by the assistant. Administrative setup and publication writes still use the
+GraphDB management and RDF APIs, independently of assistant tools.
+
+After the existing repository has been bootstrapped, run from the repository root
+with `PYTHONPATH=backend`:
+
+```powershell
+.venv\Scripts\python -m app.graph_setup
+docker compose restart graphdb
+docker compose up -d --no-deps --wait graphdb
+docker compose up -d --build --no-deps --wait backend
+```
+
+The command is for this local `motorsport` repository. It preserves other `.env`
+entries and refuses to replace an existing unmanaged account. It creates separate
+`racing_admin`, `racing_maintenance` and `racing_assistant` GraphDB accounts, turns
+off anonymous free access and enables authentication. A built-in administrator
+that still accepts the documented default password is disabled; a customized one
+is not changed. Generated credentials are stored only in ignored `.env`, never
+printed. If authentication is already enabled, configured administrator credentials
+are required. Use the locally stored `GRAPHDB_ADMIN_USER`/`GRAPHDB_ADMIN_PASSWORD`
+for Workbench administration; never paste them into chat.
+
+The assistant has only `ROLE_USER` and `READ_REPO_motorsport`. It cannot write or
+administer users/repositories. Maintenance has repository read/write permission,
+not administrator privileges. Compose sends only the relevant read/write accounts
+to the backend, not the administrator account. Host-side maintenance commands
+also need `GRAPHDB_MAINTENANCE_USER` and `GRAPHDB_MAINTENANCE_PASSWORD` in their
+process environment; do not display expanded environment values. GraphDB tools
+are not advertised without `GRAPHDB_MCP_URL`, `GRAPHDB_ASSISTANT_USER` and
+`GRAPHDB_ASSISTANT_PASSWORD`.
+
+Isolated service tests additionally use `TEST_GRAPHDB_USER` and
+`TEST_GRAPHDB_PASSWORD` with repository-administration permission, alongside
+`TEST_DATABASE_URL` and `TEST_GRAPHDB_URL`. Only test fixtures substitute those
+credentials for disposable repository creation/deletion. Never grant these
+privileges to the assistant identity.
+
+### Query Policy And Inference
+
+The backend parses the entire SPARQL query and allowlists its algebra, not keywords.
+SELECT, ASK, CONSTRUCT and DESCRIBE execute through native MCP `sparql_query` with
+the repository fixed server-side and namespace auto-expansion disabled.
+
+- Exactly one `FROM` must identify the accepted publication graph. Default union,
+  historical/staged graphs, `FROM NAMED`, `GRAPH`, federation, updates, extension
+  functions, paths and variable predicates are rejected.
+- Only explicit public predicates can be read. Private evidence, translation
+  authorization, reviewer and rule predicates are excluded. DESCRIBE output is
+  filtered to public predicates and requires explicit canonical target IRIs.
+- Input is at most 12,000 UTF-8 bytes, 100 algebra nodes and 30 combined pattern
+  and template triples. SELECT/CONSTRUCT/DESCRIBE require `LIMIT 1..100`; OFFSET is
+  at most 1,000. CONSTRUCT only projects triples from a conjunctive matched pattern.
+- Results are bounded to 100 rows or 300 triples, 90 KB decoded result text and
+  128 KB per HTTP response. Unexpected compression is rejected before expansion.
+  The shared 90 KB per-turn tool budget still applies. Row-limit hits are explicit.
+- GraphDB enforces a 10-second query timeout, 1,000-result ceiling and
+  `throw-QueryEvaluationException-on-timeout=true`. Client operations have a
+  12-second read timeout, 15-second overall deadline and at most two concurrent
+  graph calls per backend worker. These bounds are required local configuration,
+  not a claim that another arbitrarily configured GraphDB instance is safe.
+
+Each turn constructs its own graph client. Each query opens and closes its native
+MCP session in the tool's owning async task, including cancellation; no transport or
+MCP session is shared between tabs or retained across turns. Reset cancels the active
+turn. All registered server tools other than `sparql_query` remain inaccessible.
+
+The named graph contains asserted Publication facts. Shared-Circuit matches and
+CONSTRUCT projections are labelled **derived from asserted premises**, not
+OWL-inferred relationships. GraphDB puts inferred triples in its global default
+graph, which can combine historical or unpublished premises. The assistant does
+not expose that graph or claim its contents are publication-isolated; it explains
+that inferred relationships are unavailable when asked. Actual inferred-fact
+retrieval would require a separately approved publication-isolated inference design.
+
+Shared-circuit questions join canonical Circuit IRIs across the Publication, not
+labels or the ten-row schedule tool. Answers include competition/resource IRIs and
+actual Meeting source URLs. Matching a Circuit does not prove matching Layouts or
+complete season coverage. Generic graph results resolve canonical IRIs through
+published documentation for citations; an ASK alone has no resource citation and
+requires a separate source lookup before supporting a natural-language answer.
 
 ## Publication And Search
 

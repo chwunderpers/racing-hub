@@ -10,6 +10,7 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from rdflib import Graph, Literal, URIRef
 
 from app.stores import GraphDbProjection, PostgresOperationalStore
+from app.graph_config import maintenance_auth
 
 
 @pytest.fixture
@@ -30,10 +31,13 @@ def isolated_database_url():
 
 
 @pytest.fixture
-def isolated_services(tmp_path, isolated_database_url):
+def isolated_services(tmp_path, isolated_database_url, monkeypatch):
     graphdb_url = os.environ.get("TEST_GRAPHDB_URL")
     if not graphdb_url:
         pytest.skip("Set TEST_GRAPHDB_URL for isolated service tests")
+    for field in ("USER", "PASSWORD"):
+        if os.environ.get("TEST_GRAPHDB_" + field):
+            monkeypatch.setenv("GRAPHDB_MAINTENANCE_" + field, os.environ["TEST_GRAPHDB_" + field])
     identifier = conninfo_to_dict(isolated_database_url)["dbname"]
     operational = PostgresOperationalStore(isolated_database_url)
     operational.initialize()
@@ -48,6 +52,6 @@ def isolated_services(tmp_path, isolated_database_url):
         graph.initialize()
         yield operational, graph
     finally:
-        response = httpx.delete(f"{graphdb_url.rstrip('/')}/rest/repositories/{identifier}", timeout=30)
+        response = httpx.delete(f"{graphdb_url.rstrip('/')}/rest/repositories/{identifier}", timeout=30, auth=maintenance_auth())
         if response.status_code != 404:
             response.raise_for_status()

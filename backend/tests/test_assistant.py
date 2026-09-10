@@ -162,3 +162,63 @@ def test_nls_tools_preserve_abandonment_unknown_ends_and_unresolved_clocks():
     assert result["coverage"][0]["state"] == "incomplete"
     assert "fieldAssertions" not in meeting
     assert "translationReviewer" not in str(result)
+
+
+def test_provider_shared_circuit_answer_has_sources_iris_and_asserted_premises():
+    import json
+    import httpx
+    import httpx2
+    from app.assistant_provider import AzureAnswerProvider
+    from app.graph_mcp import GraphMcpClient
+    circuit = "https://w3id.org/motorsport-hub/resource/circuit/spa"
+    captured = []
+
+    def graph_response(request):
+        if request.method == "GET":
+            return httpx.Response(405)
+        if request.method == "DELETE":
+            return httpx.Response(200)
+        message = json.loads(request.content)
+        if "id" not in message:
+            return httpx.Response(202)
+        if message["method"] == "initialize":
+            result = {"protocolVersion": "2025-03-26", "capabilities": {"tools": {}}, "serverInfo": {"name": "GraphDB", "version": "test"}}
+        elif message["method"] == "tools/list":
+            result = {"tools": [{"name": "sparql_query", "inputSchema": {"type": "object"}}, {"name": "unsafe_remote_tool", "inputSchema": {"type": "object"}}]}
+        else:
+            assert message["params"]["name"] == "sparql_query"
+            assert "SELECT DISTINCT" in message["params"]["arguments"]["query"]
+            columns = "?circuit\t?circuitName\t?competitionA\t?nameA\t?competitionB\t?nameB\t?sourceA\t?retrievedA\t?sourceB\t?retrievedB"
+            row = f'<{circuit}>\t"Spa"@en\t<https://w3id.org/motorsport-hub/resource/competition/f1>\t"F1"@en\t<https://w3id.org/motorsport-hub/resource/competition/gt>\t"GT"@en\t<https://example.org/f1>\t"2026-09-10"\t<https://example.org/gt>\t"2026-09-10"'
+            result = {"content": [{"type": "text", "text": json.dumps(columns + "\n" + row)}], "isError": False}
+        return httpx.Response(200, json={"jsonrpc": "2.0", "id": message["id"], "result": result})
+
+    def azure_response(request):
+        payload = json.loads(request.content)
+        captured.append(payload)
+        if len(captured) == 1:
+            output = [{"type": "function_call", "id": "fc_graph", "call_id": "call_graph", "name": "graph_shared_circuits", "arguments": "{}", "status": "completed"}]
+        else:
+            results = [item for item in payload["input"] if item.get("type") == "function_call_output"]
+            result = json.loads(results[0]["output"])
+            assert result["relationshipKind"] == "derived"
+            assert result["premiseKind"] == "asserted"
+            assert result["circuits"][0]["iri"] == circuit
+            assert result["limited"] is False
+            output = [{"type": "message", "id": "msg_graph", "role": "assistant", "status": "completed", "content": [{"type": "output_text", "annotations": [], "text": json.dumps({"text": "F1 and GT share Spa: " + circuit + ". This is derived from asserted Meeting links, not an inferred relationship.", "citations": ["citation-1", "citation-2"], "classification": "derived"})}]}]
+        return httpx2.Response(200, json={"id": "resp_graph", "object": "response", "created_at": 1, "status": "completed", "model": "test", "output": output})
+
+    store = InMemoryOperationalStore()
+    candidate = CandidateEnvelope.model_validate_json((Path(__file__).parents[1] / "fixtures/f1-2026-australia.json").read_text("utf-8"))
+    PublicationModule(store, InMemoryGraphProjection()).publish(candidate)
+    provider = AzureAnswerProvider("https://example.test/openai/v1/", "test", "test-only-key", http_client_factory=lambda: httpx2.AsyncClient(transport=httpx2.MockTransport(azure_response)))
+    factory = lambda version: GraphMcpClient("http://localhost:7200/mcp", version, "test-user", "server-only-password", transport=httpx.MockTransport(graph_response))
+    service = AssistantService(store, provider, graph_factory=factory)
+    answer = asyncio.run(service.ask(service.create_session(), "Which competitions share circuits?", "UTC"))
+    assert answer.classification == "derived"
+    assert circuit in answer.text
+    assert {citation.sourceUrl for citation in answer.citations} == {"https://example.org/f1", "https://example.org/gt"}
+    for payload in captured:
+        assert {tool["name"] for tool in payload["tools"]} == {"schedule", "search_documentation", "lookup_iri", "graph_shared_circuits", "graph_query"}
+        assert "server-only-password" not in json.dumps(payload)
+        assert payload["store"] is False

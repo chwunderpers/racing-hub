@@ -9,6 +9,7 @@ import psycopg
 from psycopg.rows import dict_row
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.compare import isomorphic
+from app.graph_config import maintenance_auth
 
 from app.publication import CandidateEnvelope, CandidateLayout, PublicationCandidate, PublicationSnapshot, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view, coverage_view
 
@@ -344,7 +345,7 @@ class GraphDbProjection:
         return f"{self._base_url}/repositories/{self._repository_id}"
 
     def initialize(self) -> None:
-        response = httpx.get(f"{self._base_url}/rest/repositories", timeout=30)
+        response = httpx.get(f"{self._base_url}/rest/repositories", timeout=30, auth=maintenance_auth())
         response.raise_for_status()
         if any(repository["id"] == self._repository_id for repository in response.json()):
             return
@@ -352,6 +353,7 @@ class GraphDbProjection:
             response = httpx.post(
                 f"{self._base_url}/rest/repositories",
                 files={"config": (self._repository_config.name, config, "text/turtle")},
+                auth=maintenance_auth(),
                 timeout=30,
             )
         response.raise_for_status()
@@ -362,6 +364,7 @@ class GraphDbProjection:
             f"{self.repository_url}/statements",
             params={"context": f"<{PUBLICATION_GRAPH}{version}>"},
             content=graph.serialize(format="turtle"),
+            auth=maintenance_auth(),
             headers={"Content-Type": "text/turtle"},
             timeout=30,
         )
@@ -372,6 +375,7 @@ class GraphDbProjection:
             response = httpx.get(
                 f"{self.repository_url}/statements",
                 params={"context": f"<{PUBLICATION_GRAPH}{version}>", "infer": "false"},
+                auth=maintenance_auth(),
                 headers={"Accept": "application/n-triples"},
                 timeout=30,
             )
@@ -388,6 +392,7 @@ class GraphDbProjection:
         response = httpx.post(
             self.repository_url,
             data={"query": query},
+            auth=maintenance_auth(),
             headers={"Accept": "application/sparql-results+json"},
             timeout=30,
         )
