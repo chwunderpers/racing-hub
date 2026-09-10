@@ -41,6 +41,18 @@ def serialized(method):
     return locked
 
 
+def _read_queue(directory: Path) -> dict:
+    path = directory / "queue.yaml"
+    return yaml.safe_load(path.read_text("utf-8")) if path.exists() else {"items": []}
+
+
+def show_review_item(directory: Path, item_id: str) -> dict:
+    if not directory.exists():
+        raise StopIteration("Review Item not found")
+    with FileLock(directory / ".review.lock", timeout=0):
+        return next(item for item in _read_queue(directory)["items"] if item["id"] == item_id)
+
+
 class ReviewService:
     def __init__(self, directory: Path, store: ReviewStore, publisher: PublicationModule) -> None:
         self.directory = directory
@@ -208,8 +220,7 @@ class ReviewService:
         return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
     def _queue(self) -> dict:
-        path = self.directory / "queue.yaml"
-        return yaml.safe_load(path.read_text("utf-8")) if path.exists() else {"items": []}
+        return _read_queue(self.directory)
 
     @staticmethod
     def _write(path: Path, data: dict) -> None:

@@ -2,8 +2,77 @@
 
 Implementation checkpoint: `e0f03d795a075de765a62299a2d49587d21136b4` on
 `feature/11-f1-regulations`. Review baseline:
-`cb0b40973a55e524cbdaed60a473a17202871825`. This is a pending-review
-implementation, not an approved regulation Publication.
+`cb0b40973a55e524cbdaed60a473a17202871825`. The original checkpoint below
+predates approval and publication; the completed closeout is recorded first.
+
+## Approved Publication And Closeout
+
+On 2026-09-10 Chris accepted the evidence with rationale **All fine**, decision
+`ba7c325d-1a9e-44af-883b-18816c0f1788`. The additive vocabulary was separately
+approved with the same rationale in
+[Issue 11's ontology approval record](https://github.com/chwunderpers/racing-hub/issues/11#issuecomment-5623837574).
+Chris subsequently confirmed the exact publication version and digest.
+
+- Published at **2026-09-10T18:58:09.679064+00:00**; immutable receipt:
+  [publication receipt](../reviews/publications/ba7c325d-1a9e-44af-883b-18816c0f1788.yaml).
+- Current version:
+  `7eda872e9f7397f4b398a9203b576a2d47e651d1078ff21fa83843a2fb180105`.
+- The version recomputes from the accepted candidate. GraphDB's asserted
+  projection is RDF-isomorphic to the expected graph. The API is healthy and
+  serves the same version for **50 Meetings and 146 Sessions**.
+- The published Formula One 2026 profile has **two official documents, four
+  English paraphrases and four Provisions**. Synthetic translation and amendment
+  examples were not published. The completed Review Item left the queue.
+- An initial retry was required because the host CLI had not loaded GraphDB
+  maintenance credentials. The previous publication remained complete and the
+  candidate was only staged. Loading the local environment file and retrying
+  the same confirmed digest completed publication. No new approval was inferred.
+- Post-publication verification exposed a stale backend image. Rebuilding and
+  restarting only the backend restored its regulation-aware schema; all live
+  agreement and API checks then passed.
+
+The private `issue-11-f1-regulations-proposal-001/rehearsal-002` bundle conforms
+to vocabulary and instance SHACL and passes all five competency checks: class,
+inverse, shared-circuit, distinct-circuit-identities and graph-separation.
+The approved delta is **99 added, zero removed vocabulary triples**, with no
+renames or changed example triples; **211 asserted and 615 inferred triples**
+remain separate. Private proposal inputs and existing reports were preserved.
+The canonical vocabulary now matches the approved candidate by RDF isomorphism.
+The historical baseline is retained in Git at the closeout review baseline,
+`8a9bcf37fbfccf4bee3f6c4386393bb7bbeb1303`.
+
+Approved input SHA-256 hashes:
+
+```text
+baseline  3745f15248c08b5655909bedcf4b622ac2aaa841a46d2d8af7d4785b52ac577d
+ontology  758310f5747aa043ccfcceb6ac76e92c2a17080ad2f7afc2363aaa65944e801b
+data      3c5ad4239ebf0c7d20548c91e02f0fd4853ba4ffb4206daa50191bd51b8431b8
+proposal  b247589e5302db465d432e0cb4b0ae1cd37cc5a2c4efb451f484e8d5ab7608f0
+```
+
+Closeout checks after canonical vocabulary promotion:
+
+- Ontology, review, review CLI and regulation tests: **80 passed, 3 skipped**.
+  The three service-dependent regulation checks were then rerun against
+  disposable PostgreSQL databases and GraphDB repositories: **3 passed**.
+  All 83 selected tests therefore ran successfully across the two invocations.
+- Eight new CLI cases accept neutral machine strings, reject English and French
+  language tags on machine fields, and preserve English-only prose validation.
+  Queue-only CLI tests cover missing settings, missing items, contention and
+  unchanged queue bytes. Other commands report missing setting names only.
+- Live Azure assistant evaluation returned **HTTP 200** for the sole full-points
+  Formula One 2026 race-winner question. It answered **25 points**, qualified by
+  **75% distance**, the required consecutive laps without SC/VSC, final
+  classification and dead-heat rules. All four reviewed Provisions were cited
+  with canonical IRIs and FIA PDF page links. The answer used the exact current
+  publication version and did not infer historical applicability or an event
+  award. The temporary assistant session was deleted after the check.
+
+Scope remains the approved single-Competition conditional scoring topic. Live
+FIA evidence was originally English; translation behavior is verified with
+explicitly synthetic fixtures, not represented as a real FIA translation.
+Shared Circuit does not prove shared Layout. Comparison with NLS, curated
+documentation, exports and whole-PoC acceptance belong to other open tickets.
 
 ## Executed Checks
 
