@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from app.stores import PostgresOperationalStore
-from app.publication import FieldAssertion
+from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, CoverageAssessment, coverage_view
 
 
 class HealthResponse(BaseModel):
@@ -26,9 +26,25 @@ class TimeResponse(BaseModel):
 class SessionResponse(BaseModel):
     id: str
     name: str
-    status: Literal["scheduled", "completed", "cancelled"]
+    status: Literal["scheduled", "completed", "cancelled", "abandoned"]
     start: TimeResponse
     end: TimeResponse | None
+    roundId: str | None = None
+    durationMinutes: int | None = None
+    circuitId: str | None = None
+    layout: CandidateLayout | None = None
+
+
+class RoundResponse(BaseModel):
+    id: str
+    number: int
+    name: str
+    status: Literal["scheduled", "completed", "cancelled", "abandoned"]
+
+
+class SeasonCoverageResponse(CoverageAssessment):
+    competitionId: str
+    season: int
 
 
 class MeetingResponse(BaseModel):
@@ -47,6 +63,10 @@ class MeetingResponse(BaseModel):
     retrievedAt: str
     round: int | None = None
     roundId: str | None = None
+    rounds: list[RoundResponse] = Field(default_factory=list)
+    venue: CandidatePlace | None = None
+    layout: CandidateLayout | None = None
+    coverage: CoverageAssessment | None = None
     kind: Literal["championship", "test", "prologue"] | None = None
     fieldAssertions: list[FieldAssertion] = Field(default_factory=list)
     eventTimezone: str | None = None
@@ -72,6 +92,7 @@ class FreshnessResponse(BaseModel):
 class ScheduleResponse(BaseModel):
     meetings: list[MeetingResponse]
     freshness: FreshnessResponse | None = None
+    coverage: list[SeasonCoverageResponse] = Field(default_factory=list)
 
 
 def database_url() -> str:
@@ -121,7 +142,9 @@ def health(database: str = Depends(database_status)) -> Response:
 
 @app.get("/api/schedule", response_model=ScheduleResponse, response_model_exclude_unset=True)
 def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> ScheduleResponse:
+    version = store.current_publication_version() if hasattr(store, "current_publication_version") else None
     return ScheduleResponse(
-        meetings=[MeetingResponse.model_validate(meeting) for meeting in store.visible_meetings()],
+        meetings=[MeetingResponse.model_validate(meeting) for meeting in (store.visible_meetings(version=version) if version else store.visible_meetings())],
+        **({"coverage": coverage_view(store.publication_envelope(version))} if version else {}),
         **({"freshness": FreshnessResponse.model_validate(store.source_freshness())} if hasattr(store, "source_freshness") else {}),
     )

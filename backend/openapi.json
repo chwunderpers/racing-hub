@@ -54,6 +54,98 @@
   },
   "components": {
     "schemas": {
+      "CandidateLayout": {
+        "properties": {
+          "identity": {
+            "type": "string",
+            "title": "Identity"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "length_km": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length Km"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "identity",
+          "name"
+        ],
+        "title": "CandidateLayout"
+      },
+      "CandidatePlace": {
+        "properties": {
+          "identity": {
+            "type": "string",
+            "title": "Identity"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "identity",
+          "name"
+        ],
+        "title": "CandidatePlace"
+      },
+      "CoverageAssessment": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "incomplete",
+              "unassessed"
+            ],
+            "title": "State"
+          },
+          "activity": {
+            "type": "string",
+            "enum": [
+              "present",
+              "empty",
+              "unknown"
+            ],
+            "title": "Activity"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Source Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "activity",
+          "reason",
+          "source_url"
+        ],
+        "title": "CoverageAssessment"
+      },
       "FieldAssertion": {
         "properties": {
           "field": {
@@ -88,6 +180,50 @@
             "type": "boolean",
             "title": "Preferred",
             "default": false
+          },
+          "response_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Sha256"
+          },
+          "translation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TranslationRecord"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_identity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Identity"
+          },
+          "effective_local": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Local"
           }
         },
         "additionalProperties": false,
@@ -276,6 +412,43 @@
             ],
             "title": "Roundid"
           },
+          "rounds": {
+            "items": {
+              "$ref": "#/components/schemas/RoundResponse"
+            },
+            "type": "array",
+            "title": "Rounds"
+          },
+          "venue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidatePlace"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidateLayout"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coverage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoverageAssessment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "kind": {
             "anyOf": [
               {
@@ -333,6 +506,40 @@
         ],
         "title": "MeetingResponse"
       },
+      "RoundResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "cancelled",
+              "abandoned"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "name",
+          "status"
+        ],
+        "title": "RoundResponse"
+      },
       "ScheduleResponse": {
         "properties": {
           "meetings": {
@@ -351,6 +558,13 @@
                 "type": "null"
               }
             ]
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/SeasonCoverageResponse"
+            },
+            "type": "array",
+            "title": "Coverage"
           }
         },
         "type": "object",
@@ -358,6 +572,58 @@
           "meetings"
         ],
         "title": "ScheduleResponse"
+      },
+      "SeasonCoverageResponse": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "incomplete",
+              "unassessed"
+            ],
+            "title": "State"
+          },
+          "activity": {
+            "type": "string",
+            "enum": [
+              "present",
+              "empty",
+              "unknown"
+            ],
+            "title": "Activity"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Source Url"
+          },
+          "competitionId": {
+            "type": "string",
+            "title": "Competitionid"
+          },
+          "season": {
+            "type": "integer",
+            "title": "Season"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "activity",
+          "reason",
+          "source_url",
+          "competitionId",
+          "season"
+        ],
+        "title": "SeasonCoverageResponse"
       },
       "SessionResponse": {
         "properties": {
@@ -374,7 +640,8 @@
             "enum": [
               "scheduled",
               "completed",
-              "cancelled"
+              "cancelled",
+              "abandoned"
             ],
             "title": "Status"
           },
@@ -385,6 +652,49 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/TimeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "roundId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roundid"
+          },
+          "durationMinutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationminutes"
+          },
+          "circuitId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Circuitid"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CandidateLayout"
               },
               {
                 "type": "null"
@@ -501,6 +811,53 @@
           "instant"
         ],
         "title": "TimeResponse"
+      },
+      "TranslationRecord": {
+        "properties": {
+          "source_language": {
+            "type": "string",
+            "const": "de",
+            "title": "Source Language"
+          },
+          "method": {
+            "type": "string",
+            "title": "Method"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "translated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Translated At"
+          },
+          "review_state": {
+            "type": "string",
+            "const": "accepted-standing-poc",
+            "title": "Review State"
+          },
+          "reviewer": {
+            "type": "string",
+            "title": "Reviewer"
+          },
+          "authorization": {
+            "type": "string",
+            "title": "Authorization"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "source_language",
+          "method",
+          "version",
+          "translated_at",
+          "review_state",
+          "reviewer",
+          "authorization"
+        ],
+        "title": "TranslationRecord"
       }
     }
   }

@@ -167,3 +167,40 @@ it("filters shared Circuits by identity and navigates across Competitions withou
   expect(screen.getByRole("combobox", { name: "Circuit" })).toHaveValue("circuit:f1-circuit-7");
   expect(screen.getByRole("combobox", { name: "Competition" })).toHaveValue("competition:formula-one");
 });
+
+it.each([
+  ["complete", "empty", "Officially empty schedule"],
+  ["incomplete", "unknown", "Coverage incomplete"],
+  ["unassessed", "unknown", "Coverage unassessed"],
+])("distinguishes %s coverage from absence of published Meetings", async (state, activity, label) => {
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => Response.json(String(input).endsWith("/api/health")
+    ? { status: "ok", database: "ok" }
+    : { meetings: [], coverage: [{ competitionId: "competition:nls", season: 2026, state, activity, reason: "Official source assessment", source_url: "https://example.org/calendar" }] }));
+  render(<App />);
+  await screen.findByText("System ready");
+  expect(screen.getByText(label)).toBeVisible();
+  expect(screen.queryByText("The starting grid is clear for the first approved publication.")).not.toBeInTheDocument();
+});
+
+it("shows multi-Round NLS details with abandonment, nominal duration, place and incomplete clocks", async () => {
+  window.history.replaceState({}, "", "/?meeting=nls-qualifiers");
+  const meeting = {
+    id: "nls-qualifiers", name: "NLS Qualifiers", competition: "NLS", competitionId: "competition:nls", season: 2026,
+    circuit: "Nordschleife combined course", circuitId: "circuit:nls:nordschleife-combined", status: "scheduled", kind: "championship",
+    startDate: "2026-04-17", endDate: "2026-04-19", sourceUrl: "https://example.org/qualifiers", retrievedAt: "2026-09-10T11:00:00Z", publicationVersion: "test",
+    venue: { identity: "nuerburgring", name: "Nuerburgring" }, layout: { identity: "qualifiers-2026", name: "Qualifiers route 2026", length_km: 25.378 },
+    rounds: [{ id: "nls4", number: 4, name: "First race", status: "abandoned" }, { id: "nls5", number: 5, name: "Second race", status: "scheduled" }],
+    coverage: { state: "incomplete", activity: "present", reason: "Friday timetable unverified", source_url: "https://example.org/qualifiers" },
+    sessions: [{ id: "nls4-race", name: "Race", roundId: "nls4", status: "abandoned", durationMinutes: 240, start: { local: "2026-04-18T17:30", instant: null, zone: null, offset: null }, end: null }],
+  };
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => Response.json(String(input).endsWith("/api/health") ? { status: "ok", database: "ok" } : { meetings: [meeting] }));
+  render(<App />);
+  await screen.findByText("System ready");
+  expect(screen.getByText("Round 4: First race")).toBeVisible();
+  expect(screen.getByText("Round 5: Second race")).toBeVisible();
+  expect(screen.getByText("Nominal duration: 240 minutes")).toBeVisible();
+  expect(screen.getByText("Scheduled end unknown")).toBeVisible();
+  expect(screen.getByText("Qualifiers route 2026 / 25.378 km")).toBeVisible();
+  expect(screen.getByText("Coverage incomplete: Friday timetable unverified")).toBeVisible();
+  expect(screen.getAllByText("abandoned").length).toBeGreaterThan(0);
+});

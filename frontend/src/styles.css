@@ -3,6 +3,22 @@
 @import "@fontsource/barlow/latin-600.css";
 @import "@fontsource/barlow/latin-700.css";
 
+.coverage-notice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #33403d;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.coverage-notice strong { color: #56d8df; }
+.coverage-notice a { color: inherit; }
+.round-list { list-style: none; padding: 0; }
+.round-list li { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 0; }
+.place-detail { font-size: 15px; overflow-wrap: anywhere; }
+
 :root {
   --background: #0b0d0e;
   --surface: #181c1e;

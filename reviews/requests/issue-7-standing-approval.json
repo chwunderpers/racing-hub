@@ -1,0 +1,17 @@
+{
+  "person": "Chris",
+  "authorizationDate": "2026-09-10",
+  "source": "User instruction in the current VS Code conversation",
+  "scope": "Local Racing Hub proof of concept ingestion, factual translations, identity mappings, candidate acceptance and publication; Issue 7 and subsequent PoC ingestion work",
+  "instructionExcerpts": [
+    "go ahead with the current implementation or the issue you're working on, which is number seven",
+    "I totally confirm this this Git identifier as a baseline",
+    "you don't need to get a specific approval from myself because this is just a PUC",
+    "for the POC please just treat it as like confirmed",
+    "you can also include my name and the evidence"
+  ],
+  "reviewBaseline": "21a160f38db865425c95a2349a9c30a47cc3baeb",
+  "execution": "Agent may record the decision and exact publication confirmation under this standing authorization. Records must identify delegated execution, not claim Chris individually reviewed each source or candidate.",
+  "limits": "Local PoC only. Preserve provenance, source conflicts and incomplete coverage. No source rights clearance, license bypass, public deployment or paid purchase is implied.",
+  "graphdb": "Temporary consistent backup and migration authorized. Remove temporary migration copies after verified cutover or restoration; no retained backup archive requested."
+}

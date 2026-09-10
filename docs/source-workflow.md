@@ -29,6 +29,8 @@ requirements as part of operator setup. Run from the repository root:
 .venv\Scripts\python -m app.source_workflow --fixture backend/fixtures/f1-2026-source.json
 .venv\Scripts\python -m app.source_workflow --source-family gt-world-challenge-europe --season 2026
 .venv\Scripts\python -m app.source_workflow --source-family gt-world-challenge-europe --fixture backend/fixtures/gtwce-2026-source.json
+.venv\Scripts\python -m app.source_workflow --source-family nls --season 2026
+.venv\Scripts\python -m app.source_workflow --source-family nls --fixture backend/fixtures/nls-2026-source.json
 ```
 
 The first command uses ordinary sequential HTTPS GETs, parses HTML/JavaScript
@@ -72,7 +74,7 @@ fetch clears the pending-revision marker. No successful fetch means unverified.
 Checks are isolated by source family in `source_checks`; initialization copies legacy
 F1 attempts without deleting them. The schedule is stale when any included or checked
 source is stale. A GT success cannot clear an F1 failure. API freshness includes
-per-source details. The current 24-hour policy is applied independently to both families.
+per-source details. The current 24-hour policy is applied independently to all three families.
 
 ## Coverage
 
@@ -141,3 +143,50 @@ SELECT DISTINCT ?circuit WHERE {
 The source command queues a combined candidate, not a decision. Separate exact human
 decision and publication confirmations remain mandatory. Do not mark Issue 6's
 approved-season publication criterion complete until its publication receipt exists.
+
+## NLS And PoC Authorization
+
+The [NLS inventory](sources/nls.md) documents official HTML and editorial sources,
+regulation links, rights, translation provenance, inaccessible resources and limits.
+The Adapter publishes eight championship Meetings containing ten distinct Rounds,
+plus seven independent unnumbered test Meetings. There are 21 known championship
+track periods and ten test windows. April and September are multi-Round Meetings.
+Ancillary spectator/grid timetable rows remain assertions, not Sessions.
+
+NLS1 is cancelled; the first Qualifiers race is abandoned, not cancelled before
+starting. Planned clocks remain alongside the status evidence. The March 21 date
+revision preserves Round 2 identity. No replacement race is established by the
+reviewed sources, and none is invented. Nominal durations do not supply missing
+finish times. All NLS UTC offsets and instants remain unresolved.
+
+Venue, Circuit and Layout stay distinct. The Qualifiers' 25.378 km route is
+explicitly scoped to 2026. The generic 24.358 km description remains an assertion,
+not a verified ordinary-2026 canonical length. Sprint-course test windows have
+their own Session course/Layout references. NLS does not merge with the unresolved
+GT Nurburgring Circuit by name.
+
+The source contract pins the observed calendar dates/URLs and checks structured
+HTML rows. Editorial facts use fingerprints of the reviewed paragraph/table
+projections, ignoring unrelated dynamic markup. A changed relevant passage requires
+reassessment. Public GETs have finite time/byte limits and reject redirects,
+blocked/challenged resources and unknown shapes. No source scripts run, and no raw
+HTML, PDF or non-English evidence passage is retained. English factual assertions
+carry response hashes, locators and translation metadata. Fixture replay is not
+a complete live refresh because it omits ancillary table rows.
+
+Coverage is an explicit assessment for a Competition/Season and for a Meeting's
+Sessions. `complete`, `incomplete` and `unassessed` are separate from `present`,
+`empty` and `unknown` activity. Only an explicitly assessed complete source scope
+can claim an officially empty schedule. NLS remains incomplete: detailed PDFs,
+Friday Qualifiers activity, final timings and complete status history are not
+verified. Filtering to zero Meetings is not evidence of an empty official scope.
+
+On 2026-09-10 Chris granted standing approval for local PoC ingestion, mappings,
+factual translations and publication. The authorization is retained in
+`reviews/requests/issue-7-standing-approval.json`. Agents may execute both exact
+decision and publication confirmations under that authorization, identifying this
+as delegated execution rather than an individual human review of each candidate.
+The general review API, digest checks and publication-agreement gates remain.
+Source acquisition still queues only; it never silently approves or publishes.
+This local approval is not rights clearance, public hosting approval or a license
+exception. Future production use retains the normal human review process.

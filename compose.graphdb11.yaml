@@ -1,0 +1,10 @@
+services:
+  graphdb:
+    image: ontotext/graphdb:11.5.0
+    environment:
+      GDB_JAVA_OPTS: -Xms512m -Xmx1g -Dgraphdb.license.file=/run/secrets/graphdb.license
+    volumes:
+      - type: bind
+        source: ${GRAPHDB_LICENSE_FILE:?Set GRAPHDB_LICENSE_FILE to a valid GraphDB 11.5 license file}
+        target: /run/secrets/graphdb.license
+        read_only: true

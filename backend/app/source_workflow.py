@@ -8,7 +8,7 @@ from pathlib import Path
 import httpx
 
 from app.formula_one import adapt_season, fetch_season
-from app import gt_world_challenge
+from app import gt_world_challenge, nls
 from app.publication import SeasonCandidateEnvelope, PublicationSnapshot, PublicationModule, merge_season
 from app.review import ReviewService
 from app.stores import PostgresOperationalStore, GraphDbProjection
@@ -21,16 +21,24 @@ def semantic_version(candidate: SeasonCandidateEnvelope) -> str:
         entry.pop("retrieved_at")
         for assertion in entry.get("field_assertions", []):
             assertion.pop("retrieved_at")
+            assertion.pop("response_sha256", None)
+            if assertion.get("translation"):
+                assertion["translation"].pop("translated_at", None)
     value["meetings"].sort(key=lambda entry: entry["source_identity"])
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
 def fetch_for_review(season: int, client: httpx.Client, store, review: ReviewService, now: datetime | None = None, source_family: str = "formula-one") -> dict:
     now = now or datetime.now(UTC)
-    if source_family not in ("formula-one", gt_world_challenge.COMPETITION):
+    if source_family not in ("formula-one", gt_world_challenge.COMPETITION, nls.COMPETITION):
         raise ValueError("Unknown source family")
     try:
-        candidate = gt_world_challenge.adapt_season(gt_world_challenge.fetch_season(season, client, now)) if source_family == gt_world_challenge.COMPETITION else adapt_season(fetch_season(season, client, now))
+        if source_family == nls.COMPETITION:
+            candidate = nls.adapt_season(nls.fetch_season(season, client, now))
+        elif source_family == gt_world_challenge.COMPETITION:
+            candidate = gt_world_challenge.adapt_season(gt_world_challenge.fetch_season(season, client, now))
+        else:
+            candidate = adapt_season(fetch_season(season, client, now))
         current = store.current_publication_version()
         previous = store.publication_envelope(current) if current else None
         seasons = previous.seasons if isinstance(previous, PublicationSnapshot) else [previous] if isinstance(previous, SeasonCandidateEnvelope) else []
@@ -52,7 +60,7 @@ def fetch_for_review(season: int, client: httpx.Client, store, review: ReviewSer
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Fetch official schedules for private review; never publish")
-    parser.add_argument("--source-family", choices=["formula-one", gt_world_challenge.COMPETITION], default="formula-one")
+    parser.add_argument("--source-family", choices=["formula-one", gt_world_challenge.COMPETITION, nls.COMPETITION], default="formula-one")
     parser.add_argument("--season", type=int, default=2026)
     parser.add_argument("--reviews-dir", type=Path, default=Path(__file__).parents[2] / "reviews")
     parser.add_argument("--fixture", type=Path)
@@ -63,7 +71,7 @@ def main() -> int:
         graph = GraphDbProjection(os.environ["GRAPHDB_URL"], os.environ.get("GRAPHDB_REPOSITORY", "motorsport"), Path(__file__).parents[2] / "graphdb/repository-config.ttl")
         review = ReviewService(options.reviews_dir, store, PublicationModule(store, graph))
         if options.fixture:
-            adapter = gt_world_challenge.adapt_season if options.source_family == gt_world_challenge.COMPETITION else adapt_season
+            adapter = {"formula-one": adapt_season, gt_world_challenge.COMPETITION: gt_world_challenge.adapt_season, nls.COMPETITION: nls.adapt_season}[options.source_family]
             candidate = adapter(json.loads(options.fixture.read_text("utf-8")))
             current = store.current_publication_version()
             previous = store.publication_envelope(current) if current else None

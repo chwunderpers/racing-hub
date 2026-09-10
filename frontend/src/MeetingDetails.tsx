@@ -39,15 +39,22 @@ export function MeetingDetails({ meeting, meetings, meetingHref, onMeeting, zone
       </select></label>}
     </div>
     {meeting.status === "cancelled" && <strong className="stale-notice">Meeting cancelled</strong>}
+    {meeting.coverage && <p className="coverage-notice">{meeting.coverage.activity === "empty" ? "Officially empty schedule" : `Coverage ${meeting.coverage.state}`}: {meeting.coverage.reason}</p>}
+    {meeting.venue && <p className="place-detail">Venue: {meeting.venue.name}</p>}
+    {meeting.layout && <p className="place-detail">{meeting.layout.name}{meeting.layout.length_km ? ` / ${meeting.layout.length_km} km` : ""}</p>}
+    {Boolean(meeting.rounds?.length) && <ul className="round-list">{meeting.rounds!.map((round) => <li key={round.id}><strong>{`Round ${round.number}: ${round.name}`}</strong><span className="session-status">{round.status}</span></li>)}</ul>}
     <div className="session-list">
       {(meeting.sessions || []).map((session) => <article key={session.id} className="session-row">
-        <div><h3>{session.name}</h3><span className="session-status">{session.status}</span></div>
+        <div><h3>{session.name}</h3>{session.roundId && <span>Round {meeting.rounds?.find((round) => round.id === session.roundId)?.number}</span>}<span className="session-status">{session.status}</span></div>
         <div className="session-times"><SessionTime clock={session.start} zone={zone} eventZone={meeting.eventTimezone} />
           {session.end && <span>Scheduled end: <SessionTime clock={session.end} zone={zone} eventZone={meeting.eventTimezone} /></span>}
+          {!session.end && <span>Scheduled end unknown</span>}
+          {session.durationMinutes && <span>Nominal duration: {session.durationMinutes} minutes</span>}
+          {session.layout && <span>{session.layout.name}</span>}
           <span className="source-clock">Published: {session.start.local}{session.start.offset ? ` ${session.start.offset}` : ""}{session.start.zone ? ` (${session.start.zone})` : ""}</span>
         </div>
       </article>)}
-      {!(meeting.sessions || []).length && <p>Session times not published</p>}
+      {!(meeting.sessions || []).length && <p>{meeting.coverage?.activity === "empty" ? "Officially no Sessions in this scope" : meeting.coverage ? `Session coverage ${meeting.coverage.state}` : "Session coverage unassessed"}</p>}
     </div>
     {shared && <section className="shared-circuit" aria-labelledby="shared-circuit-title">
       <h3 id="shared-circuit-title">Shared circuit</h3>
@@ -62,6 +69,9 @@ export function MeetingDetails({ meeting, meetings, meetingHref, onMeeting, zone
         <dt>{assertion.field.replaceAll("_", " ")} <span>{assertion.preferred ? "Preferred" : "Retained alternative"}</span></dt>
         <dd><p className="assertion-value">{assertion.value || "(empty)"}</p><p>{assertion.rule}</p>
           <a href={assertion.source_url} target="_blank" rel="noreferrer">{assertion.locator}</a><span>Retrieved {assertion.retrieved_at}</span>
+          {assertion.translation && <p>Translated from {assertion.translation.source_language} / {assertion.translation.method} / {assertion.translation.version}. PoC standing approval: {assertion.translation.reviewer}.</p>}
+          {assertion.effective_local && <p>Effective local: {assertion.effective_local}</p>}
+          {assertion.response_sha256 && <p className="publication-version">Source SHA-256: {assertion.response_sha256}</p>}
         </dd>
       </div>)}</dl>
     </details>}

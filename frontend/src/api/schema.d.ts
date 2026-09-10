@@ -42,6 +42,42 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CandidateLayout */
+        CandidateLayout: {
+            /** Identity */
+            identity: string;
+            /** Name */
+            name: string;
+            /** Length Km */
+            length_km?: number | null;
+        };
+        /** CandidatePlace */
+        CandidatePlace: {
+            /** Identity */
+            identity: string;
+            /** Name */
+            name: string;
+        };
+        /** CoverageAssessment */
+        CoverageAssessment: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "complete" | "incomplete" | "unassessed";
+            /**
+             * Activity
+             * @enum {string}
+             */
+            activity: "present" | "empty" | "unknown";
+            /** Reason */
+            reason: string;
+            /**
+             * Source Url
+             * Format: uri
+             */
+            source_url: string;
+        };
         /** FieldAssertion */
         FieldAssertion: {
             /** Field */
@@ -64,6 +100,13 @@ export interface components {
              * @default false
              */
             preferred: boolean;
+            /** Response Sha256 */
+            response_sha256?: string | null;
+            translation?: components["schemas"]["TranslationRecord"] | null;
+            /** Subject Identity */
+            subject_identity?: string | null;
+            /** Effective Local */
+            effective_local?: string | null;
         };
         /** FreshnessResponse */
         FreshnessResponse: {
@@ -127,6 +170,11 @@ export interface components {
             round?: number | null;
             /** Roundid */
             roundId?: string | null;
+            /** Rounds */
+            rounds?: components["schemas"]["RoundResponse"][];
+            venue?: components["schemas"]["CandidatePlace"] | null;
+            layout?: components["schemas"]["CandidateLayout"] | null;
+            coverage?: components["schemas"]["CoverageAssessment"] | null;
             /** Kind */
             kind?: ("championship" | "test" | "prologue") | null;
             /** Fieldassertions */
@@ -136,11 +184,51 @@ export interface components {
             /** Sessions */
             sessions?: components["schemas"]["SessionResponse"][];
         };
+        /** RoundResponse */
+        RoundResponse: {
+            /** Id */
+            id: string;
+            /** Number */
+            number: number;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "scheduled" | "completed" | "cancelled" | "abandoned";
+        };
         /** ScheduleResponse */
         ScheduleResponse: {
             /** Meetings */
             meetings: components["schemas"]["MeetingResponse"][];
             freshness?: components["schemas"]["FreshnessResponse"] | null;
+            /** Coverage */
+            coverage?: components["schemas"]["SeasonCoverageResponse"][];
+        };
+        /** SeasonCoverageResponse */
+        SeasonCoverageResponse: {
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "complete" | "incomplete" | "unassessed";
+            /**
+             * Activity
+             * @enum {string}
+             */
+            activity: "present" | "empty" | "unknown";
+            /** Reason */
+            reason: string;
+            /**
+             * Source Url
+             * Format: uri
+             */
+            source_url: string;
+            /** Competitionid */
+            competitionId: string;
+            /** Season */
+            season: number;
         };
         /** SessionResponse */
         SessionResponse: {
@@ -152,9 +240,16 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "scheduled" | "completed" | "cancelled";
+            status: "scheduled" | "completed" | "cancelled" | "abandoned";
             start: components["schemas"]["TimeResponse"];
             end: components["schemas"]["TimeResponse"] | null;
+            /** Roundid */
+            roundId?: string | null;
+            /** Durationminutes */
+            durationMinutes?: number | null;
+            /** Circuitid */
+            circuitId?: string | null;
+            layout?: components["schemas"]["CandidateLayout"] | null;
         };
         /** SourceFreshnessResponse */
         SourceFreshnessResponse: {
@@ -179,6 +274,32 @@ export interface components {
             zone: string | null;
             /** Instant */
             instant: string | null;
+        };
+        /** TranslationRecord */
+        TranslationRecord: {
+            /**
+             * Source Language
+             * @constant
+             */
+            source_language: "de";
+            /** Method */
+            method: string;
+            /** Version */
+            version: string;
+            /**
+             * Translated At
+             * Format: date-time
+             */
+            translated_at: string;
+            /**
+             * Review State
+             * @constant
+             */
+            review_state: "accepted-standing-poc";
+            /** Reviewer */
+            reviewer: string;
+            /** Authorization */
+            authorization: string;
         };
     };
     responses: never;

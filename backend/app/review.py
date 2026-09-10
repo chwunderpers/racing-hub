@@ -27,6 +27,8 @@ class DecisionRequest(BaseModel):
 class ReviewStore(Protocol):
     def visible_meetings(self) -> list[dict[str, object]]: ...
 
+    def current_publication_version(self) -> str | None: ...
+
     def publication_envelope(self, version: str) -> PublicationCandidate: ...
 
 
@@ -199,8 +201,7 @@ class ReviewService:
         temporary.replace(path)
 
     def _preview(self, candidate: dict) -> dict:
-        meetings = self.store.visible_meetings()
-        baseline_version = str(meetings[0]["publicationVersion"]) if meetings else None
+        baseline_version = self.store.current_publication_version()
         baseline = self.store.publication_envelope(baseline_version) if baseline_version else None
         errors = []
         try:
@@ -264,7 +265,7 @@ class ReviewService:
         changes = {}
         unresolved = [
             f"{identity}/circuit_identity" for identity in sorted(set(proposed) - set(previous))
-            if proposed[identity]["meeting"]["competition_identity"] == "gt-world-challenge-europe"
+            if proposed[identity]["meeting"]["competition_identity"] in ("gt-world-challenge-europe", "nls")
         ]
         for identity in previous.keys() & proposed.keys():
             before, after = previous[identity], proposed[identity]
@@ -274,9 +275,13 @@ class ReviewService:
                 conflicts.append("Missing published timetable observations; retain the evidence or provide a corrected candidate: " + identity)
             prior_sessions = {session["identity"] for session in before["meeting"].get("sessions", [])}
             next_sessions = {session["identity"] for session in after["meeting"].get("sessions", [])}
+            prior_rounds = {entry["identity"] for entry in before["meeting"].get("rounds", [])}
+            next_rounds = {entry["identity"] for entry in after["meeting"].get("rounds", [])}
+            if prior_rounds - next_rounds:
+                conflicts.append("Missing published Rounds; retain their identities and sourced status: " + ", ".join(sorted(prior_rounds - next_rounds)))
             if prior_sessions - next_sessions:
                 conflicts.append("Missing published Sessions; retain them with explicit sourced cancellation: " + ", ".join(sorted(prior_sessions - next_sessions)))
-            fields = {key: {"before": before["meeting"].get(key), "after": value} for key, value in after["meeting"].items() if before["meeting"].get(key) != value}
+            fields = {key: {"before": before["meeting"].get(key), "after": after["meeting"].get(key)} for key in before["meeting"].keys() | after["meeting"].keys() if before["meeting"].get(key) != after["meeting"].get(key)}
             for field in ("source_url", "retrieved_at", "evidence", "field_assertions"):
                 if before.get(field) != after.get(field):
                     fields[field] = {"before": before.get(field), "after": after.get(field)}

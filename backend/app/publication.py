@@ -106,9 +106,21 @@ class CandidateSession(BaseModel):
 
     identity: str
     name: str
-    status: Literal["scheduled", "completed", "cancelled"]
+    status: Literal["scheduled", "completed", "cancelled", "abandoned"]
     start: PublishedTime
     end: PublishedTime | None = None
+    round_identity: str | None = None
+    duration_minutes: int | None = Field(default=None, gt=0)
+    circuit_identity: str | None = None
+    layout: "CandidateLayout | None" = None
+
+    @model_serializer(mode="wrap")
+    def compatible_dump(self, handler):
+        value = handler(self)
+        for field in ("round_identity", "duration_minutes", "circuit_identity", "layout"):
+            if getattr(self, field) is None:
+                value.pop(field, None)
+        return value
 
     @model_validator(mode="after")
     def valid_range(self) -> "CandidateSession":
@@ -117,8 +129,47 @@ class CandidateSession(BaseModel):
         return self
 
 
+class CandidateRound(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
+    identity: str
+    number: int = Field(gt=0)
+    name: str
+    status: Literal["scheduled", "completed", "cancelled", "abandoned"]
+
+
+class CoverageAssessment(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
+    state: Literal["complete", "incomplete", "unassessed"]
+    activity: Literal["present", "empty", "unknown"]
+    reason: str
+    source_url: HttpUrl
+
+    @model_validator(mode="after")
+    def assessed_empty(self) -> "CoverageAssessment":
+        if self.activity == "empty" and self.state != "complete":
+            raise ValueError("Officially empty requires complete assessed coverage")
+        return self
+
+
+class CandidatePlace(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, str_min_length=1)
+
+    identity: str
+    name: str
+
+
+class CandidateLayout(CandidatePlace):
+    length_km: float | None = Field(default=None, gt=0)
+
+
 class ScheduledMeeting(CandidateMeeting):
     round_number: int | None = Field(gt=0)
+    rounds: list[CandidateRound] = Field(default_factory=list)
+    venue: CandidatePlace | None = None
+    layout: CandidateLayout | None = None
+    coverage: CoverageAssessment | None = None
     kind: Literal["championship", "test", "prologue"] = "championship"
     event_timezone: str | None = None
     sessions: list[CandidateSession]
@@ -128,16 +179,43 @@ class ScheduledMeeting(CandidateMeeting):
         value = handler(self)
         if self.kind == "championship":
             value.pop("kind", None)
+        if not self.rounds:
+            value.pop("rounds", None)
+        for field in ("venue", "layout", "coverage"):
+            if getattr(self, field) is None:
+                value.pop(field, None)
         return value
 
     @model_validator(mode="after")
     def distinct_sessions(self) -> "ScheduledMeeting":
-        if (self.kind == "championship") != (self.round_number is not None):
+        if (self.kind == "championship") != (self.round_number is not None or bool(self.rounds)):
             raise ValueError("Only championship Meetings have Round numbers")
+        if self.rounds and self.round_number is not None:
+            raise ValueError("Use explicit Rounds or the legacy Round number, not both")
+        round_ids = [entry.identity for entry in self.rounds]
+        numbers = [entry.number for entry in self.rounds]
+        if len(round_ids) != len(set(round_ids)) or len(numbers) != len(set(numbers)):
+            raise ValueError("Duplicate Round identity or number")
+        if any(session.round_identity is not None and session.round_identity not in round_ids for session in self.sessions):
+            raise ValueError("Session Round must belong to its Meeting")
+        if self.coverage and self.coverage.activity == "empty" and self.sessions:
+            raise ValueError("Empty Session coverage cannot contain Sessions")
         identities = [session.identity for session in self.sessions]
         if len(identities) != len(set(identities)):
             raise ValueError("Duplicate session identity")
         return self
+
+
+class TranslationRecord(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_language: Literal["de"]
+    method: str
+    version: str
+    translated_at: AwareDatetime
+    review_state: Literal["accepted-standing-poc"]
+    reviewer: str
+    authorization: str
 
 
 class FieldAssertion(BaseModel):
@@ -150,6 +228,18 @@ class FieldAssertion(BaseModel):
     locator: str = Field(min_length=1)
     rule: str = Field(min_length=1)
     preferred: bool = False
+    response_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    translation: TranslationRecord | None = None
+    subject_identity: str | None = None
+    effective_local: str | None = None
+
+    @model_serializer(mode="wrap")
+    def compatible_dump(self, handler):
+        value = handler(self)
+        for field in ("response_sha256", "translation", "subject_identity", "effective_local"):
+            if getattr(self, field) is None:
+                value.pop(field, None)
+        return value
 
     @field_validator("source_url")
     @classmethod
@@ -179,12 +269,28 @@ class SeasonCandidateEnvelope(BaseModel):
     source_language: Literal["en"]
     competition_identity: str
     season_year: int
-    meetings: list[ScheduledEnvelope] = Field(min_length=1)
+    meetings: list[ScheduledEnvelope]
+    coverage: CoverageAssessment | None = None
+
+    @model_serializer(mode="wrap")
+    def compatible_dump(self, handler):
+        value = handler(self)
+        if self.coverage is None:
+            value.pop("coverage", None)
+        return value
 
     @model_validator(mode="after")
     def valid_scope(self) -> "SeasonCandidateEnvelope":
         HttpUrl(self.source_url)
+        if not self.meetings and self.coverage is None:
+            raise ValueError("An empty season needs an explicit Coverage assessment")
+        if self.coverage and ((self.coverage.activity == "present" and not self.meetings) or (self.coverage.activity == "empty" and self.meetings)):
+            raise ValueError("Coverage activity disagrees with Meeting inventory")
         identities = [entry.source_identity for entry in self.meetings]
+        rounds = [entry.identity for envelope in self.meetings for entry in envelope.meeting.rounds]
+        numbers = [entry.number for envelope in self.meetings for entry in envelope.meeting.rounds]
+        if len(rounds) != len(set(rounds)) or len(numbers) != len(set(numbers)):
+            raise ValueError("Duplicate Round across Meetings")
         sessions = [session.identity for entry in self.meetings for session in entry.meeting.sessions]
         if len(identities) != len(set(identities)) or len(sessions) != len(set(sessions)):
             raise ValueError("Duplicate Meeting or Session identity")
@@ -233,6 +339,12 @@ def candidate_meetings(candidate: PublicationCandidate) -> list[CandidateEnvelop
     if isinstance(candidate, PublicationSnapshot):
         return [entry for season in candidate.seasons for entry in season.meetings]
     return list(candidate.meetings) if isinstance(candidate, SeasonCandidateEnvelope) else [candidate]
+
+
+def coverage_view(candidate: PublicationCandidate) -> list[dict]:
+    seasons = candidate.seasons if isinstance(candidate, PublicationSnapshot) else [candidate] if isinstance(candidate, SeasonCandidateEnvelope) else []
+    return [{"competitionId": f"competition:{season.competition_identity}", "season": season.season_year,
+             **(season.coverage.model_dump(mode="json") if season.coverage else {"state": "unassessed", "activity": "present" if season.meetings else "unknown", "reason": "Coverage has not been assessed", "source_url": season.source_url})} for season in seasons]
 
 
 class OperationalStore(Protocol):
@@ -301,8 +413,18 @@ def meeting_view(envelope: CandidateEnvelope) -> dict[str, object]:
             "sessions": [{
                 "id": session.identity, "name": session.name, "status": session.status,
                 "start": clock_view(session.start), "end": clock_view(session.end),
+                **({"roundId": session.round_identity} if session.round_identity else {}),
+                **({"durationMinutes": session.duration_minutes} if session.duration_minutes else {}),
+                **({"circuitId": f"circuit:{session.circuit_identity}"} if session.circuit_identity else {}),
+                **({"layout": session.layout.model_dump(mode="json")} if session.layout else {}),
             } for session in meeting.sessions],
         })
+        if meeting.rounds:
+            view["rounds"] = [{"id": entry.identity, "number": entry.number, "name": entry.name, "status": entry.status} for entry in meeting.rounds]
+        for field in ("venue", "layout", "coverage"):
+            value = getattr(meeting, field)
+            if value is not None:
+                view[field] = value.model_dump(mode="json")
     if isinstance(envelope, ScheduledEnvelope) and envelope.field_assertions:
         view["fieldAssertions"] = [assertion.model_dump(mode="json") for assertion in envelope.field_assertions]
     return view
@@ -340,7 +462,8 @@ class PublicationModule:
 
     def _publish(self, envelope: PublicationCandidate) -> PublicationResult:
         version = publication_version(envelope)
-        meeting_id = canonical_meeting_id(candidate_meetings(envelope)[0].source_identity)
+        meetings = candidate_meetings(envelope)
+        meeting_id = canonical_meeting_id(meetings[0].source_identity) if meetings else ""
         self._operational_store.stage(version, envelope)
         self._graph_projection.project(version, envelope)
         if not self._graph_projection.agrees(version, meeting_id, envelope):
@@ -412,13 +535,14 @@ class InMemoryOperationalStore:
     def publication_envelope(self, version: str) -> PublicationCandidate:
         return self._staged[version].model_copy(deep=True)
 
-    def visible_meetings(self) -> list[dict[str, object]]:
-        if self.current_version is None:
+    def visible_meetings(self, version: str | None = None) -> list[dict[str, object]]:
+        version = version or self.current_version
+        if version is None:
             return []
         return [{
             **meeting_view(entry),
-            "publicationVersion": self.current_version,
-        } for entry in candidate_meetings(self._staged[self.current_version])]
+            "publicationVersion": version,
+        } for entry in candidate_meetings(self._staged[version])]
 
     def canonical_resource_counts(self) -> dict[str, int]:
         return self._resources.counts()
@@ -434,10 +558,10 @@ class InMemoryGraphProjection:
         for entry in candidate_meetings(envelope):
             self._resources.add(entry)
 
-    def agrees(self, version: str, meeting_id: str, envelope: CandidateEnvelope | None = None) -> bool:
+    def agrees(self, version: str, meeting_id: str, envelope: PublicationCandidate | None = None) -> bool:
         return (
             self.current_version == version
-            and self._resources.contains_meeting(meeting_id)
+            and (self._resources.contains_meeting(meeting_id) or (envelope is not None and not candidate_meetings(envelope)))
         )
 
     def canonical_resource_counts(self) -> dict[str, int]:

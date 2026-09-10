@@ -10,7 +10,7 @@ from psycopg.rows import dict_row
 from rdflib import Graph, Literal, Namespace, RDF, RDFS, URIRef, XSD
 from rdflib.compare import isomorphic
 
-from app.publication import CandidateEnvelope, PublicationCandidate, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view
+from app.publication import CandidateEnvelope, PublicationCandidate, ScheduledEnvelope, ScheduledMeeting, candidate_meetings, parse_candidate, canonical_resource_ids, meeting_view, coverage_view
 
 
 MOTORSPORT = Namespace("https://w3id.org/motorsport-hub/ontology/")
@@ -207,7 +207,7 @@ class PostgresOperationalStore:
                 (version,),
             )
 
-    def visible_meetings(self) -> list[dict[str, object]]:
+    def visible_meetings(self, version: str | None = None) -> list[dict[str, object]]:
         with psycopg.connect(
             self._database_url,
             connect_timeout=2,
@@ -216,10 +216,11 @@ class PostgresOperationalStore:
             rows = connection.execute(
                 """SELECT pm.payload, p.version
                 FROM publication_state ps
-                JOIN publications p ON p.version = ps.current_version
+                JOIN publications p ON p.version = COALESCE(%s, ps.current_version)
                 JOIN publication_meetings pm ON pm.publication_version = p.version
                 WHERE ps.singleton = TRUE AND p.status = 'complete'
-                ORDER BY pm.payload->>'startDate', pm.meeting_id"""
+                ORDER BY pm.payload->>'startDate', pm.meeting_id""",
+                (version,),
             ).fetchall()
         if not rows:
             return []
@@ -306,6 +307,19 @@ class GraphDbProjection:
             graph = Graph()
             for entry in candidate_meetings(envelope):
                 graph += self._build_graph(version, entry)
+            for assessment in coverage_view(envelope):
+                if assessment["state"] == "unassessed":
+                    continue
+                season_iri = self._resource_iri(f"season:{assessment['competitionId']}:{assessment['season']}")
+                graph.add((season_iri, RDF.type, MOTORSPORT.Season))
+                graph.add((season_iri, MOTORSPORT.coverageState, Literal(assessment["state"])))
+                graph.add((season_iri, MOTORSPORT.activity, Literal(assessment["activity"])))
+                graph.add((season_iri, MOTORSPORT.coverageReason, Literal(assessment["reason"], lang="en")))
+                graph.add((season_iri, MOTORSPORT.sourceUrl, URIRef(assessment["source_url"])))
+                publication_iri = URIRef(f"{RESOURCE}publication/{version}")
+                graph.add((publication_iri, RDF.type, MOTORSPORT.Publication))
+                graph.add((publication_iri, MOTORSPORT.version, Literal(version)))
+                graph.add((publication_iri, MOTORSPORT.includesSeason, season_iri))
             return graph
         ids = canonical_resource_ids(envelope)
         meeting = envelope.meeting
@@ -343,12 +357,14 @@ class GraphDbProjection:
         graph.add((publication_iri, MOTORSPORT.version, Literal(version)))
         graph.add((publication_iri, MOTORSPORT.includesMeeting, meeting_iri))
         if isinstance(envelope, ScheduledEnvelope):
+            subjects = {entry.identity: self._resource_iri(f"round:{entry.identity}") for entry in envelope.meeting.rounds}
+            subjects.update({session.identity: self._resource_iri(f"session:{session.identity}") for session in envelope.meeting.sessions})
             for assertion in envelope.field_assertions:
                 digest = hashlib.sha256(assertion.model_dump_json().encode("utf-8")).hexdigest()
                 assertion_iri = self._resource_iri(f"assertion:{envelope.source_identity}:{digest}")
                 graph.add((meeting_iri, MOTORSPORT.fieldAssertion, assertion_iri))
                 graph.add((assertion_iri, RDF.type, MOTORSPORT.SourceAssertion))
-                graph.add((assertion_iri, MOTORSPORT.subject, circuit_iri if assertion.field.startswith("circuit_") else meeting_iri))
+                graph.add((assertion_iri, MOTORSPORT.subject, subjects.get(assertion.subject_identity, circuit_iri if assertion.field.startswith("circuit_") else meeting_iri)))
                 graph.add((assertion_iri, MOTORSPORT.field, Literal(assertion.field)))
                 graph.add((assertion_iri, MOTORSPORT.value, Literal(assertion.value)))
                 graph.add((assertion_iri, MOTORSPORT.locator, Literal(assertion.locator)))
@@ -356,8 +372,46 @@ class GraphDbProjection:
                 graph.add((assertion_iri, MOTORSPORT.preferred, Literal(assertion.preferred)))
                 graph.add((assertion_iri, MOTORSPORT.sourceUrl, URIRef(assertion.source_url)))
                 graph.add((assertion_iri, MOTORSPORT.retrievedAt, Literal(assertion.retrieved_at, datatype=XSD.dateTime)))
+                if assertion.response_sha256:
+                    graph.add((assertion_iri, MOTORSPORT.responseSha256, Literal(assertion.response_sha256)))
+                if assertion.effective_local:
+                    graph.add((assertion_iri, MOTORSPORT.effectiveLocal, Literal(assertion.effective_local)))
+                if assertion.translation:
+                    graph.add((assertion_iri, MOTORSPORT.sourceLanguage, Literal(assertion.translation.source_language)))
+                    graph.add((assertion_iri, MOTORSPORT.translationMethod, Literal(assertion.translation.method, lang="en")))
+                    graph.add((assertion_iri, MOTORSPORT.translationVersion, Literal(assertion.translation.version)))
+                    graph.add((assertion_iri, MOTORSPORT.translatedAt, Literal(assertion.translation.translated_at, datatype=XSD.dateTime)))
+                    graph.add((assertion_iri, MOTORSPORT.translationReviewState, Literal(assertion.translation.review_state)))
+                    graph.add((assertion_iri, MOTORSPORT.translationReviewer, Literal(assertion.translation.reviewer, lang="en")))
+                    graph.add((assertion_iri, MOTORSPORT.translationAuthorization, Literal(assertion.translation.authorization, lang="en")))
         if isinstance(meeting, ScheduledMeeting):
             round_iri = self._resource_iri(f"round:{envelope.source_identity}") if meeting.round_number is not None else None
+            for entry in meeting.rounds:
+                explicit_round = self._resource_iri(f"round:{entry.identity}")
+                graph.add((explicit_round, RDF.type, MOTORSPORT.Round))
+                graph.add((explicit_round, RDFS.label, Literal(entry.name, lang="en")))
+                graph.add((explicit_round, MOTORSPORT.meeting, meeting_iri))
+                graph.add((explicit_round, MOTORSPORT.season, season_iri))
+                graph.add((explicit_round, MOTORSPORT.number, Literal(entry.number, datatype=XSD.integer)))
+                graph.add((explicit_round, MOTORSPORT.status, Literal(entry.status)))
+            if meeting.venue:
+                venue_iri = self._resource_iri(f"venue:{meeting.venue.identity}")
+                graph.add((venue_iri, RDF.type, MOTORSPORT.Venue))
+                graph.add((venue_iri, RDFS.label, Literal(meeting.venue.name, lang="en")))
+                graph.add((meeting_iri, MOTORSPORT.venue, venue_iri))
+                graph.add((circuit_iri, MOTORSPORT.venue, venue_iri))
+            if meeting.layout:
+                layout_iri = self._resource_iri(f"layout:{meeting.layout.identity}")
+                graph.add((layout_iri, RDF.type, MOTORSPORT.Layout))
+                graph.add((layout_iri, RDFS.label, Literal(meeting.layout.name, lang="en")))
+                graph.add((layout_iri, MOTORSPORT.circuit, circuit_iri))
+                graph.add((meeting_iri, MOTORSPORT.layout, layout_iri))
+                if meeting.layout.length_km is not None:
+                    graph.add((layout_iri, MOTORSPORT.lengthKm, Literal(meeting.layout.length_km)))
+            if meeting.coverage:
+                graph.add((meeting_iri, MOTORSPORT.coverageState, Literal(meeting.coverage.state)))
+                graph.add((meeting_iri, MOTORSPORT.activity, Literal(meeting.coverage.activity)))
+                graph.add((meeting_iri, MOTORSPORT.coverageReason, Literal(meeting.coverage.reason, lang="en")))
             if meeting.kind != "championship":
                 graph.add((meeting_iri, MOTORSPORT.kind, Literal(meeting.kind)))
             if round_iri is not None:
@@ -374,6 +428,22 @@ class GraphDbProjection:
                 graph.add((session_iri, MOTORSPORT.meeting, meeting_iri))
                 if round_iri is not None:
                     graph.add((session_iri, MOTORSPORT.round, round_iri))
+                if session.round_identity:
+                    graph.add((session_iri, MOTORSPORT.round, self._resource_iri(f"round:{session.round_identity}")))
+                if session.duration_minutes is not None:
+                    graph.add((session_iri, MOTORSPORT.durationMinutes, Literal(session.duration_minutes, datatype=XSD.integer)))
+                if session.circuit_identity:
+                    session_circuit = self._resource_iri(f"circuit:{session.circuit_identity}")
+                    graph.add((session_circuit, RDF.type, MOTORSPORT.Circuit))
+                    graph.add((session_iri, MOTORSPORT.circuit, session_circuit))
+                    if meeting.venue:
+                        graph.add((session_circuit, MOTORSPORT.venue, venue_iri))
+                    if session.layout:
+                        session_layout = self._resource_iri(f"layout:{session.layout.identity}")
+                        graph.add((session_layout, RDF.type, MOTORSPORT.Layout))
+                        graph.add((session_layout, RDFS.label, Literal(session.layout.name, lang="en")))
+                        graph.add((session_layout, MOTORSPORT.circuit, session_circuit))
+                        graph.add((session_iri, MOTORSPORT.layout, session_layout))
                 graph.add((session_iri, MOTORSPORT.status, Literal(session.status)))
                 graph.add((session_iri, MOTORSPORT.provenance, provenance_iri))
                 for label, clock in (("start", session.start), ("end", session.end)):

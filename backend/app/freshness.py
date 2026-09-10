@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 
 def source_freshness_view(attempts: dict[str, dict | None], competitions: set[str]) -> dict:
-    families = set(attempts) | ({"formula-one"} if "formula-one" in competitions else set()) | ({"gt-world-challenge-europe"} if "gt-world-challenge-europe" in competitions else set())
+    families = set(attempts) | (competitions & {"formula-one", "gt-world-challenge-europe", "nls"})
     if not families:
         return freshness_view(None)
     sources = [{"sourceFamily": family, **freshness_view(attempts.get(family))} for family in sorted(families)]

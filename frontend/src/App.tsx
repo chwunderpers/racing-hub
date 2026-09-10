@@ -65,6 +65,7 @@ function validFilterDate(value: string): boolean {
 function App() {
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [coverage, setCoverage] = useState<components["schemas"]["SeasonCoverageResponse"][]>([]);
   const [freshness, setFreshness] = useState<components["schemas"]["FreshnessResponse"] | null>(null);
   const [query, setQuery] = useState(() => new URLSearchParams(window.location.search));
   const queryFor = (key: string, value: string) => {
@@ -91,6 +92,9 @@ function App() {
   const through = validFilterDate(rawThrough) ? rawThrough : "";
   const invalidDates = Boolean(from && through && from > through);
   const competitionOptions = new Map(meetings.map((meeting) => [meeting.competitionId || meeting.competition, meeting.competition]));
+  for (const assessment of coverage) {
+    if (!competitionOptions.has(assessment.competitionId)) competitionOptions.set(assessment.competitionId, assessment.competitionId.replace("competition:", ""));
+  }
   const circuitOptions = new Map<string, string>();
   for (const meeting of meetings) {
     const identity = meeting.circuitId || meeting.circuit;
@@ -108,6 +112,7 @@ function App() {
       .then(([health, schedule]) => {
         if (active) {
           setMeetings(schedule.meetings);
+          setCoverage(schedule.coverage || []);
           setFreshness(schedule.freshness || null);
           setViewState(health.status !== "ok" ? "database-unavailable" : "ready");
         }
@@ -183,6 +188,11 @@ function App() {
         {viewState === "ready" && freshness?.stale && <p className="stale-notice" role="status">Schedule may be outdated. {freshness.reason}{freshness.lastSuccessAt ? ` Last verified ${formatRetrieved(freshness.lastSuccessAt)}.` : ""}</p>}
         {invalidDates && <p className="stale-notice" role="alert">From date must not follow through date.</p>}
         {malformedDates && <p className="stale-notice" role="alert">Date filters must use valid YYYY-MM-DD dates.</p>}
+        {viewState === "ready" && !selectedId && coverage.filter((assessment) => !competition || assessment.competitionId === competition).map((assessment) => <div className="coverage-notice" key={`${assessment.competitionId}:${assessment.season}`}>
+          <span>{competitionOptions.get(assessment.competitionId)} / {assessment.season}</span>
+          <strong>{assessment.activity === "empty" ? "Officially empty schedule" : assessment.state === "complete" ? "Coverage complete" : assessment.state === "incomplete" ? "Coverage incomplete" : "Coverage unassessed"}</strong>
+          <span>{assessment.reason}</span><a href={assessment.source_url} target="_blank" rel="noreferrer">Source</a>
+        </div>)}
         {viewState === "ready" && selected && <MeetingDetails meeting={selected} meetings={meetings} meetingHref={(identity) => queryFor("meeting", identity)} onMeeting={(identity) => changeQuery("meeting", identity)} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
         {viewState === "ready" && selectedId && !selected && <div className="empty-state"><h2>Meeting not found</h2><a href={queryFor("meeting", "")} onClick={(event) => { event.preventDefault(); changeQuery("meeting", ""); }}>Back to schedule</a></div>}
 
@@ -201,7 +211,7 @@ function App() {
               </div>
               <div>
                 <h2>No meetings published yet</h2>
-                <p>The starting grid is clear for the first approved publication.</p>
+                {!coverage.length && <p>Coverage unassessed</p>}
               </div>
               <span className="empty-code">00</span>
             </div>
@@ -211,12 +221,13 @@ function App() {
             <div className="meeting-list">
               {filtered.map((meeting) => (
                 <article className="meeting-row" key={meeting.id}>
-                  <div className="meeting-round" aria-label={meeting.round ? `Round ${meeting.round}` : meeting.kind === "prologue" ? "Prologue" : meeting.kind === "test" ? "Test" : "Meeting"}>
-                    {meeting.round ? String(meeting.round).padStart(2, "0") : <FlaskConical size={24} aria-hidden="true" />}
+                  <div className="meeting-round" aria-label={meeting.round ? `Round ${meeting.round}` : meeting.rounds?.length ? `Rounds ${meeting.rounds.map((round) => round.number).join(", ")}` : meeting.kind === "prologue" ? "Prologue" : meeting.kind === "test" ? "Test" : "Meeting"}>
+                    {meeting.round ? String(meeting.round).padStart(2, "0") : meeting.rounds?.length === 1 ? String(meeting.rounds[0].number).padStart(2, "0") : meeting.rounds?.length ? <Flag size={24} aria-hidden="true" /> : <FlaskConical size={24} aria-hidden="true" />}
                   </div>
                   <div className="meeting-primary">
                     <p>{meeting.competition}</p>
                     <h2><a href={queryFor("meeting", meeting.id)} onClick={(event) => { if (!event.ctrlKey && !event.metaKey) { event.preventDefault(); changeQuery("meeting", meeting.id); } }}>{meeting.name}</a></h2>
+                    {Boolean(meeting.rounds?.length) && <span className="meeting-kind">{meeting.rounds!.map((round) => `Round ${round.number}${round.status === "abandoned" ? " (abandoned)" : ""}`).join(" / ")}</span>}
                     {meeting.kind && meeting.kind !== "championship" && <span className="meeting-kind">{meeting.kind === "prologue" ? "Prologue" : "Test"}</span>}
                     {meeting.status === "cancelled" && <strong>Cancelled</strong>}
                     <span className="meeting-circuit">

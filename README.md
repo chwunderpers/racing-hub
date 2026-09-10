@@ -33,6 +33,10 @@ GraphDB Workbench is at <http://localhost:7200>. Compose provisions the
 one-shot bootstrap before starting the API. Service ports bind to loopback;
 these development credentials and unauthenticated services are not for hosting.
 
+The GraphDB 11.5 native-MCP migration was rehearsed on a temporary copy, but
+cutover requires a vendor-issued license. The default remains 10.8.10 to keep
+the local schedule usable. See [migration results and configuration](docs/graphdb-upgrade.md).
+
 GraphDB 10.8 may enable anonymous usage statistics by default depending on
 the license. Disable them in Workbench under Setup > Repositories > Edit
 common settings. This stack does not claim to disable telemetry automatically.
@@ -90,12 +94,14 @@ records the exact human decision, then asks separately for publication approval.
 See [the review workflow](docs/review-workflow.md) for commands, candidate and
 decision formats, audit files and failure recovery. Acceptance alone never publishes.
 
-Select **Racing Source** to investigate official sources, fetch Formula One or GT World
-Challenge Europe into private review, or replay captured 2026 facts. F1 covers 23
+Select **Racing Source** to investigate official sources, fetch Formula One, GT World
+Challenge Europe or NLS into private review, or replay captured 2026 facts. F1 covers 23
 numbered Meetings and 115 available Sessions; GT covers ten Rounds and two unnumbered
 prologues at date-level precision. GT acquisition retains timetable observations
-without inventing canonical Sessions. See [the source workflow](docs/source-workflow.md) for commands,
-coverage, time semantics and limitations. This adds no automated publication gate.
+without inventing canonical Sessions. NLS adds eight championship Meetings with
+ten Rounds and seven unnumbered test Meetings, 31 known track periods, and explicit
+incomplete coverage. See [the source workflow](docs/source-workflow.md) for commands,
+coverage, time semantics, limitations and Chris's standing local-PoC authorization.
 
 Season publications include Rounds, Sessions, revision/status and provenance in
 PostgreSQL and the exact versioned GraphDB projection. The browser provides
