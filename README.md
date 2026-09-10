@@ -53,6 +53,12 @@ promotes the schedule. A failed update leaves the previous schedule visible;
 staged versions remain available for retry. PostgreSQL outages make reads
 unavailable until it recovers, but do not replace the last complete version.
 
+Competition and Circuit identity keys are explicitly approved in the candidate
+envelope, independent of display labels. Full envelopes, including source evidence,
+are stored immutably by version. `publication_envelope(version)` provides the
+maintenance read for those records. `/api/schedule` returns `publicationVersion`
+with each Meeting so graph consumers can select the same snapshot.
+
 GraphDB is an administrative projection, not a public read API. It contains
 staged and historical graphs. Query the exact promoted version, never the union
 of all named graphs, when reading published data. Obtain that version with:

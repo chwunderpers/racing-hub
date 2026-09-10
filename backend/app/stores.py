@@ -45,6 +45,10 @@ CREATE TABLE IF NOT EXISTS publications (
     source_identity TEXT NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('staged', 'complete'))
 );
+CREATE TABLE IF NOT EXISTS publication_envelopes (
+    publication_version TEXT PRIMARY KEY REFERENCES publications(version),
+    payload JSONB NOT NULL
+);
 CREATE TABLE IF NOT EXISTS publication_meetings (
     publication_version TEXT NOT NULL REFERENCES publications(version),
     meeting_id TEXT NOT NULL REFERENCES meetings(id),
@@ -117,12 +121,27 @@ class PostgresOperationalStore:
                 (version, envelope.source_identity),
             )
             connection.execute(
+                """INSERT INTO publication_envelopes (publication_version, payload)
+                VALUES (%s, %s) ON CONFLICT (publication_version) DO NOTHING""",
+                (version, psycopg.types.json.Jsonb(envelope.model_dump(mode="json"))),
+            )
+            connection.execute(
                 """INSERT INTO publication_meetings
                 (publication_version, meeting_id, payload)
                 VALUES (%s, %s, %s)
                 ON CONFLICT (publication_version, meeting_id) DO NOTHING""",
                 (version, ids["meetings"], psycopg.types.json.Jsonb(meeting_view(envelope))),
             )
+
+    def publication_envelope(self, version: str) -> CandidateEnvelope:
+        with psycopg.connect(self._database_url, connect_timeout=5) as connection:
+            row = connection.execute(
+                "SELECT payload FROM publication_envelopes WHERE publication_version = %s",
+                (version,),
+            ).fetchone()
+        if row is None:
+            raise LookupError("Publication envelope not found")
+        return CandidateEnvelope.model_validate(row[0])
 
     def promote(self, version: str) -> None:
         with psycopg.connect(self._database_url, connect_timeout=5) as connection:
@@ -144,14 +163,14 @@ class PostgresOperationalStore:
             row_factory=dict_row,
         ) as connection:
             rows = connection.execute(
-                """SELECT pm.payload
+                """SELECT pm.payload, p.version
                 FROM publication_state ps
                 JOIN publications p ON p.version = ps.current_version
                 JOIN publication_meetings pm ON pm.publication_version = p.version
                 WHERE ps.singleton = TRUE AND p.status = 'complete'
                 ORDER BY pm.payload->>'startDate', pm.meeting_id"""
             ).fetchall()
-        return [row["payload"] for row in rows]
+        return [{**row["payload"], "publicationVersion": row["version"]} for row in rows]
 
     def canonical_resource_counts(self) -> dict[str, int]:
         tables = ("competitions", "seasons", "meetings", "circuits", "provenance")
@@ -245,6 +264,9 @@ class GraphDbProjection:
         graph.add((meeting_iri, MOTORSPORT.endDate, Literal(meeting.end_date, datatype=XSD.date)))
         graph.add((meeting_iri, MOTORSPORT.provenance, provenance_iri))
         graph.add((provenance_iri, RDF.type, MOTORSPORT.SourceAssertion))
+        graph.add((provenance_iri, MOTORSPORT.sourceIdentity, Literal(envelope.source_identity)))
+        graph.add((provenance_iri, MOTORSPORT.evidence, Literal(envelope.evidence, lang="en")))
+        graph.add((provenance_iri, MOTORSPORT.sourceLanguage, Literal(envelope.source_language)))
         graph.add((provenance_iri, MOTORSPORT.sourceUrl, URIRef(envelope.source_url)))
         graph.add((provenance_iri, MOTORSPORT.retrievedAt, Literal(envelope.retrieved_at, datatype=XSD.dateTime)))
         graph.add((publication_iri, RDF.type, MOTORSPORT.Publication))

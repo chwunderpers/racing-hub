@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 
 class CandidateMeeting(BaseModel):
+    competition_identity: str
+    circuit_identity: str
     competition_name: str
     season_year: int
     meeting_name: str
@@ -49,12 +51,12 @@ def canonical_meeting_id(source_identity: str) -> str:
 
 def canonical_resource_ids(envelope: CandidateEnvelope) -> dict[str, str]:
     meeting = envelope.meeting
-    competition_id = f"competition:{meeting.competition_name.lower().replace(' ', '-')}"
+    competition_id = f"competition:{meeting.competition_identity}"
     return {
         "competitions": competition_id,
         "seasons": f"season:{competition_id}:{meeting.season_year}",
         "meetings": canonical_meeting_id(envelope.source_identity),
-        "circuits": f"circuit:{meeting.circuit_name.lower().replace(' ', '-')}",
+        "circuits": f"circuit:{meeting.circuit_identity}",
         "provenance": f"source:{envelope.source_identity}",
     }
 
@@ -100,10 +102,8 @@ class PublicationModule:
         return PublicationResult(status="published", version=version)
 
 
-class InMemoryOperationalStore:
+class InMemoryCanonicalResources:
     def __init__(self) -> None:
-        self.current_version: str | None = None
-        self._staged: dict[str, CandidateEnvelope] = {}
         self._resources: dict[str, set[str]] = {
             resource_type: set()
             for resource_type in (
@@ -115,10 +115,29 @@ class InMemoryOperationalStore:
             )
         }
 
-    def stage(self, version: str, envelope: CandidateEnvelope) -> None:
-        self._staged[version] = envelope
+    def add(self, envelope: CandidateEnvelope) -> None:
         for resource_type, resource_id in canonical_resource_ids(envelope).items():
             self._resources[resource_type].add(resource_id)
+
+    def contains_meeting(self, meeting_id: str) -> bool:
+        return meeting_id in self._resources["meetings"]
+
+    def counts(self) -> dict[str, int]:
+        return {
+            resource_type: len(resource_ids)
+            for resource_type, resource_ids in self._resources.items()
+        }
+
+
+class InMemoryOperationalStore:
+    def __init__(self) -> None:
+        self.current_version: str | None = None
+        self._staged: dict[str, CandidateEnvelope] = {}
+        self._resources = InMemoryCanonicalResources()
+
+    def stage(self, version: str, envelope: CandidateEnvelope) -> None:
+        self._staged[version] = envelope
+        self._resources.add(envelope)
 
     def promote(self, version: str) -> None:
         if version not in self._staged:
@@ -128,42 +147,29 @@ class InMemoryOperationalStore:
     def visible_meetings(self) -> list[dict[str, object]]:
         if self.current_version is None:
             return []
-        return [meeting_view(self._staged[self.current_version])]
+        return [{
+            **meeting_view(self._staged[self.current_version]),
+            "publicationVersion": self.current_version,
+        }]
 
     def canonical_resource_counts(self) -> dict[str, int]:
-        return {
-            resource_type: len(resource_ids)
-            for resource_type, resource_ids in self._resources.items()
-        }
+        return self._resources.counts()
 
 
 class InMemoryGraphProjection:
     def __init__(self) -> None:
         self.current_version: str | None = None
-        self._resources: dict[str, set[str]] = {
-            resource_type: set()
-            for resource_type in (
-                "competitions",
-                "seasons",
-                "meetings",
-                "circuits",
-                "provenance",
-            )
-        }
+        self._resources = InMemoryCanonicalResources()
 
     def project(self, version: str, envelope: CandidateEnvelope) -> None:
         self.current_version = version
-        for resource_type, resource_id in canonical_resource_ids(envelope).items():
-            self._resources[resource_type].add(resource_id)
+        self._resources.add(envelope)
 
     def agrees(self, version: str, meeting_id: str) -> bool:
         return (
             self.current_version == version
-            and meeting_id in self._resources["meetings"]
+            and self._resources.contains_meeting(meeting_id)
         )
 
     def canonical_resource_counts(self) -> dict[str, int]:
-        return {
-            resource_type: len(resource_ids)
-            for resource_type, resource_ids in self._resources.items()
-        }
+        return self._resources.counts()

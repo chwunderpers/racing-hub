@@ -19,6 +19,8 @@ def formula_one_envelope() -> CandidateEnvelope:
         source_language="en",
         evidence="FORMULA 1 QATAR AIRWAYS AUSTRALIAN GRAND PRIX 2026",
         meeting=CandidateMeeting(
+            competition_identity="formula-one",
+            circuit_identity="albert-park-grand-prix-circuit",
             competition_name="Formula One",
             season_year=2026,
             meeting_name="Australian Grand Prix",
@@ -41,6 +43,7 @@ def test_publish_promotes_only_after_operational_and_graph_versions_agree() -> N
     assert graph.current_version == result.version
     assert operational.visible_meetings() == [
         {
+            "publicationVersion": result.version,
             "id": "meeting:f1:2026:australia",
             "name": "Australian Grand Prix",
             "competition": "Formula One",
@@ -78,6 +81,26 @@ def test_retrying_the_same_source_identity_creates_no_canonical_duplicates() -> 
         "circuits": 1,
         "provenance": 1,
     }
+
+
+def test_correcting_labels_preserves_approved_canonical_identities() -> None:
+    operational = InMemoryOperationalStore()
+    graph = InMemoryGraphProjection()
+    publication = PublicationModule(operational, graph)
+    envelope = formula_one_envelope()
+    publication.publish(envelope)
+    revised = envelope.model_copy(update={"meeting": envelope.meeting.model_copy(update={
+        "competition_name": "Formula 1",
+        "circuit_name": "Albert Park Circuit",
+    })})
+
+    publication.publish(revised)
+
+    assert operational.visible_meetings()[0]["competition"] == "Formula 1"
+    assert operational.canonical_resource_counts() == {
+        "competitions": 1, "seasons": 1, "meetings": 1, "circuits": 1, "provenance": 1,
+    }
+    assert graph.canonical_resource_counts() == operational.canonical_resource_counts()
 
 
 def test_graph_failure_keeps_the_previous_complete_publication_visible() -> None:
@@ -128,3 +151,16 @@ def test_operational_failure_keeps_the_previous_complete_publication_visible() -
 
     assert operational.current_version == first.version
     assert graph.current_version == first.version
+
+
+def test_disagreement_does_not_promote_a_staged_publication(monkeypatch) -> None:
+    operational = InMemoryOperationalStore()
+    graph = InMemoryGraphProjection()
+    publication = PublicationModule(operational, graph)
+    first = publication.publish(formula_one_envelope())
+    monkeypatch.setattr(graph, "agrees", lambda version, meeting_id: False)
+
+    with pytest.raises(RuntimeError, match="does not agree"):
+        publication.publish(formula_one_envelope().model_copy(update={"evidence": "Revised evidence"}))
+
+    assert operational.current_version == first.version

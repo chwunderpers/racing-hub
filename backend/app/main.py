@@ -16,6 +16,7 @@ class HealthResponse(BaseModel):
 
 
 class MeetingResponse(BaseModel):
+    publicationVersion: str
     id: str
     name: str
     competition: str
@@ -31,22 +32,20 @@ class ScheduleResponse(BaseModel):
     meetings: list[MeetingResponse]
 
 
-def operational_store() -> PostgresOperationalStore:
-    return PostgresOperationalStore(
-        os.environ.get(
-            "DATABASE_URL",
-            "postgresql://motorsport:motorsport@localhost:5432/motorsport",
-        )
-    )
-
-
-def database_status() -> str:
-    database_url = os.environ.get(
+def database_url() -> str:
+    return os.environ.get(
         "DATABASE_URL",
         "postgresql://motorsport:motorsport@localhost:5432/motorsport",
     )
+
+
+def operational_store() -> PostgresOperationalStore:
+    return PostgresOperationalStore(database_url())
+
+
+def database_status() -> str:
     try:
-        with psycopg.connect(database_url, connect_timeout=2) as connection:
+        with psycopg.connect(database_url(), connect_timeout=2) as connection:
             connection.execute("SELECT 1")
         return "ok"
     except psycopg.Error:

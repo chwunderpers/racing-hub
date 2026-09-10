@@ -5,6 +5,8 @@
   "source_language": "en",
   "evidence": "FORMULA 1 QATAR AIRWAYS AUSTRALIAN GRAND PRIX 2026",
   "meeting": {
+    "competition_identity": "formula-one",
+    "circuit_identity": "albert-park-grand-prix-circuit",
     "competition_name": "Formula One",
     "season_year": 2026,
     "meeting_name": "Australian Grand Prix",

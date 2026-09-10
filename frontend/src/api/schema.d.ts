@@ -57,6 +57,8 @@ export interface components {
         };
         /** MeetingResponse */
         MeetingResponse: {
+            /** Publicationversion */
+            publicationVersion: string;
             /** Id */
             id: string;
             /** Name */

@@ -82,6 +82,10 @@
       },
       "MeetingResponse": {
         "properties": {
+          "publicationVersion": {
+            "type": "string",
+            "title": "Publicationversion"
+          },
           "id": {
             "type": "string",
             "title": "Id"
@@ -121,6 +125,7 @@
         },
         "type": "object",
         "required": [
+          "publicationVersion",
           "id",
           "name",
           "competition",
