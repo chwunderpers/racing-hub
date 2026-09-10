@@ -1,7 +1,9 @@
 # Issue 5 Verification
 
 Baseline: `22efac94b6871e7f79836ba6d42871afe0d00f4e`. Implementation committed on
-the user-approved current `main` branch; no push or live publication is implied.
+the user-approved current `main` branch. Chris subsequently confirmed the exact
+acceptance proposal and separately approved publication, then authorized Issue 5
+closeout including pushing the scoped work and closing the ticket.
 
 ## Delivery
 
@@ -13,9 +15,13 @@ the user-approved current `main` branch; no push or live publication is implied.
 - Competition/Circuit/date filters and shareable detail URLs preserve query state.
   Browser-local, event-local, UTC and selected IANA displays preserve resolved
   instants; unresolved clocks remain explicitly unconverted.
-- Original public version remains
-  `28c1e67d2560767a65df33e9689d46daed3fa744c49f680ceca6b255c4c5ba32`.
-  The browser visibly marks it stale while the newer source candidate awaits review.
+- Published version is
+  `5ceaf34cc28a433b064dd26a766647d36a3d6e0708fc96469adb7d81b1109590`, replacing
+  the original Australia-only version after both explicit human approvals.
+  Decision: `01a282eb-adf0-431d-b98f-181143c59b82`, person Chris, rationale
+  "looking good, no blockers", evidence `https://www.formula1.com/en/racing/2026`.
+  [Publication receipt](../reviews/publications/01a282eb-adf0-431d-b98f-181143c59b82.yaml)
+  records success at 2026-09-10 09:33:16 UTC. The pending queue is empty.
 
 ## Standards
 
@@ -52,12 +58,19 @@ Parallel review reported four findings, all fixed with focused regressions:
   session-text containers. UTC and America/New_York clocks verified, unresolved date
   retained, and Back-to-schedule/browser Back preserved the Circuit filter.
   Session presentation used browser-only test data; no test data was published.
-- Final app containers healthy at <http://localhost:5173>; public version unchanged.
+- Final app containers healthy at <http://localhost:5173>.
+- Post-publication source fetch at 2026-09-10 09:36:19 UTC returned `unchanged`
+  for the approved version. The documented reconciliation cleared the previous
+  pending-revision marker without another candidate, approval or publication.
+  Live API assertions passed: 23 Meetings, 115 Sessions, exactly the approved
+  publication version, `freshness.stale: false`, and no stale reason.
 
-## Remaining Gate
+## Closeout
 
 The source scope is the current F1 numbered calendar, not reconstructed historical
 cancellation coverage. Factual PoC authorization is not legal clearance. See
 [source workflow](source-workflow.md) for the approved-inventory checks and limits.
-Human candidate acceptance and separate publication approval are still required.
-The issue remains open for that operational handoff; implementation commits are local.
+This candidate's human acceptance and publication gates are complete. Future data
+revisions retain those gates; routine implementation and closeout actions do not
+require repeated operator decisions. No runtime code change was needed to reconcile
+freshness. The decision, request and publication receipt are retained with the work.
