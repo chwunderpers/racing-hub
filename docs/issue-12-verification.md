@@ -30,7 +30,7 @@ with F1 as the reference. Review baseline: `4f87d77`. Implementation is local on
 
 - Full backend suite with disposable PostgreSQL and GraphDB stores: **242 passed,
   zero skipped**, 814.65 seconds. Existing dependency warnings remain (703).
-- New comparison test file: 25 cases, included in that full run. Covers private
+- Initial comparison test file: 25 cases, included in that full run. Covers private
   translation gates, authority/host/season policy, profile absence states,
   ingestion preservation, exact graph agreement, amendment traversal, temporal
   gaps, independent conflicts, scoped citations, wrong seasons and SDK refusals.
@@ -59,6 +59,34 @@ The SDK evaluation uses deterministic mock model responses, not a new live Azure
 evaluation. It verifies actual tool serialization, retrieval, citation ownership,
 refusal guards and isolation; it does not prove arbitrary model prose semantically
 correct or complete. No automatic conflict-precedence engine is claimed.
+
+## Code Review
+
+Baseline `4f87d77`; initial implementation commit `52f796b`. The Standards review
+found no confirmed hard violations and two low-severity heuristics: loosely typed
+comparison results and case-heavy SDK test setup. These remain maintainability
+advisories, not demonstrated failures.
+
+The Spec review identified two confirmed defects, repaired with red/green tests:
+future, related amendments incorrectly blocked a currently governing historical
+rule; native graph policy omitted public regulation predicates. Retrieval now
+marks directly governing Provisions, discloses out-of-period related amendments
+without letting them block the current rule, and permits existing public
+regulation predicates through the same version/size/private-field query policy.
+Post-review verification: **89 affected tests passed** (regulations, comparison,
+assistant and graph queries), including 27 comparison cases and real isolated
+native MCP. Pyright over all seven changed implementation modules and the
+comparison suite is clean. The full suite was run once before review, as agreed;
+these focused checks cover the subsequent fixes.
+
+The review also identified a model-trust limitation: comparison-specific service
+guards apply when the model invokes `compare_regulations`. A model that ignores
+instructions and chooses only single-Competition or general retrieval tools can
+still produce semantically unsupported comparison prose with valid citation IDs.
+Tool choice and prose interpretation remain model-evaluated, not deterministic
+intent recognition. This is an explicit residual risk, not a claim of complete
+prevention. The implementation does not introduce keyword-based request routing
+or pretend citation membership proves what the prose says.
 
 Issue #12 remains open pending real evidence review and separate exact publication
 confirmation. Implementation completion is not live acceptance of all issue criteria.

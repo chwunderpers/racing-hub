@@ -115,6 +115,7 @@ def profile_projection(graph: Graph, subject: URIRef) -> list[dict]:
             document = graph.value(passage, MOTORSPORT.document)
             provisions.append({
                 "iri": str(provision), "summary": scalar(provision, RDFS.label),
+                "governing": (entry, MOTORSPORT.provision, provision) in graph,
                 "applicability": scalar(provision, MOTORSPORT.applicability),
                 "exceptions": sorted(str(value) for value in graph.objects(provision, MOTORSPORT.exception)),
                 "discretion": scalar(provision, MOTORSPORT.discretion),

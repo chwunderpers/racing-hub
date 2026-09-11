@@ -95,7 +95,7 @@ def publish_comparison(review, candidate):
     return review.publish(item["id"], proposal["confirmation"])
 
 
-@pytest.mark.parametrize("case", ["scoring", "unknown", "outside-period", "unresolved-period", "amendment"])
+@pytest.mark.parametrize("case", ["scoring", "unknown", "outside-period", "unresolved-period", "amendment", "future-amendment"])
 def test_comparison_discloses_scope_gaps_and_amendments(isolated_services, tmp_path, case):
     from app.assistant import ReadTools, RegulationComparisonQuery
 
@@ -103,7 +103,7 @@ def test_comparison_discloses_scope_gaps_and_amendments(isolated_services, tmp_p
     nls = candidate["regulations"][1]
     if case == "unresolved-period":
         nls["provisions"][0]["effective_from"] = None
-    if case == "amendment":
+    if case in ("amendment", "future-amendment"):
         amendment = copy.deepcopy(nls["provisions"][0])
         amendment.update(identity="synthetic-amendment", summary="Conflicting synthetic amended allocation; resolve applicability before comparison.",
                          amends=["synthetic-points"], effective_from="2026-07-01")
@@ -112,18 +112,21 @@ def test_comparison_discloses_scope_gaps_and_amendments(isolated_services, tmp_p
     receipt = publish_comparison(ReviewService(tmp_path, store, PublicationModule(store, graph)), candidate)
     tools = ReadTools(store.assistant_reader(), receipt["version"], "UTC")
     request = RegulationComparisonQuery(season=2026, topic="tyres" if case == "unknown" else "scoring",
-                                       on_date=date(2025, 12, 1) if case == "outside-period" else date(2026, 8, 1))
+                                       on_date=date(2025, 12, 1) if case == "outside-period" else date(2026, 3, 1) if case == "future-amendment" else date(2026, 8, 1))
     result = tools.compare_regulations(request)
     assert [side["competition"] for side in result["profiles"]] == ["formula-one", "nls"]
     assert result["season"] == 2026 and result["publicationVersion"] == receipt["version"]
-    assert result["status"] == ("available" if case == "scoring" else "insufficient-evidence")
+    assert result["status"] == ("available" if case in ("scoring", "future-amendment") else "insufficient-evidence")
     if case == "unknown":
         assert all(side["profile"][0]["state"] == "unknown" for side in result["profiles"])
-    elif case == "amendment":
+    elif case in ("amendment", "future-amendment"):
         provisions = result["profiles"][1]["profile"][0]["provisions"]
         assert len(provisions) == 2
         assert any(provision["amends"] for provision in provisions)
         assert len({provision["citation"] for provision in provisions}) == 2
+        if case == "future-amendment":
+            future = next(provision for provision in provisions if provision["amends"])
+            assert future["temporalStatus"] == "outside-period" and not future["governing"]
     elif case != "scoring":
         assert result["limitations"]
 
@@ -299,3 +302,45 @@ def test_real_nls_inventory_remains_private_pending_translation_review(tmp_path)
     with pytest.raises(ValueError, match="translations require"):
         publish_comparison(review, candidate)
     assert store.current_publication_version() is None
+
+
+def test_native_graph_queries_retrieve_scoped_regulation_evidence(isolated_services, tmp_path):
+    import asyncio
+    import os
+    from app.graph_mcp import GraphMcpClient
+    from app.graph_queries import GraphQueryPolicy
+
+    store, graph = isolated_services
+    receipt = publish_comparison(ReviewService(tmp_path, store, PublicationModule(store, graph)), comparison_candidate())
+    version = receipt["version"]
+    query = f"""PREFIX msh: <https://w3id.org/motorsport-hub/ontology/>
+SELECT ?competition ?year ?state ?value ?provision ?text ?source
+FROM <https://w3id.org/motorsport-hub/graph/publication/{version}>
+WHERE {{
+    ?profile a msh:CompetitionProfile; msh:competition ?competition; msh:year ?year; msh:profileValue ?entry .
+    ?entry msh:topic "scoring"; msh:knowledgeState ?state; msh:normalizedValue ?value; msh:provision ?provision .
+    ?provision msh:provenance ?passage .
+    ?passage msh:passageText ?text; msh:sourceUrl ?source .
+}} LIMIT 10"""
+
+    async def scenario():
+        client = GraphMcpClient(os.environ["TEST_GRAPHDB_URL"] + "/mcp", version,
+            os.environ.get("TEST_GRAPHDB_USER"), os.environ.get("TEST_GRAPHDB_PASSWORD"),
+            repository=graph.repository_url.rsplit("/", 1)[1])
+        result = await client.query(query)
+        rows = result["rows"]
+        assert isinstance(rows, list) and len(rows) == 2
+        assert {row["competition"]["value"].rsplit("/", 1)[1] for row in rows} == {"formula-one", "nls"}
+        for row in rows:
+            assert row["year"]["value"] == "2026" and row["state"]["value"] == "known"
+            scope = row["competition"]["value"].rsplit("/", 1)[1]
+            assert scope + "%3A2026" in row["provision"]["value"]
+            assert ("fia.com" in row["source"]["value"]) is (scope == "formula-one")
+        encoded = json.dumps(result)
+        assert "Private translation reviewer" not in encoded
+        assert "Private explicit translation approval" not in encoded
+
+    asyncio.run(scenario())
+    for private in ("reviewer", "authorization", "evidence"):
+        with pytest.raises(ValueError, match="public predicates"):
+            GraphQueryPolicy(version).validate(query.replace("msh:passageText", "msh:" + private))

@@ -14,6 +14,10 @@ PUBLIC_PREDICATES = {RDF.type, RDFS.label} | {
         "startDate", "endDate", "status", "year", "number", "kind", "lengthKm", "timeZone",
         "sourceUrl", "retrievedAt", "provenance", "includesMeeting", "version",
         "subject", "field", "value", "preferred", "effectiveLocal", "coverageState",
+        "includesProfile", "profileValue", "topic", "knowledgeState", "normalizedValue", "provision",
+        "amends", "effectiveFrom", "effectiveUntil", "passageText", "document", "evidenceKind",
+        "sectionAnchor", "sourceLanguage", "authority", "checksum", "issuedOn", "translationMethod",
+        "translationVersion", "translatedAt", "applicability", "discretion", "exception",
     )
 }
 

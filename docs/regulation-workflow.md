@@ -106,7 +106,11 @@ and topic from the same completed Publication. Optional `on_date` reports each
 Provision as not assessed, unresolved, outside its period or within its stated
 bounds. These labels do not prove full historical applicability. Connected
 amendments remain visible even when not directly linked from the profile value;
-unresolved amendments prevent a normalized applicable-value conclusion.
+unresolved applicable amendments prevent a normalized applicable-value conclusion.
+Out-of-period related amendments remain disclosed without blocking a currently
+governing Provision. Current-publication native graph queries also admit the
+public regulation predicates, while retaining existing bounds and private-field
+exclusion.
 
 Without an event date, compare only the cited versions conditionally. Retain each
 Competition's own citations, exceptions and conflicting authoritative assertions;
@@ -115,3 +119,6 @@ unknown topics and unsupported dates cause explicit scoped refusals. The service
 also rejects one-sided or invented citations and marks supported comparisons as
 derived. Citation membership is enforced; semantic accuracy and completeness of
 the model's prose still require evaluation, not just valid citation IDs.
+The comparison guard runs when `compare_regulations` is invoked. Model tool
+selection remains a trust boundary: the service does not recognize every possible
+comparison request or detect unsupported prose after unrelated tool calls.

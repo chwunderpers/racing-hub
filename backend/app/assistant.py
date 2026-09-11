@@ -199,10 +199,11 @@ class ReadTools:
                         limitations.append(f"{competition}: applicability is unresolved for {provision['iri']}.")
                     elif request.on_date < date.fromisoformat(start) or (end and request.on_date > date.fromisoformat(end)):
                         provision["temporalStatus"] = "outside-period"
-                        limitations.append(f"{competition}: requested date is outside {provision['iri']}'s stated period.")
+                        if provision.get("governing", True):
+                            limitations.append(f"{competition}: requested date is outside {provision['iri']}'s stated period.")
                     else:
                         provision["temporalStatus"] = "within-stated-bounds"
-                    if provision["amends"]:
+                    if provision["amends"] and provision["temporalStatus"] != "outside-period":
                         limitations.append(f"{competition}: amendment relationships require resolution before applying a normalized value.")
         result.update({
             "status": "insufficient-evidence" if limitations else "available",
