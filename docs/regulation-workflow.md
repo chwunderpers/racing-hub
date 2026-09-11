@@ -1,7 +1,7 @@
-# Private Formula One Regulation Workflow
+# Private Regulation Workflow
 
-Issue #11 adds a local operator path for the approved Formula One 2026 race-points
-slice. Select **Racing Regulations** or invoke `/racing-regulations`. The website
+Issues #11 and #12 provide a local operator path for Formula One and NLS 2026
+race-points evidence. Select **Racing Regulations** or invoke `/racing-regulations`. The website
 assistant has read-only access to completed Publications, never this workflow.
 
 ## Prepare Evidence
@@ -13,11 +13,23 @@ paraphrases, not a redistribution of the PDFs. Document versions, section/page
 anchors, checksum and retrieval metadata are retained. Unknown effective dates
 stay null: an issue's publication date does not establish historical applicability.
 
-For a new source, inventory the official HTTPS FIA PDF and review its identity,
+The [NLS inventory](../backend/fixtures/nls-2026-regulations.json) contains two
+verified VLN documents and 14 English passages with pending Translation Records.
+Use the [NLS research](nls-regulations-source-inventory.md) to review exact anchors,
+table values, the conflicting approval dates and incomplete amendment coverage.
+Its scoring value is conditional; six other topics are unknown. The class-based
+A-F championship allocation is distinct from the Speed Trophy H overall award.
+No NLS evidence has been approved or published by Issue #12 implementation.
+
+For a new source, inventory the official HTTPS FIA, VLN or DMSB PDF and review its identity,
 season, authority, version, section anchors and permissible evidence reuse before
 acceptance. The command verifies bytes and bounded PDF responses, not the truth of
 a paraphrase or a reuse licence. It rejects redirects, content compression,
 checksum drift and documents over 10 MB. It never retains downloaded PDF bodies.
+F1 documents require FIA authority; NLS admits VLN or DMSB on their approved
+official hosts, including the organizer-linked `teilnehmer.vln.de` portal.
+Keep organizer authorship separate from DMSB approval. Unknown `issued_on` dates
+remain null; version, approval and retrieval dates do not fill that gap.
 
 Translate non-English text before writing an inventory or Review Item. Retain
 only English evidence plus source-language metadata, source URL, checksum and
@@ -37,6 +49,9 @@ connection values outside chat:
 $env:PYTHONPATH = 'backend'
 .\.venv\Scripts\python.exe -m app.regulation_ingestion backend/fixtures/f1-2026-regulations.json
 ```
+
+For NLS, select `backend/fixtures/nls-2026-regulations.json` instead. This only
+previews pending translations; it does not accept them.
 
 This requires an existing season-scoped Publication. It merges only the selected
 regulation profile into that snapshot, preserving all schedule seasons and other
@@ -60,9 +75,10 @@ keep operational review artifacts out of implementation commits.
    submit a corrected candidate, then review and accept its new preview. Display
    the decision proposal and obtain explicit human confirmation before `decide`.
 3. New regulation vocabulary also requires the separate
-   [ontology review](ontology-maintenance.md). Issue #11's new RDF terms have not
-   yet been approved in the baseline ontology. Complete that review before live
-   publication; do not treat passing isolated-store tests as vocabulary approval.
+   [ontology review](ontology-maintenance.md). Issue #11's regulation vocabulary
+   was approved and published on 2026-09-10. Issue #12 reuses those terms;
+   additional vocabulary still needs its own review before live publication.
+   Passing isolated-store tests is not vocabulary approval.
 4. Request a separate publication proposal and explicit confirmation before
    `publish`. It checks the accepted candidate, regulation confirmation tokens,
    translation review, identities and publication baseline. SQL/search and RDF
@@ -84,3 +100,18 @@ caveats. It does not establish any real race award, earlier issue applicability,
 sprint rule, other Competition rule or complete regulation coverage. Missing
 reviewed evidence produces an explicit refusal. Existing call, byte and iteration
 budgets and Responses `store=False` still apply.
+
+`compare_regulations` reads both `formula-one` and `nls` for one requested season
+and topic from the same completed Publication. Optional `on_date` reports each
+Provision as not assessed, unresolved, outside its period or within its stated
+bounds. These labels do not prove full historical applicability. Connected
+amendments remain visible even when not directly linked from the profile value;
+unresolved amendments prevent a normalized applicable-value conclusion.
+
+Without an event date, compare only the cited versions conditionally. Retain each
+Competition's own citations, exceptions and conflicting authoritative assertions;
+do not select an authoritative winner or infer an event award. Missing profiles,
+unknown topics and unsupported dates cause explicit scoped refusals. The service
+also rejects one-sided or invented citations and marks supported comparisons as
+derived. Citation membership is enforced; semantic accuracy and completeness of
+the model's prose still require evaluation, not just valid citation IDs.

@@ -1,7 +1,7 @@
 ---
 name: Racing Regulations
-description: Verify official Formula One regulation sources and prepare English evidence for private review without publication.
-argument-hint: Inventory a scoped rule topic or preview the Formula One 2026 race-points candidate.
+description: Verify official Formula One or NLS regulation sources and prepare English evidence for private review without publication.
+argument-hint: Inventory a scoped rule topic or preview a Formula One or NLS 2026 race-points candidate.
 tools: [read, search, edit, web, execute/runInTerminal]
 agents: []
 user-invocable: true

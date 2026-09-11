@@ -17,9 +17,10 @@ def regulation_iri(kind: str, identity: str) -> URIRef:
 def regulation_graph(bundle: CompetitionRegulations, version: str) -> Graph:
     graph = Graph()
     scope = f"{bundle.competition_identity}:{bundle.season_year}"
+    name = "Formula One" if bundle.competition_identity == "formula-one" else "NLS"
     profile = regulation_iri("competition-profile", scope)
     graph.add((profile, RDF.type, MOTORSPORT.CompetitionProfile))
-    graph.add((profile, RDFS.label, Literal(f"Formula One {bundle.season_year} Competition Profile", lang="en")))
+    graph.add((profile, RDFS.label, Literal(f"{name} {bundle.season_year} Competition Profile", lang="en")))
     graph.add((profile, MOTORSPORT.competition, regulation_iri("competition", bundle.competition_identity)))
     graph.add((profile, MOTORSPORT.season, regulation_iri("season", "competition:" + scope)))
     graph.add((profile, MOTORSPORT.year, Literal(bundle.season_year, datatype=XSD.integer)))
@@ -34,7 +35,8 @@ def regulation_graph(bundle: CompetitionRegulations, version: str) -> Graph:
         graph.add((subject, MOTORSPORT.authority, Literal(document.authority, lang="en")))
         graph.add((subject, MOTORSPORT.sourceUrl, URIRef(str(document.source_url))))
         graph.add((subject, MOTORSPORT.retrievedAt, Literal(document.retrieved_at, datatype=XSD.dateTime)))
-        graph.add((subject, MOTORSPORT.issuedOn, Literal(document.issued_on, datatype=XSD.date)))
+        if document.issued_on:
+            graph.add((subject, MOTORSPORT.issuedOn, Literal(document.issued_on, datatype=XSD.date)))
         for section in document.sections:
             graph.add((subject, MOTORSPORT.sectionAnchor, Literal(f"{section.anchor}; PDF page {section.page}")))
     for passage in bundle.passages:
@@ -78,7 +80,7 @@ def regulation_graph(bundle: CompetitionRegulations, version: str) -> Graph:
         subject = regulation_iri("profile-value", scope + ":" + topic)
         graph.add((profile, MOTORSPORT.profileValue, subject))
         graph.add((subject, RDF.type, MOTORSPORT.ProfileValue))
-        graph.add((subject, RDFS.label, Literal(f"Formula One {bundle.season_year} {topic}", lang="en")))
+        graph.add((subject, RDFS.label, Literal(f"{name} {bundle.season_year} {topic}", lang="en")))
         graph.add((subject, MOTORSPORT.topic, Literal(topic)))
         graph.add((subject, MOTORSPORT.knowledgeState, Literal(entry.state if entry else "unknown")))
         if entry:
@@ -101,7 +103,14 @@ def profile_projection(graph: Graph, subject: URIRef) -> list[dict]:
     profile = []
     for entry in sorted(graph.objects(subject, MOTORSPORT.profileValue), key=str):
         provisions = []
-        for provision in sorted(graph.objects(entry, MOTORSPORT.provision), key=str):
+        related = set(graph.objects(entry, MOTORSPORT.provision))
+        pending = list(related)
+        while pending:
+            provision = pending.pop()
+            neighbors = set(graph.objects(provision, MOTORSPORT.amends)) | set(graph.subjects(MOTORSPORT.amends, provision))
+            pending.extend(neighbors - related)
+            related.update(neighbors)
+        for provision in sorted(related, key=str):
             passage = graph.value(provision, MOTORSPORT.provenance)
             document = graph.value(passage, MOTORSPORT.document)
             provisions.append({

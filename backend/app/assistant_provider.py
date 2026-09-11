@@ -5,7 +5,7 @@ from agent_framework import Agent, Message, tool
 from agent_framework.openai import OpenAIChatClient
 from openai import AsyncOpenAI
 
-from app.assistant import AnswerDraft, GraphQuery, IriQuery, ReadTools, RegulationQuery, ScheduleQuery, SearchQuery
+from app.assistant import AnswerDraft, GraphQuery, IriQuery, ReadTools, RegulationComparisonQuery, RegulationQuery, ScheduleQuery, SearchQuery
 
 
 class AzureAnswerProvider:
@@ -37,12 +37,19 @@ class AzureAnswerProvider:
             except Exception:
                 return {"error": "Published data unavailable or request exceeds permitted bounds"}
 
-        @tool(name="competition_regulations", description="Read a reviewed Competition Profile and governing Provisions, English Evidence Passages, document versions and page citations. Exact competition identity (formula-one), season and topic required. Unknown is not false; no event result calculation.")
+        @tool(name="competition_regulations", description="Read a reviewed Competition Profile and governing Provisions, English Evidence Passages, document versions and page citations. Exact competition identity (formula-one or nls), season and topic required. Unknown is not false; no event result calculation.")
         def competition_regulations(request: RegulationQuery) -> dict:
             try:
                 return tools.regulations(RegulationQuery.model_validate(request))
             except Exception:
                 return {"status": "insufficient-evidence", "error": "Reviewed regulation evidence unavailable or request exceeds permitted bounds"}
+
+        @tool(name="compare_regulations", description="Compare the reviewed Formula One and NLS profiles for one season and topic, optionally on a specific date. Returns both scoped evidence sets and limitations. Class scoring is not overall race scoring; no event award calculation.")
+        def compare_regulations(request: RegulationComparisonQuery) -> dict:
+            try:
+                return tools.compare_regulations(RegulationComparisonQuery.model_validate(request))
+            except Exception:
+                return {"status": "insufficient-evidence", "error": "Reviewed comparison evidence unavailable or request exceeds permitted bounds"}
 
         @tool(name="graph_shared_circuits", description="Find shared canonical Circuits across ALL competitions in the current Publication using native GraphDB MCP. Use this for shared tracks; includes source citations and IRIs.")
         async def graph_shared_circuits() -> dict:
@@ -68,7 +75,12 @@ class AzureAnswerProvider:
             "Use only returned reviewed profile values and Provisions; cite their specific passage/page, not a Meeting. "
             "Retain document version, applicability dates, amendments, exceptions, discretion and unknown/not-published/not-applicable distinctions. "
             "A paraphrase or translation is not an exact source quotation. Never supply a rule from training or infer false from missing evidence. "
-            "No cross-Competition rule comparison or actual event-points calculation is supported. A season does not establish historical issue applicability. "
+            "For Formula One versus NLS comparisons use compare_regulations, retaining both exact Competition identities, season and any requested date. "
+            "Do not equate NLS class championship points with overall race or Speed Trophy points. Cite each Competition's own provisions for its claims. "
+            "Disclose all returned conflicting authoritative assertions and amendments; never silently choose one or assume the latest date resolves precedence. "
+            "When comparison status is insufficient-evidence, explain the gaps and decline the unsupported conclusion, even if one side is known. "
+            "With no requested date, only give a conditional comparison of the cited versions, not a claim about which rules applied at an event. "
+            "Actual event-points calculation is unsupported. A season does not establish historical issue applicability. "
             "For actual race awards require reviewed final classification, distance, relevant lap procedures, ties and decisions; otherwise explicitly decline. "
             "When graph tools are available, use graph_shared_circuits for shared-track questions, not partial schedule listings. "
             "Graph queries must use FROM <https://w3id.org/motorsport-hub/graph/publication/" + str(tools.version) + ">. "
@@ -81,7 +93,7 @@ class AzureAnswerProvider:
             "Use deterministic tool display values for conversions; unresolved clocks retain published local time. "
             "Cite relevant returned citation IDs in citations; never invent IDs, URLs or facts. "
             "For unsupported questions say evidence is unavailable and use classification unsupported. "
-            "Classification is stated for sourced facts, derived for time conversions; do not claim inference. "
+            "Classification is stated for sourced facts, derived for time conversions or evidence-linked comparisons; do not claim inference. "
             f"Display time zone: {tools.zone}. Today UTC: {datetime.now(timezone.utc).date()}. "
             f"Publication: {tools.version}. Reply concisely in plain text without Markdown links."
         )
@@ -89,7 +101,7 @@ class AzureAnswerProvider:
                        http_client=self._http_client_factory() if self._http_client_factory else None) as transport:
             client = OpenAIChatClient(model=self.deployment, async_client=transport,
                                       function_invocation_configuration={"max_iterations": 4, "max_function_calls": 6, "include_detailed_errors": False})
-            agent_tools = [schedule, search_documentation, lookup_iri, competition_regulations]
+            agent_tools = [schedule, search_documentation, lookup_iri, competition_regulations, compare_regulations]
             if tools.graph is not None:
                 agent_tools.extend([graph_shared_circuits, graph_query])
             agent = Agent(client=client, instructions=instructions, tools=agent_tools)

@@ -21,18 +21,21 @@ class RegulationDocument(RegulationModel):
     title: str
     version: str
     season_year: int = Field(ge=2026, le=2026)
-    authority: Literal["FIA"]
+    authority: Literal["FIA", "DMSB", "VLN"]
     source_url: HttpUrl
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     retrieved_at: AwareDatetime
-    issued_on: date
+    issued_on: date | None
     source_language: str = Field(pattern=r"^[a-z]{2,3}$")
     sections: list[SectionAnchor] = Field(min_length=1)
 
     @model_validator(mode="after")
     def official_document(self) -> "RegulationDocument":
-        if self.source_url.scheme != "https" or self.source_url.host not in ("www.fia.com", "fia.com"):
-            raise ValueError("Regulation documents require official HTTPS FIA URLs")
+        hosts = {"FIA": ("www.fia.com", "fia.com"),
+             "DMSB": ("www.dmsb.de", "dmsb.de", "www.nuerburgring-langstrecken-serie.de", "nuerburgring-langstrecken-serie.de", "teilnehmer.vln.de"),
+             "VLN": ("www.nuerburgring-langstrecken-serie.de", "nuerburgring-langstrecken-serie.de", "teilnehmer.vln.de")}
+        if self.source_url.scheme != "https" or self.source_url.host not in hosts[self.authority]:
+            raise ValueError("Regulation documents require an official HTTPS host for their authority")
         if len({section.anchor for section in self.sections}) != len(self.sections):
             raise ValueError("Duplicate document section anchor")
         return self
@@ -107,7 +110,7 @@ class ProfileValue(RegulationModel):
 
 
 class CompetitionRegulations(RegulationModel):
-    competition_identity: Literal["formula-one"]
+    competition_identity: Literal["formula-one", "nls"]
     season_year: int = Field(ge=2026, le=2026)
     documents: list[RegulationDocument] = Field(min_length=1, max_length=20)
     passages: list[EnglishEvidencePassage] = Field(min_length=1, max_length=100)
@@ -116,6 +119,9 @@ class CompetitionRegulations(RegulationModel):
 
     @model_validator(mode="after")
     def linked_evidence(self) -> "CompetitionRegulations":
+        authorities = ("FIA",) if self.competition_identity == "formula-one" else ("DMSB", "VLN")
+        if any(document.authority not in authorities or document.season_year != self.season_year for document in self.documents):
+            raise ValueError("Regulation document authority and season must match its Competition scope")
         for entries in (self.documents, self.passages, self.provisions):
             if len({entry.identity for entry in entries}) != len(entries):
                 raise ValueError("Duplicate regulation resource identity")

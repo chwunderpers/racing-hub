@@ -49,7 +49,7 @@ def prepare_candidate(path: Path, store: ReviewStore, client: httpx.Client) -> P
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Privately verify FIA document checksums and preview a regulation candidate; never approve or publish.")
+    parser = argparse.ArgumentParser(description="Privately verify official Formula One or NLS document checksums and preview a regulation candidate; never approve or publish.")
     parser.add_argument("inventory", type=Path)
     parser.add_argument("--reviews-dir", type=Path, default=Path(__file__).parents[2] / "reviews")
     options = parser.parse_args()

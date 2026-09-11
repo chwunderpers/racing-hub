@@ -1,0 +1,259 @@
+{
+  "competition_identity": "nls",
+  "season_year": 2026,
+  "documents": [
+    {
+      "identity": "vln:2026:a1:2026-06-12",
+      "title": "NLS 2026 Part 1 Sporting Regulations",
+      "version": "A1 as at 12 June 2026 (after Bulletin 5)",
+      "season_year": 2026,
+      "authority": "VLN",
+      "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+      "sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+      "retrieved_at": "2026-09-11T06:47:29.997768Z",
+      "issued_on": null,
+      "source_language": "de",
+      "sections": [
+        {"anchor": "p. 1 title/organizer/as-at/visa; p. 6 Art. 2.3, German and English approval clauses", "page": 1},
+        {"anchor": "pp. 7-8 Art. 3; p. 8 Arts. 3.1-3.2", "page": 7},
+        {"anchor": "p. 9 Art. 4, matching Qualifiers and points-allocation paragraph", "page": 9},
+        {"anchor": "p. 51 Art. 25, registration/fee and nonregistered participants", "page": 51},
+        {"anchor": "pp. 51-52 Art. 25.1, scope/final class rank/actual starters", "page": 51},
+        {"anchor": "p. 53 Art. 25.1.1 4h matrix and Art. 25.1.2 6h matrix", "page": 53},
+        {"anchor": "p. 52 Art. 25.1, shortened/stopped-race duration bands a/b", "page": 52},
+        {"anchor": "pp. 49-50 Art. 24, distance/finish/finality conditions", "page": 49},
+        {"anchor": "pp. 41-42 Art. 18.5, stoppage/restart, especially p. 42 DMSB reference", "page": 41},
+        {"anchor": "pp. 53-54 Art. 25.2, discards and disqualification", "page": 53},
+        {"anchor": "p. 54 Art. 25.3, double-start allocation", "page": 54},
+        {"anchor": "p. 60 Art. 25.6.2, eligibility/race table/qualifying points", "page": 60},
+        {"anchor": "pp. 52-53 Art. 25.1, objections and corrections", "page": 52}
+      ]
+    },
+    {
+      "identity": "vln:2026:bulletin:03",
+      "title": "NLS 2026 Bulletin 03 to the Standard Regulations",
+      "version": "Bulletin 03 / 2026",
+      "season_year": 2026,
+      "authority": "VLN",
+      "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Bulletins/Bulletin_3_2026_genehmigt.pdf",
+      "sha256": "347c028ecdd056de22b188b13079bec6b42062e65cad6f19ea2be4a0b26f3159",
+      "retrieved_at": "2026-09-11T06:47:37.607849Z",
+      "issued_on": null,
+      "source_language": "de",
+      "sections": [{"anchor": "p. 1 Part 1 Art. 4, Qualifiers and points-allocation paragraph", "page": 1}]
+    }
+  ],
+  "passages": [
+    {
+      "identity": "nls-e01-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 1 title/organizer/as-at/visa; p. 6 Art. 2.3, German and English approval clauses",
+      "language": "en", "kind": "translation",
+      "text": "VLN Sport GmbH & Co. KG organizes the series, supported by VLN VV GmbH & Co. KG. Part 1 is as at 12 June 2026 and carries DMSB approval/visa 970/26. The German approval clause prints 16 February 2025, while parallel English prints 16 February 2026. The discrepancy is unresolved; neither date establishes issue or commencement of this consolidated version.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 1 title/organizer/as-at/visa; p. 6 Art. 2.3, German and English approval clauses",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e02-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 7-8 Art. 3; p. 8 Arts. 3.1-3.2",
+      "language": "en", "kind": "translation",
+      "text": "The currently valid listed FIA/DMSB instruments, DMSB circuit Appendices 1 and 2, NLS Parts 1-3, approved bulletins and event regulations apply. Only the DMSB-approved German text is binding. Interpretation involves the clerk/race director with stewards and organizer; final interpretation rests with DMSB sporting jurisdiction. This does not identify an exact DMSB edition or establish a universal precedence ladder.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 7-8 Art. 3; p. 8 Arts. 3.1-3.2",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e03-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 9 Art. 4, matching Qualifiers and points-allocation paragraph",
+      "language": "en", "kind": "translation",
+      "text": "The two ADAC 24h Nurburgring Qualifiers races run under their event regulations. Points for all events listed in the NLS series calendar are awarded under these series regulations. This scoring-scope wording is present in A1; it does not establish that a particular Qualifiers race was completed or earned points.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 9 Art. 4, matching Qualifiers and points-allocation paragraph",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e03-b3", "document_identity": "vln:2026:bulletin:03",
+      "anchor": "p. 1 Part 1 Art. 4, Qualifiers and points-allocation paragraph",
+      "language": "en", "kind": "translation",
+      "text": "Bulletin 03 changes Part 1 Art. 4: the two ADAC 24h Nurburgring Qualifiers races run under their event regulations, and points for every event in the NLS series calendar are awarded under these series regulations. This wording matches the later A1 Art. 4 passage. The unavailable preceding version is not reconstructed.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Bulletins/Bulletin_3_2026_genehmigt.pdf",
+        "source_sha256": "347c028ecdd056de22b188b13079bec6b42062e65cad6f19ea2be4a0b26f3159",
+        "source_anchor": "p. 1 Part 1 Art. 4, Qualifiers and points-allocation paragraph",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e04-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 51 Art. 25, registration/fee and nonregistered participants",
+      "language": "en", "kind": "translation",
+      "text": "Registered drivers and competitors/teams are eligible for championship classifications A-I only after receipt of registration and its fee. Earlier results do not count. Nonregistered participants receive no championship points and appear only in event classifications. Additional Cup/Trophy conditions apply.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 51 Art. 25, registration/fee and nonregistered participants",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e05-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 51-52 Art. 25.1, scope/final class rank/actual starters",
+      "language": "en", "kind": "translation",
+      "text": "Classifications A-F, including the annual overall championship but excluding G/H/I, use actual class placing in official final race results and the Arts. 25.1.1-25.1.2 tables. Nonregistered participants are not deleted to promote registered participants, except for classification/sporting penalties. Class starters are vehicles actually starting by crossing the start line after the start signal or subsequently starting from the pit lane, not registered entrants, qualifiers or finishers.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 51-52 Art. 25.1, scope/final class rank/actual starters",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e06-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 53 Art. 25.1.1 4h matrix and Art. 25.1.2 6h matrix",
+      "language": "en", "kind": "translation",
+      "text": "The allocation tables depend on actual class starters and final class rank. For class rank 1 and class-starter bands 1, 2, 3, 4, 5, 6, 7 or more, the full-points 4-hour awards are respectively 2, 3, 4, 6, 8, 11, 15; the full-points 6-hour awards are respectively 3, 4, 5, 8, 10, 14, 19. These are the complete winner rows, not the lower-rank rows. A one-starter class can score; seven starters is a field-size band, not a minimum eligibility threshold. No continuous formula or general points-rounding instruction is established by these allocation paragraphs.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 53 Art. 25.1.1 4h matrix and Art. 25.1.2 6h matrix",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e07-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 52 Art. 25.1, shortened/stopped-race duration bands a/b",
+      "language": "en", "kind": "translation",
+      "text": "If scheduled distance is shortened or a stopped race is not resumed, a 4-hour race lasting up to 80 minutes has no classification; over 80 through 160 minutes gives half points; over 160 minutes gives full points. For a 6-hour race, up to 120 minutes has no classification; over 120 through 250 minutes gives half points; over 250 minutes gives full points. The boundary is 250, not 240. These are duration bands within A-F allocation, not a 75% distance threshold; their application to G/H/I is not established here.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 52 Art. 25.1, shortened/stopped-race duration bands a/b",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e08-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 49-50 Art. 24, distance/finish/finality conditions",
+      "language": "en", "kind": "translation",
+      "text": "The winner completes the most laps; equal distances are ordered by shorter elapsed time including imposed time penalties. Classification requires at least 70% of the class winner's distance and 50% of the overall winner's distance, each commercially rounded, and crossing the finish/timing line within 20 minutes after the overall winner is flagged. Finish and counted laps must be under the vehicle's own engine power. The final lap must combine the GP course and Nordschleife. Vehicles entering the pit lane while being flagged can cross its extended timing line; those already in the pit lane when the leader is flagged are not classified. Results become final after technical checks and any protest/appeal proceedings. An exact equal-distance/equal-time dead heat is not resolved here.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 49-50 Art. 24, distance/finish/finality conditions",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e09-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 41-42 Art. 18.5, stoppage/restart, especially p. 42 DMSB reference",
+      "language": "en", "kind": "translation",
+      "text": "Stoppage classification refers to DMSB circuit Arts. 16.4 and/or 16.5. The last counted lap must end over the timing line under the vehicle's own engine power. The extracted restart clauses distinguish a leader below two laps from above two laps. Exactly two laps and the incorporated DMSB details remain unresolved; this is not a complete restart algorithm.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 41-42 Art. 18.5, stoppage/restart, especially p. 42 DMSB reference",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e10-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 53-54 Art. 25.2, discards and disqualification",
+      "language": "en", "kind": "translation",
+      "text": "For A-F, ten or nine completed races use the best eight results. Drivers/competitors/teams completing eight or fewer count those results without a discard. A completed counting race is a classified race in which that vehicle crossed the start line. A disqualification cannot be discarded. These season-total rules do not establish the actual number of completed races or an individual race award.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 53-54 Art. 25.2, discards and disqualification",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e11-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 54 Art. 25.3, double-start allocation",
+      "language": "en", "kind": "translation",
+      "text": "A driver starting two cars nominates the car for driver-championship points on the signed double-starter list by Saturday 08:00; without nomination the lower start number is used. Class classifications separately count the placing in each of two different classes, or the better placing when both cars are in one class. This double-start exception does not establish division or duplication of points among co-drivers.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 54 Art. 25.3, double-start allocation",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e12-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "p. 60 Art. 25.6.2, eligibility/race table/qualifying points",
+      "language": "en", "kind": "translation",
+      "text": "NLS Speed Trophy H is a separate award: registered competitors/teams identified by car start number score for top-20 overall race positions. Overall first receives 35 race points. Qualifying separately awards 3, 2, 1 points to the three fastest registered competitors/teams. The 35 is not an A-F driver/class-based award or necessarily the event total. Shortened-race treatment for H is not established by this passage.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "p. 60 Art. 25.6.2, eligibility/race table/qualifying points",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    },
+    {
+      "identity": "nls-e13-a1", "document_identity": "vln:2026:a1:2026-06-12",
+      "anchor": "pp. 52-53 Art. 25.1, objections and corrections",
+      "language": "en", "kind": "translation",
+      "text": "Written objections to race or championship points must reach the organizer within 14 days of publication. The organizer may correct obvious errors after publication. Complaints go to the organizer, and this clause states no appeal against its points decision. Read with Art. 3.2, this is not unlimited authority to change regulations.",
+      "translation": {
+        "source_language": "de", "method": "assistant factual translation verified against PDF extraction", "version": "nls-scoring-v1", "translated_at": "2026-09-11T06:58:19.2659669Z",
+        "source_url": "https://teilnehmer.vln.de/download.php?file=teilnehmer/Ausschreibung/A1%20Ausschreibung%20Teil%201_SPORTLICHES%20REGLEMENT_2026_genehmigt_nachBulletin5.pdf",
+        "source_sha256": "462f1172233f5591ef681b38c99563a2ab989c15a7280ab4ac64ae67b2683897",
+        "source_anchor": "pp. 52-53 Art. 25.1, objections and corrections",
+        "review_state": "pending", "reviewer": null, "reviewed_at": null, "authorization": null
+      }
+    }
+  ],
+  "provisions": [
+    {"identity": "nls-authority-e01", "passage_identity": "nls-e01-a1", "topic": "sporting", "summary": "VLN organizer authority and DMSB approval are distinct; A1 approval dates conflict.", "applicability": "NLS 2026 A1 as at 12 June 2026 (after Bulletin 5). The version date is not an issue or effective date; historical event applicability remains undefined.", "exceptions": ["German Art. 2.3 prints 16 February 2025; parallel English prints 16 February 2026. Neither is silently corrected.", "Only English evidence is retained; original filenames in exact source URLs are provenance identifiers, not retained German rule bodies."], "discretion": "Human review must resolve the approval-date conflict. No translation acceptance or reuse authorization is inferred from public availability or printed approval.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-binding-text-e02", "passage_identity": "nls-e02-a1", "topic": "sporting", "summary": "Only the DMSB-approved German text is binding; incorporated rules and interpretation remain material.", "applicability": "Authority context for this NLS 2026 evidence slice, not a complete sporting profile. Exact DMSB editions, amendments and event-specific applicability remain unresolved.", "exceptions": ["Parallel English is a cross-check, not replacement authority.", "The inventory's bounded B6-B8 scan concerns technical changes and found no direct Art. 24-25 change in extracted text; it is not a full amendment audit or proof of no indirect classification effect.", "A1's June version predates B6-B8 approvals. Technical incorporation, rear-wing diagrams and deletion semantics were not fully audited."], "discretion": "Interpretation involves the clerk/race director, stewards and organizer; final interpretation rests with DMSB sporting jurisdiction. No universal precedence ladder is inferred.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-calendar-scope-e03-a1", "passage_identity": "nls-e03-a1", "topic": "scoring", "summary": "NLS-calendar events use series points rules; the Qualifiers retain their event regulations.", "applicability": "Art. 4 in this consolidated A1 version; no historical applicability to a named race or actual event award is established.", "exceptions": ["The Qualifiers' distinct event context and race completion must be checked separately.", "No complete B1-B5 consolidation audit or complete amendment history is claimed.", "The inventory's B6-B8 technical scan is not a full amendment audit; no direct Art. 24-25 amendment was identified in extracted text, but indirect classification effects remain possible."], "discretion": "Applicable event regulations and official decisions require separate evidence. Empty amends lists mean no encoded relationship, not no amendments.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-calendar-scope-e03-b3", "passage_identity": "nls-e03-b3", "topic": "scoring", "summary": "Bulletin 03's verified Art. 4 scoring-scope wording is present in A1.", "applicability": "Bulletin 03 / 2026 Part 1 Art. 4, textually matched to A1 p. 9. Issue date and event-specific commencement are unknown.", "exceptions": ["The prior Art. 4 version is unavailable as a Provision; no fictional amendment target is created.", "B3 does not amend the later A1 consolidation; the textual match is recorded without an amends edge.", "This is not a full audit of B3's technical changes or all bulletins."], "discretion": "Human review is required for translation and event applicability. Approval is not a verified issue date.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-registration-e04", "passage_identity": "nls-e04-a1", "topic": "scoring", "summary": "Championship points require received registration and fee; earlier results are excluded.", "applicability": "A-I championship scoring prerequisites in this A1 version, subject to additional Cup/Trophy conditions; not general participation eligibility or an actual award.", "exceptions": ["Nonregistered participants receive no championship points.", "No automatic duplication or division of an award across a shared-car crew is established."], "discretion": "Actual registration, receipt and recipient entitlement require separate evidence; none is assumed for a named entrant.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-class-rank-starters-e05", "passage_identity": "nls-e05-a1", "topic": "scoring", "summary": "A-F scoring uses final class rank and actual class starters, not overall race rank or registered field size.", "applicability": "NLS 2026 classifications A-F, including the annual overall championship, under this A1 version. Final class rank, actual starters and entitlement must be established for any event award.", "exceptions": ["G/H/I are excluded from these A-F tables.", "Nonregistered starters are not removed to promote registered participants.", "Classification/sporting penalties may affect placing."], "discretion": "Use official final class results and actual start evidence, including subsequent pit-lane starts. A provisional result or entry list is insufficient.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-class-winner-tables-e06", "passage_identity": "nls-e06-a1", "topic": "scoring", "summary": "Full-points class-winner awards depend on race format and seven actual class-starter bands.", "applicability": "Conditional A-F sole class winner, final class rank 1, eligible registered recipient and classified finish under this A1 version. For 1/2/3/4/5/6/7-or-more starters, 4h gives 2/3/4/6/8/11/15 and 6h gives 3/4/5/8/10/14/19 full points. No real event award is established.", "exceptions": ["Shortened/stopped races require Art. 25.1 duration bands.", "These winner rows do not encode lower-rank awards or an exact race dead heat.", "Seven starters is not a minimum scoring threshold.", "No continuous formula or fractional-award rounding rule is inferred.", "This class-based award is not automatically equivalent to Formula One overall-winner points."], "discretion": "The table does not establish independent discretion to replace awards. Verify final classification, penalties and applicable decisions.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-shortened-race-e07", "passage_identity": "nls-e07-a1", "topic": "scoring", "summary": "A-F shortened/stopped races use duration bands for no classification, half points or full points.", "applicability": "Scheduled distance shortened or stopped race not resumed: 4h up to 80 minutes has no classification, over 80 through 160 half points, over 160 full; 6h up to 120 has no classification, over 120 through 250 half, over 250 full. Actual duration and stoppage evidence remain unknown.", "exceptions": ["The 6h upper half-points boundary is 250 minutes, not 240.", "No classification is the source condition, not a new profile knowledge state.", "Do not replace duration bands with a 75% distance test or infer their application to G/H/I.", "No rounding of fractional points is specified in this evidence slice."], "discretion": "Race-control and classification evidence must establish the applicable band; no event outcome is inferred.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-classification-e08", "passage_identity": "nls-e08-a1", "topic": "scoring", "summary": "Classification requires the 70% class-winner and 50% overall-winner distance tests plus finish conditions.", "applicability": "Art. 24 in this A1 version: both commercially rounded distance thresholds, finish/timing line within 20 minutes, own-engine-power counted laps and finish, combined GP-course/Nordschleife final lap, and final results after technical checks and any proceedings.", "exceptions": ["Vehicles already in the pit lane when the leader is flagged are not classified; entering while flagged can use the extended timing line.", "Equal distance is ordered by elapsed time including penalties; exact equal-distance/equal-time dead-heat allocation remains unknown.", "Distance-threshold rounding is not evidence for points rounding.", "No named vehicle's distance, finish, classification or points is established."], "discretion": "Technical checks, penalties, protests and appeals can affect final results; applicable decisions require their own evidence.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-stoppage-e09", "passage_identity": "nls-e09-a1", "topic": "scoring", "summary": "Stoppage classification incorporates DMSB circuit rules and requires an own-power last counted lap.", "applicability": "NLS 2026 A1 Art. 18.5 and its DMSB Arts. 16.4/16.5 references; exact incorporated edition and event-specific application are unresolved.", "exceptions": ["Exactly two leader laps is unresolved in the extracted below-two/above-two restart distinction.", "The incorporated DMSB details were not established; this is not a complete restart or classification algorithm."], "discretion": "Do not infer a race-control decision or complete award from this bounded passage alone.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-season-discards-e10", "passage_identity": "nls-e10-a1", "topic": "scoring", "summary": "A-F season totals use best eight of nine or ten completed races; eight or fewer have no discard.", "applicability": "Season totals under this A1 version, using classified counting races in which the vehicle crossed the start line; separate from the individual race table.", "exceptions": ["A disqualification cannot be discarded.", "No actual season race count or entrant's completed counting races are established.", "An organizer report about season events is not a regulatory amendment or proof of a recipient's counting races."], "discretion": "Actual season totals require the recipient's final classifications and applicable decisions; no total is calculated here.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-double-start-e11", "passage_identity": "nls-e11-a1", "topic": "scoring", "summary": "Double-start driver points use a nominated car, with separate class-classification treatment.", "applicability": "A driver starting two cars under this A1 version: signed nomination by Saturday 08:00, otherwise lower start number. Different classes count each placing; the same class uses the better placing.", "exceptions": ["This does not establish general shared-car crew entitlement, division or duplication of points.", "No timezone conversion or actual nomination is inferred."], "discretion": "The signed double-starter list and official classifications are required before attributing an award.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-speed-trophy-e12", "passage_identity": "nls-e12-a1", "topic": "scoring", "summary": "Speed Trophy H awards 35 race points for overall first to an eligible registered competitor/team.", "applicability": "Context only: separate NLS Speed Trophy H under Art. 25.6.2, identified by car start number. This is not an A-F driver/class-based award or an equivalent comparison category to Formula One driver race points.", "exceptions": ["Qualifying separately awards 3/2/1; 35 race points is not necessarily the event total.", "H shortened-race treatment is unverified; do not apply A-F reductions by assumption.", "No actual eligible team, overall winner or event award is established."], "discretion": "Check separate Trophy eligibility and final results. The contextual 35-point figure does not authorize an equivalence claim.", "amends": [], "effective_from": null, "effective_until": null},
+    {"identity": "nls-points-corrections-e13", "passage_identity": "nls-e13-a1", "topic": "scoring", "summary": "Points objections have a 14-day deadline and the organizer may correct obvious errors.", "applicability": "Race/championship points under this A1 version; written objections within 14 days of publication. Read with Art. 3.2 interpretation context, not as an unlimited regulatory power.", "exceptions": ["This clause states no appeal against the organizer's points decision.", "No actual objection, correction, decision or absence of such a decision is established.", "Only DMSB-approved German text is binding; pending English translations do not settle A1's German-2025/English-2026 approval-date conflict."], "discretion": "Organizer correction of obvious errors is distinct from changing regulations; final interpretation remains subject to the Art. 3.2 context.", "amends": [], "effective_from": null, "effective_until": null}
+  ],
+  "profile": [
+    {"topic": "eligibility", "state": "unknown", "value": null, "provision_ids": []},
+    {"topic": "format", "state": "unknown", "value": null, "provision_ids": []},
+    {
+      "topic": "scoring", "state": "known",
+      "value": "Conditional interpretation, pending translation review, of NLS 2026 A1 as at 12 June 2026 (after Bulletin 5). A-F championship scoring, including the annual overall championship, uses final CLASS rank and actual class starters, without deleting nonregistered starters. For an eligible registered sole class winner with 1/2/3/4/5/6/7-or-more actual starters, full-points 4h awards are 2/3/4/6/8/11/15; 6h awards are 3/4/5/8/10/14/19. Winner rows only; no continuous formula, lower-rank allocation or points-rounding rule is encoded. When distance is shortened or a stopped race is not resumed, 4h duration up to 80 minutes has no classification, over 80 through 160 half points, over 160 full; 6h up to 120 has no classification, over 120 through 250 half, over 250 full. Classification separately requires commercially rounded 70% class-winner AND 50% overall-winner distances, finish within 20 minutes and Art. 24 own-power/final-lap/pit-lane/finality conditions. Registration/fee, penalties, double-start nomination, season discards and points corrections remain material. Speed Trophy H's 35 overall-first race points are separate competitor/team context, not an A-F driver award, an equivalent Formula One comparison category or necessarily an event total. H reductions, exact race dead heats, full shared-car entitlement and incorporated DMSB stoppage details remain unresolved. B3 Art. 4 wording matches A1 but no unavailable prior Provision or fictional amends edge is created. Empty amends lists do not mean no amendments; B6-B8 concern technical changes in a bounded extraction scan, not a full amendment audit or proof of no indirect scoring effect. Only DMSB-approved German text is binding; the German 2025 versus English 2026 approval-date conflict is unresolved. Issue dates and effective periods are unknown. No event award or historical event applicability is established, and known does not mean reviewed, accepted or published.",
+      "provision_ids": ["nls-calendar-scope-e03-a1", "nls-calendar-scope-e03-b3", "nls-registration-e04", "nls-class-rank-starters-e05", "nls-class-winner-tables-e06", "nls-shortened-race-e07", "nls-classification-e08", "nls-stoppage-e09", "nls-season-discards-e10", "nls-double-start-e11", "nls-speed-trophy-e12", "nls-points-corrections-e13"]
+    },
+    {"topic": "tyres", "state": "unknown", "value": null, "provision_ids": []},
+    {"topic": "pit-stops", "state": "unknown", "value": null, "provision_ids": []},
+    {"topic": "sporting", "state": "unknown", "value": null, "provision_ids": ["nls-authority-e01", "nls-binding-text-e02"]},
+    {"topic": "technical", "state": "unknown", "value": null, "provision_ids": []}
+  ]
+}
