@@ -67,7 +67,7 @@ found no confirmed hard violations and two low-severity heuristics: loosely type
 comparison results and case-heavy SDK test setup. These remain maintainability
 advisories, not demonstrated failures.
 
-The Spec review identified two confirmed defects, repaired with red/green tests:
+The initial Spec review identified two confirmed defects, repaired with red/green tests:
 future, related amendments incorrectly blocked a currently governing historical
 rule; native graph policy omitted public regulation predicates. Retrieval now
 marks directly governing Provisions, discloses out-of-period related amendments
@@ -79,14 +79,30 @@ native MCP. Pyright over all seven changed implementation modules and the
 comparison suite is clean. The full suite was run once before review, as agreed;
 these focused checks cover the subsequent fixes.
 
+A follow-up Spec review found that a dated answer could cite only a future related
+amendment for one Competition. The service now requires an in-scope governing
+citation per side, while allowing related citations as additional disclosures.
+The SDK regression went red then green; all **8 SDK comparison cases passed**
+afterward, and the touched modules typecheck cleanly. Narrow review confirmed this
+defect resolved. The comparison test file now contains 28 cases.
+
 The review also identified a model-trust limitation: comparison-specific service
 guards apply when the model invokes `compare_regulations`. A model that ignores
 instructions and chooses only single-Competition or general retrieval tools can
 still produce semantically unsupported comparison prose with valid citation IDs.
 Tool choice and prose interpretation remain model-evaluated, not deterministic
 intent recognition. This is an explicit residual risk, not a claim of complete
-prevention. The implementation does not introduce keyword-based request routing
-or pretend citation membership proves what the prose says.
+prevention. **The Spec reviewer retains this as an open P1 blocker to the strict
+refusal acceptance criterion**, not a resolved finding. The implementation does
+not introduce keyword-based request routing or pretend citation membership proves
+what the prose says.
 
-Issue #12 remains open pending real evidence review and separate exact publication
-confirmation. Implementation completion is not live acceptance of all issue criteria.
+An explicit structured comparison mode with server-controlled retrieval was
+proposed, which would extend the assistant API/UI. No routing choice was supplied;
+user unavailability is not approval to expand that contract. The decision remains
+pending. Complete Standards coverage found zero hard violations and two low
+advisories; Spec has three repaired defects and this one unresolved blocker.
+
+Issue #12 remains open and is not ready for full acceptance. It needs the routing
+decision, real evidence review and separate exact publication confirmation. Local
+implementation commits do not establish acceptance of all issue criteria.

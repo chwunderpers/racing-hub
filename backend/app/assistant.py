@@ -332,7 +332,9 @@ class AssistantService:
             valid = bool(references) and len(references) == len(set(draft.citations)) and draft.classification != "unsupported"
             for comparison in tools.comparisons:
                 valid = valid and comparison["status"] == "available" and all(
-                    any(provision["citation"] in draft.citations for entry in side["profile"] for provision in entry["provisions"])
+                    any(provision["citation"] in draft.citations and provision.get("governing", True)
+                        and provision["temporalStatus"] in ("not-assessed", "within-stated-bounds")
+                        for entry in side["profile"] for provision in entry["provisions"])
                     for side in comparison["profiles"]
                 )
             text = draft.text if valid else "I could not verify an answer from the published schedule and documentation."
@@ -340,7 +342,7 @@ class AssistantService:
                 reasons = [f"{result['season']} {result['topic']} ({result['onDate'] or 'no event date'}): {reason}"
                            for result in tools.comparisons for reason in result["limitations"]]
                 text = "I cannot establish this Formula One versus NLS comparison. " + (
-                    " ".join(dict.fromkeys(reasons)) if reasons else "The answer requires verified citations from both Competition profiles."
+                    " ".join(dict.fromkeys(reasons)) if reasons else "The answer requires verified, in-scope governing citations from both Competition profiles."
                 )
                 text = text[:6000]
             classification = "derived" if tools.comparisons else draft.classification

@@ -131,7 +131,7 @@ def test_comparison_discloses_scope_gaps_and_amendments(isolated_services, tmp_p
         assert result["limitations"]
 
 
-@pytest.mark.parametrize("case", ["scoring", "tyres", "dated", "one-sided", "invented-citation", "conflict", "wrong-season"])
+@pytest.mark.parametrize("case", ["scoring", "tyres", "dated", "one-sided", "invented-citation", "conflict", "wrong-season", "future-citation"])
 def test_agent_framework_compares_with_scoped_citations_or_declines(isolated_services, tmp_path, case):
     import asyncio
     import httpx2
@@ -143,6 +143,11 @@ def test_agent_framework_compares_with_scoped_citations_or_declines(isolated_ser
     topic = "tyres" if case == "tyres" else "scoring"
     if case == "dated":
         candidate["regulations"][1]["provisions"][0]["effective_from"] = None
+    if case == "future-citation":
+        bundle = candidate["regulations"][1]
+        amendment = copy.deepcopy(bundle["provisions"][0])
+        amendment.update(identity="future-amendment", amends=[amendment["identity"]], effective_from="2026-07-01")
+        bundle["provisions"].append(amendment)
     if case == "conflict":
         bundle = candidate["regulations"][1]
         conflicting = copy.deepcopy(bundle["provisions"][0])
@@ -161,6 +166,8 @@ def test_agent_framework_compares_with_scoped_citations_or_declines(isolated_ser
             query = {"season": 2025 if case == "wrong-season" else 2026, "topic": topic}
             if case == "dated":
                 query["on_date"] = "2026-08-01"
+            elif case == "future-citation":
+                query["on_date"] = "2026-03-01"
             output = [{"type": "function_call", "id": "fc_compare", "call_id": "call_compare", "name": "compare_regulations",
                        "arguments": json.dumps({"request": query}), "status": "completed"}]
         else:
@@ -177,6 +184,11 @@ def test_agent_framework_compares_with_scoped_citations_or_declines(isolated_ser
                     draft["citations"] = draft["citations"][:1]
                 elif case == "invented-citation":
                     draft["citations"].append("citation-invented")
+                elif case == "future-citation":
+                    assert result["status"] == "available"
+                    future = next(provision for provision in second["provisions"] if provision["amends"])
+                    assert future["temporalStatus"] == "outside-period" and not future["governing"]
+                    draft["citations"] = [first["provisions"][0]["citation"], future["citation"]]
                 elif case == "conflict":
                     assert len(second["provisions"]) == 2
                     assert any("Conflict unresolved" in " ".join(provision["exceptions"]) for provision in second["provisions"])
