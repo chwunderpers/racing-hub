@@ -131,6 +131,14 @@ Verification on 2026-09-12:
 - Desktop 1440px and mobile 390px screenshots inspected; 320px inputs fit;
   no horizontal overflow at any checked width. Existing user tabs were preserved.
 
+Final two-axis review of the explicit-mode follow-up (`a1d2e1d`, original baseline
+`4f87d77`): Standards found zero hard violations and the two unchanged low
+maintainability advisories. Spec found zero new confirmed defects and confirmed
+the prior P1 optional-routing blocker closed for explicit mode. Free-form Chat's
+model-trust boundary is unchanged. Additional nonempty-history regression
+coverage was suggested as a nonblocking improvement; explicit requests currently
+discard prior history in both the service and provider.
+
 The code path is implemented and runnable at http://localhost:5173/. Issue #12
 remains open for review of the 14 pending real translations and separate exact
 candidate/publication approvals. Successful real-data comparison and live model
