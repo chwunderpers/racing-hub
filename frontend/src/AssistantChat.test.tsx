@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { AssistantChat } from "./AssistantChat";
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 it("answers with source and display zone, then resets ephemeral context", async () => {
   const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ sessionToken: "first-session", available: true })))
@@ -22,4 +22,29 @@ it("answers with source and display zone, then resets ephemeral context", async 
   expect(fetchMock.mock.calls[1][1]?.headers).toMatchObject({ "X-Assistant-Session": "first-session" });
   expect(localStorage.getItem("assistantSession")).toBeNull();
   expect(sessionStorage.getItem("assistantSession")).toBeNull();
+});
+
+it("submits structured comparison scope and keeps chat requests separate", async () => {
+  const requests: Record<string, unknown>[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, options) => {
+    if (String(input).endsWith("/sessions")) return new Response(JSON.stringify({ sessionToken: "comparison-session", available: true }));
+    if (options?.method === "DELETE") return new Response(null, { status: 204 });
+    requests.push(JSON.parse(String(options?.body)));
+    return new Response(JSON.stringify({ text: "NLS reviewed evidence is unavailable.", displayTimeZone: "UTC", classification: "unsupported", freshness: { stale: false }, citations: [] }));
+  });
+  render(<AssistantChat zone="UTC" setZone={() => {}} />);
+  fireEvent.click(screen.getByRole("radio", { name: "Compare rules" }));
+  fireEvent.change(screen.getByLabelText("Season"), { target: { value: "2025" } });
+  fireEvent.change(screen.getByLabelText("Topic"), { target: { value: "tyres" } });
+  fireEvent.change(screen.getByLabelText("On date (optional)"), { target: { value: "2025-08-01" } });
+  await waitFor(() => expect(screen.getByRole("button", { name: "Compare rules" })).toBeEnabled());
+  expect(screen.queryByRole("textbox", { name: "Question" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Compare rules" }));
+  expect(await screen.findByText("NLS reviewed evidence is unavailable.")).toBeVisible();
+  expect(requests[0]).toMatchObject({ comparison: { season: 2025, topic: "tyres", on_date: "2025-08-01" } });
+  fireEvent.click(screen.getByRole("radio", { name: "Chat" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "Question" }), { target: { value: "When is Australia?" } });
+  fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+  await waitFor(() => expect(requests).toHaveLength(2));
+  expect(requests[1]).not.toHaveProperty("comparison");
 });

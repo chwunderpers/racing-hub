@@ -302,7 +302,7 @@ class AssistantService:
         if session and session.task and not session.task.done():
             session.task.cancel()
 
-    async def ask(self, token: str, question: str, zone: str) -> AssistantAnswer:
+    async def ask(self, token: str, question: str, zone: str, comparison: RegulationComparisonQuery | None = None) -> AssistantAnswer:
         self._expire()
         session = self.sessions.get(token)
         if not session:
@@ -325,17 +325,27 @@ class AssistantService:
             version = self.store.current_publication_version()
             tools = ReadTools(self.store, version, zone, self.graph_factory(version) if self.graph_factory and version else None)
             async with asyncio.timeout(60):
-                draft = await self.provider.answer(list(session.history), question, tools)
+                if comparison is not None:
+                    question = (f"Compare Formula One and NLS {comparison.season} {comparison.topic} "
+                                + (f"on {comparison.on_date.isoformat()}." if comparison.on_date else "conditionally for the cited versions, without an event date."))
+                    try:
+                        result = tools.compare_regulations(comparison)
+                    except Exception:
+                        result = {"status": "insufficient-evidence"}
+                    draft = (await self.provider.answer([], question, tools) if result["status"] == "available"
+                             else AnswerDraft(text="Comparison evidence unavailable.", citations=[], classification="unsupported"))
+                else:
+                    draft = await self.provider.answer(list(session.history), question, tools)
             if self.store.current_publication_version() != version:
                 raise RuntimeError("Publication changed; retry the question")
             references = [tools.citations[identity] for identity in dict.fromkeys(draft.citations) if identity in tools.citations]
             valid = bool(references) and len(references) == len(set(draft.citations)) and draft.classification != "unsupported"
-            for comparison in tools.comparisons:
-                valid = valid and comparison["status"] == "available" and all(
+            for comparison_result in tools.comparisons:
+                valid = valid and comparison_result["status"] == "available" and all(
                     any(provision["citation"] in draft.citations and provision.get("governing", True)
                         and provision["temporalStatus"] in ("not-assessed", "within-stated-bounds")
                         for entry in side["profile"] for provision in entry["provisions"])
-                    for side in comparison["profiles"]
+                    for side in comparison_result["profiles"]
                 )
             text = draft.text if valid else "I could not verify an answer from the published schedule and documentation."
             if not valid and tools.comparisons:

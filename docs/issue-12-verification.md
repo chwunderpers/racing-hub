@@ -1,6 +1,6 @@
 # Issue 12 Verification
 
-Date: 2026-09-11. Scope: Formula One versus NLS, 2026 race-points allocation,
+Updated: 2026-09-12. Scope: Formula One versus NLS, 2026 race-points allocation,
 with F1 as the reference. Review baseline: `4f87d77`. Implementation is local on
 `main`; no push, merge, new evidence approval or live publication is authorized.
 
@@ -97,12 +97,42 @@ refusal acceptance criterion**, not a resolved finding. The implementation does
 not introduce keyword-based request routing or pretend citation membership proves
 what the prose says.
 
-An explicit structured comparison mode with server-controlled retrieval was
-proposed, which would extend the assistant API/UI. No routing choice was supplied;
-user unavailability is not approval to expand that contract. The decision remains
-pending. Complete Standards coverage found zero hard violations and two low
-advisories; Spec has three repaired defects and this one unresolved blocker.
+The initial routing decision was pending. On 2026-09-12 the user authorized the
+proposed explicit mode. The implementation below supersedes that implementation
+blocker for the controlled comparison workflow, not for arbitrary chat prose.
 
-Issue #12 remains open and is not ready for full acceptance. It needs the routing
-decision, real evidence review and separate exact publication confirmation. Local
-implementation commits do not establish acceptance of all issue criteria.
+## Explicit Comparison Mode
+
+The Ask panel now offers Chat and Compare rules. Compare rules selects a season,
+topic and optional date for Formula One versus NLS; it sends a typed `comparison`
+field through the existing messages API. The server generates the scoped question,
+ignores free-text scope overrides and prior chat history, and retrieves both
+profiles before calling the model. Missing or unresolved evidence produces a
+server refusal without a model call. Otherwise, the actual Agent Framework
+provider receives only that evidence and no alternate tools. Existing in-scope
+governing-citation checks apply to its answer.
+
+This fixes optional tool routing for explicit mode. Chat remains free-form and
+does not claim the same guarantee. Neither mode guarantees arbitrary generated
+prose is semantically complete or correct merely because citation IDs are valid.
+
+Verification on 2026-09-12:
+
+- Full backend suite with isolated stores: **251 passed, zero skipped**, 812.82s.
+- Four HTTP cases verify mandatory retrieval, conflicting free-text scope ignored,
+  missing/date-unresolved evidence refused without model calls, and one-sided
+  drafts rejected. Two actual SDK cases verify server evidence serialization,
+  no alternate tools, private metadata isolation and bilateral citation checks.
+- Frontend: **15 passed**; generated OpenAPI/TypeScript types and production build
+  passed. Changed assistant/provider/comparison-test Pyright: zero errors.
+- Only backend/frontend containers rebuilt and restarted; no data publication,
+  approval or ingestion ran. Live browser comparison correctly refused because
+  reviewed NLS scoring evidence is unavailable in the current Publication.
+- Desktop 1440px and mobile 390px screenshots inspected; 320px inputs fit;
+  no horizontal overflow at any checked width. Existing user tabs were preserved.
+
+The code path is implemented and runnable at http://localhost:5173/. Issue #12
+remains open for review of the 14 pending real translations and separate exact
+candidate/publication approvals. Successful real-data comparison and live model
+evaluation remain gated by that evidence review; synthetic integration success
+does not replace it.

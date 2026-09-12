@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime, timezone
 
 from agent_framework import Agent, Message, tool
@@ -104,8 +105,17 @@ class AzureAnswerProvider:
             agent_tools = [schedule, search_documentation, lookup_iri, competition_regulations, compare_regulations]
             if tools.graph is not None:
                 agent_tools.extend([graph_shared_circuits, graph_query])
-            agent = Agent(client=client, instructions=instructions, tools=agent_tools)
             messages = [Message(entry["role"], [entry["content"]]) for entry in history]
+            if tools.comparisons:
+                agent_tools = []
+                instructions += (
+                    " This is a server-scoped comparison, already retrieved for this turn. "
+                    "Use only the Server-selected comparison evidence, not history or model memory. "
+                    "No tools are available or needed. The selected season, topic and date are authoritative request scope. "
+                    "Cite governing evidence from both Competitions and disclose conflicting assertions, exceptions and amendments."
+                )
+                messages = [Message("user", ["Server-selected comparison evidence:\n" + json.dumps(tools.comparisons[0])])]
+            agent = Agent(client=client, instructions=instructions, tools=agent_tools)
             messages.append(Message("user", [question]))
             response = await agent.run(messages, options={"store": False, "max_tokens": 3000, "allow_multiple_tool_calls": False, "response_format": AnswerDraft})
             return AnswerDraft.model_validate_json(response.text)

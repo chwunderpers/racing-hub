@@ -119,6 +119,14 @@ unknown topics and unsupported dates cause explicit scoped refusals. The service
 also rejects one-sided or invented citations and marks supported comparisons as
 derived. Citation membership is enforced; semantic accuracy and completeness of
 the model's prose still require evaluation, not just valid citation IDs.
-The comparison guard runs when `compare_regulations` is invoked. Model tool
-selection remains a trust boundary: the service does not recognize every possible
-comparison request or detect unsupported prose after unrelated tool calls.
+For controlled comparisons, select **Compare rules** in the Ask panel and choose
+season, topic and optional date. The messages API accepts the typed `comparison`
+field. The server retrieves both profiles before model invocation and returns a
+scoped refusal directly when evidence is unavailable or unresolved. Supported
+requests send only the server-selected evidence to the model, with no alternate
+tools or chat history. Governing citations from both profiles are mandatory.
+
+Chat remains free-form: model tool selection is still a trust boundary there.
+The service does not recognize every comparison phrasing or prove arbitrary prose
+correct after unrelated tool calls. The explicit mode establishes request scope
+and evidence availability, not an automatic interpretation of every assertion.
