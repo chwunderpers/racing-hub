@@ -61,6 +61,8 @@ def run_acceptance(output: Path, license_path: Path) -> int:
             environment.update({key: value for key, value in dotenv_values(checkout / ".env").items() if value is not None})
             run("Restart secured GraphDB", [*compose, "restart", "graphdb"])
             run("Wait for secured GraphDB", [*compose, "up", "-d", "--no-deps", "--wait", "graphdb"])
+            environment["GRAPHDB_URL"] = "http://127.0.0.1:" + port("graphdb", "7200")
+            environment["GRAPHDB_MCP_URL"] = environment["GRAPHDB_URL"] + "/mcp"
             run("Provision restricted PostgreSQL reader", [sys.executable, "-m", "app.assistant_setup"])
             environment.update({key: value for key, value in dotenv_values(checkout / ".env").items() if value is not None})
             run("Build and start clean application", [*compose, "up", "-d", "--build", "--wait", "backend", "frontend"], 900)
