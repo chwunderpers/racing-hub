@@ -85,7 +85,10 @@ def canonical_documents(graph: Graph, version: str) -> list[dict]:
         documents.append("---\n" + yaml.safe_dump(metadata.model_dump(), sort_keys=True, allow_unicode=False) + "---\n" + "\n".join(lines) + "\n")
     records = [{**record, "sources": sources_by_iri[record["iri"]]} for record in project_markdown(documents, graph, version)]
     from app.regulation_projection import profile_projection
+    from app.vehicle_projection import vehicle_projection
     for record in records:
         if str(ONTOLOGY.CompetitionProfile) in record["rdfTypes"]:
             record["regulationProfile"] = profile_projection(graph, URIRef(record["iri"]))
+        if str(ONTOLOGY.VehicleModel) in record["rdfTypes"]:
+            record["vehicleSpecification"] = vehicle_projection(graph, URIRef(record["iri"]))
     return records

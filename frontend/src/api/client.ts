@@ -20,3 +20,12 @@ export function getHealth(): Promise<HealthResponse> {
 export function getSchedule(): Promise<ScheduleResponse> {
   return getJson<ScheduleResponse>("/api/schedule");
 }
+
+export function getVehicles(): Promise<components["schemas"]["VehicleListResponse"]> {
+  return getJson("/api/vehicles");
+}
+
+export function getVehicle(identity: string): Promise<components["schemas"]["VehicleDetailsResponse"] | null> {
+  return getJson<components["schemas"]["VehicleDetailsResponse"] | { detail: string }>(`/api/vehicles/${encodeURIComponent(identity)}`, [200, 404])
+    .then(result => "vehicle" in result ? result : null);
+}

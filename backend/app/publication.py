@@ -13,6 +13,7 @@ import tzdata
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator, model_validator, model_serializer
 
 from app.regulations import CompetitionRegulations
+from app.vehicles import BasicVehicleSpecification
 
 
 class CandidateMeeting(BaseModel):
@@ -308,12 +309,15 @@ class PublicationSnapshot(BaseModel):
     source_language: Literal["en"] = "en"
     seasons: list[SeasonCandidateEnvelope] = Field(min_length=1)
     regulations: list[CompetitionRegulations] = Field(default_factory=list)
+    vehicles: list[BasicVehicleSpecification] = Field(default_factory=list, max_length=50)
 
     @model_serializer(mode="wrap")
     def compatible_dump(self, handler):
         value = handler(self)
         if not self.regulations:
             value.pop("regulations", None)
+        if not self.vehicles:
+            value.pop("vehicles", None)
         return value
 
     @model_validator(mode="after")
@@ -326,6 +330,8 @@ class PublicationSnapshot(BaseModel):
         regulation_scopes = [(entry.competition_identity, entry.season_year) for entry in self.regulations]
         if len(regulation_scopes) != len(set(regulation_scopes)) or any(scope not in scopes for scope in regulation_scopes):
             raise ValueError("Regulation scope must match a unique published Season")
+        if len({vehicle.identity for vehicle in self.vehicles}) != len(self.vehicles):
+            raise ValueError("Duplicate Vehicle Model identity")
         return self
 
 
@@ -337,8 +343,9 @@ def merge_season(previous: PublicationCandidate | None, incoming: SeasonCandidat
         return incoming
     seasons = previous.seasons if isinstance(previous, PublicationSnapshot) else [previous]
     retained = [season for season in seasons if (season.competition_identity, season.season_year) != (incoming.competition_identity, incoming.season_year)]
-    if isinstance(previous, PublicationSnapshot) and previous.regulations:
-        return PublicationSnapshot(seasons=sorted([*retained, incoming], key=lambda season: (season.competition_identity, season.season_year)), regulations=previous.regulations)
+    if isinstance(previous, PublicationSnapshot) and (previous.regulations or previous.vehicles):
+        return PublicationSnapshot(seasons=sorted([*retained, incoming], key=lambda season: (season.competition_identity, season.season_year)),
+                                   regulations=previous.regulations, vehicles=previous.vehicles)
     if not retained:
         return incoming
     return PublicationSnapshot(seasons=sorted([*retained, incoming], key=lambda season: (season.competition_identity, season.season_year)))

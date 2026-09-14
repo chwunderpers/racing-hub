@@ -19,6 +19,31 @@
 .round-list li { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 0; }
 .place-detail { font-size: 15px; overflow-wrap: anywhere; }
 
+.section-nav { display: flex; gap: 24px; border-bottom: 1px solid var(--border); }
+.section-nav a { padding: 16px 0 12px; color: var(--secondary); text-decoration: none; border-bottom: 3px solid transparent; }
+.section-nav a[aria-current="page"] { color: var(--text); border-color: var(--accent); }
+.vehicles-view { max-width: 1040px; min-height: 420px; overflow-wrap: anywhere; }
+.vehicles-view h1 { font-size: 36px; }
+.vehicle-back, .vehicle-evidence a { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); }
+.vehicle-list { list-style: none; padding: 0; }
+.vehicle-list li { border-bottom: 1px solid var(--border); }
+.vehicle-list a { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; padding: 16px 0; color: var(--text); font-size: 22px; text-decoration: none; }
+.vehicle-fields { margin-top: 32px; }
+.vehicle-field { display: grid; grid-template-columns: minmax(100px, 180px) minmax(0, 1fr); gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+.vehicle-field dt { color: var(--secondary); }
+.vehicle-field dd { margin: 0; min-width: 0; }
+.vehicle-field summary { cursor: pointer; color: var(--accent); margin: 12px 0; }
+.vehicle-field summary:focus-visible { outline: 2px solid var(--accent); }
+.vehicle-evidence { border-left: 2px solid var(--border); padding: 0 0 0 16px; margin: 20px 0; }
+.vehicle-evidence p { margin: 8px 0; max-width: 75ch; }
+.vehicle-checksum { font-size: 13px; color: var(--secondary); overflow-wrap: anywhere; }
+.evidence-kind { display: block; color: var(--secondary); font-size: 14px; }
+.vehicle-conflict { display: block; color: var(--warning-text); }
+@media (max-width: 600px) {
+  .vehicles-view h1 { font-size: 28px; }
+  .vehicle-field { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+
 :root {
   --background: #0b0d0e;
   --surface: #181c1e;

@@ -51,6 +51,63 @@
         }
       }
     },
+    "/api/vehicles": {
+      "get": {
+        "summary": "Vehicles",
+        "operationId": "vehicles_api_vehicles_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vehicles/{identity}": {
+      "get": {
+        "summary": "Vehicle Details",
+        "operationId": "vehicle_details_api_vehicles__identity__get",
+        "parameters": [
+          {
+            "name": "identity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDetailsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/assistant/sessions": {
       "post": {
         "summary": "Assistant Session",
@@ -1192,6 +1249,213 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VehicleAssertionResponse": {
+        "properties": {
+          "iri": {
+            "type": "string",
+            "title": "Iri"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "applicability": {
+            "type": "string",
+            "title": "Applicability"
+          },
+          "evidenceKind": {
+            "type": "string",
+            "enum": [
+              "authoritative",
+              "secondary"
+            ],
+            "title": "Evidencekind"
+          },
+          "publisher": {
+            "type": "string",
+            "title": "Publisher"
+          },
+          "sourceUrl": {
+            "type": "string",
+            "title": "Sourceurl"
+          },
+          "retrievedAt": {
+            "type": "string",
+            "title": "Retrievedat"
+          },
+          "checksum": {
+            "type": "string",
+            "title": "Checksum"
+          },
+          "anchor": {
+            "type": "string",
+            "title": "Anchor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "iri",
+          "value",
+          "applicability",
+          "evidenceKind",
+          "publisher",
+          "sourceUrl",
+          "retrievedAt",
+          "checksum",
+          "anchor"
+        ],
+        "title": "VehicleAssertionResponse"
+      },
+      "VehicleDetailsResponse": {
+        "properties": {
+          "publicationVersion": {
+            "type": "string",
+            "title": "Publicationversion"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleSpecificationResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publicationVersion",
+          "vehicle"
+        ],
+        "title": "VehicleDetailsResponse"
+      },
+      "VehicleFieldResponse": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "enum": [
+              "manufacturer",
+              "model_name",
+              "category",
+              "generation",
+              "variant",
+              "engine",
+              "drivetrain",
+              "dimensions",
+              "base_weight",
+              "power"
+            ],
+            "title": "Field"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "conflict": {
+            "type": "boolean",
+            "title": "Conflict"
+          },
+          "assertions": {
+            "items": {
+              "$ref": "#/components/schemas/VehicleAssertionResponse"
+            },
+            "type": "array",
+            "title": "Assertions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "field",
+          "value",
+          "conflict",
+          "assertions"
+        ],
+        "title": "VehicleFieldResponse"
+      },
+      "VehicleListResponse": {
+        "properties": {
+          "publicationVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publicationversion"
+          },
+          "vehicles": {
+            "items": {
+              "$ref": "#/components/schemas/VehicleSummaryResponse"
+            },
+            "type": "array",
+            "title": "Vehicles"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publicationVersion",
+          "vehicles"
+        ],
+        "title": "VehicleListResponse"
+      },
+      "VehicleSpecificationResponse": {
+        "properties": {
+          "iri": {
+            "type": "string",
+            "title": "Iri"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "eligibilityEstablished": {
+            "type": "boolean",
+            "const": false,
+            "title": "Eligibilityestablished",
+            "default": false
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/VehicleFieldResponse"
+            },
+            "type": "array",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "iri",
+          "title",
+          "fields"
+        ],
+        "title": "VehicleSpecificationResponse"
+      },
+      "VehicleSummaryResponse": {
+        "properties": {
+          "identity": {
+            "type": "string",
+            "title": "Identity"
+          },
+          "iri": {
+            "type": "string",
+            "title": "Iri"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identity",
+          "iri",
+          "title"
+        ],
+        "title": "VehicleSummaryResponse"
       }
     }
   }
