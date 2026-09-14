@@ -1,11 +1,12 @@
 import os
 import asyncio
+import hashlib
 from contextlib import asynccontextmanager
 from functools import lru_cache
 from typing import Annotated, Literal
 
 import psycopg
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Path, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,6 +21,7 @@ from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, Cov
 from app.vehicle_projection import vehicle_iri
 from app.vehicles import VehicleDetailsResponse, VehicleListResponse
 from app.capabilities import CapabilityQuery, CapabilityRegistry, CapabilityResponse, configured_capabilities, published_contributions
+from app.exports import EXPORT_TYPES, ExportFormat, ExportSelection, ontology_bytes, publication_graph, serialize_publication
 
 
 class HealthResponse(BaseModel):
@@ -167,6 +169,42 @@ def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> Sc
         **({"coverage": coverage_view(store.publication_envelope(version))} if version else {}),
         **({"freshness": FreshnessResponse.model_validate(store.source_freshness())} if hasattr(store, "source_freshness") else {}),
     )
+
+
+@app.get("/api/exports", response_model=ExportSelection, responses={503: {"description": "Publication store unavailable"}})
+def export_selection(response: Response, store: PostgresOperationalStore = Depends(operational_store)) -> ExportSelection:
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        return ExportSelection(publicationVersion=store.current_publication_version())
+    except psycopg.Error:
+        raise HTTPException(503, "Publication service unavailable", headers={"Cache-Control": "no-store"}) from None
+
+
+@app.get("/api/exports/ontology", response_class=Response, responses={200: {"content": {"text/turtle": {}}}})
+def export_ontology() -> Response:
+    body = ontology_bytes()
+    checksum = hashlib.sha256(body).hexdigest()
+    return Response(body, media_type="text/turtle", headers={
+        "Content-Disposition": f'attachment; filename="racing-hub-ontology-{checksum}.ttl"',
+        "ETag": f'"{checksum}"', "Cache-Control": "no-cache", "X-Content-Type-Options": "nosniff",
+    })
+
+
+@app.get("/api/exports/publications/{version}/{format}", response_class=Response,
+         responses={200: {"content": {"application/ld+json": {}, "text/csv": {}, "text/turtle": {}}},
+                    409: {"description": "Publication unavailable or changed"}, 503: {"description": "Publication store unavailable"}})
+def export_publication(version: Annotated[str, Path(pattern=r"^[0-9a-f]{64}$")], format: ExportFormat,
+                       store: PostgresOperationalStore = Depends(operational_store)) -> Response:
+    try:
+        graph = publication_graph(store, version)
+    except LookupError:
+        raise HTTPException(409, "Publication unavailable or changed; refresh the export selection", headers={"Cache-Control": "no-store"}) from None
+    except psycopg.Error:
+        raise HTTPException(503, "Publication service unavailable", headers={"Cache-Control": "no-store"}) from None
+    media_type, extension = EXPORT_TYPES[format]
+    return Response(serialize_publication(graph, version, format), media_type=media_type,
+                    headers={"Content-Disposition": f'attachment; filename="racing-hub-{version}.{extension}"',
+                             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Publication-Version": version})
 
 
 @app.get("/api/capabilities", response_model=CapabilityResponse)

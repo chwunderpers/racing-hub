@@ -4,10 +4,69 @@ import { afterEach, expect, it, vi } from "vitest";
 import App from "./App";
 import { MeetingCapabilities } from "./MeetingCapabilities";
 
+it("downloads each export from one selected publication and handles a changed version", async () => {
+  const version = "a".repeat(64);
+  let selectedVersion = version;
+  const requests: string[] = [];
+  vi.spyOn(globalThis, "fetch").mockImplementation(async input => {
+    const url = String(input);
+    requests.push(url);
+    if (url.endsWith("/api/health")) return Response.json({ status: "ok", database: "ok" });
+    if (url.endsWith("/api/exports")) return Response.json({ publicationVersion: selectedVersion });
+    if (url.includes("/api/exports/publications/")) return url.includes(selectedVersion) ? new Response("export content") : new Response("changed", { status: 409 });
+    if (url.endsWith("/api/exports/ontology")) return new Response("ontology content");
+    return Response.json({ meetings: [], coverage: [] });
+  });
+  const createUrl = vi.fn(() => "blob:export");
+  const revokeUrl = vi.fn();
+  vi.stubGlobal("URL", class extends URL {
+    static createObjectURL = createUrl;
+    static revokeObjectURL = revokeUrl;
+  });
+  const save = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+  render(<App />);
+  fireEvent.click(screen.getByRole("link", { name: "Exports" }));
+  expect(await screen.findByText(version)).toBeInTheDocument();
+  for (const format of ["json", "csv", "turtle"]) {
+    fireEvent.change(screen.getByRole("combobox", { name: "Format" }), { target: { value: format } });
+    fireEvent.click(screen.getByRole("button", { name: "Download publication" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Download publication" })).not.toBeDisabled());
+    expect(requests).toContain(`/api/exports/publications/${version}/${format}`);
+  }
+  expect(save).toHaveBeenCalledTimes(3);
+  selectedVersion = "b".repeat(64);
+  fireEvent.click(screen.getByRole("button", { name: "Download publication" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("Publication changed");
+  expect(save).toHaveBeenCalledTimes(3);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh publication" }));
+  expect(await screen.findByText(selectedVersion)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Download ontology" }));
+  await waitFor(() => expect(save).toHaveBeenCalledTimes(4));
+  expect(requests).toContain("/api/exports/ontology");
+  await waitFor(() => expect(revokeUrl).toHaveBeenCalledTimes(4), { timeout: 2000 });
+});
+
+it.each(["empty", "unavailable"])("keeps ontology accessible when publication is %s", async state => {
+  window.history.replaceState({}, "", "/?view=exports");
+  vi.spyOn(globalThis, "fetch").mockImplementation(async input => {
+    const url = String(input);
+    if (url.endsWith("/api/health")) return Response.json({ status: "ok", database: "ok" });
+    if (url.endsWith("/api/exports")) return state === "empty" ? Response.json({ publicationVersion: null }) : new Response("unavailable", { status: 503 });
+    return Response.json({ meetings: [], coverage: [] });
+  });
+  render(<App />);
+  if (state === "empty") expect(await screen.findByText("No accepted publication yet")).toBeInTheDocument();
+  else expect(await screen.findByRole("alert")).toHaveTextContent("Publication service unavailable");
+  expect(screen.getByRole("button", { name: "Download publication" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Download ontology" })).not.toBeDisabled();
+  expect(screen.getByRole("button", { name: "Refresh publication" })).not.toBeDisabled();
+});
+
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   window.history.replaceState({}, "", "/");
 });
 

@@ -33,3 +33,22 @@ export function getVehicle(identity: string): Promise<components["schemas"]["Veh
 export function getCapabilities(subjectIri: string): Promise<components["schemas"]["CapabilityResponse"]> {
   return getJson(`/api/capabilities?${new URLSearchParams({ subjectIri })}`);
 }
+
+export function getExportSelection(): Promise<components["schemas"]["ExportSelection"]> {
+  return getJson("/api/exports");
+}
+
+export async function downloadExport(version: string | null, format: "json" | "csv" | "turtle"): Promise<void> {
+  const path = version ? `/api/exports/publications/${encodeURIComponent(version)}/${format}` : "/api/exports/ontology";
+  const response = await fetch(`${apiBaseUrl}${path}`);
+  if (response.status === 409) throw new Error("Publication changed. Refresh the publication before downloading.");
+  if (!response.ok) throw new Error("Download unavailable. Retry the download.");
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = version ? `racing-hub-${version}.${format === "turtle" ? "ttl" : format}` : "racing-hub-ontology.ttl";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
