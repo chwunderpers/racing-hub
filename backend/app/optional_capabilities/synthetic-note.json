@@ -1,0 +1,10 @@
+{
+  "id": "synthetic-note",
+  "title": "Synthetic Meeting note",
+  "records": [
+    {
+      "subjectIri": "https://w3id.org/motorsport-hub/resource/meeting/f1%3A2026%3Aaustralia",
+      "text": "Demonstration marker: A-01."
+    }
+  ]
+}

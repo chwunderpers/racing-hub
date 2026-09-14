@@ -29,3 +29,7 @@ export function getVehicle(identity: string): Promise<components["schemas"]["Veh
   return getJson<components["schemas"]["VehicleDetailsResponse"] | { detail: string }>(`/api/vehicles/${encodeURIComponent(identity)}`, [200, 404])
     .then(result => "vehicle" in result ? result : null);
 }
+
+export function getCapabilities(subjectIri: string): Promise<components["schemas"]["CapabilityResponse"]> {
+  return getJson(`/api/capabilities?${new URLSearchParams({ subjectIri })}`);
+}

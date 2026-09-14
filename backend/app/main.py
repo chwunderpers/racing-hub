@@ -2,10 +2,10 @@ import os
 import asyncio
 from contextlib import asynccontextmanager
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 import psycopg
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -19,6 +19,7 @@ from app.stores import PostgresOperationalStore
 from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, CoverageAssessment, coverage_view
 from app.vehicle_projection import vehicle_iri
 from app.vehicles import VehicleDetailsResponse, VehicleListResponse
+from app.capabilities import CapabilityQuery, CapabilityRegistry, CapabilityResponse, configured_capabilities, published_contributions
 
 
 class HealthResponse(BaseModel):
@@ -168,6 +169,15 @@ def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> Sc
     )
 
 
+@app.get("/api/capabilities", response_model=CapabilityResponse)
+def capabilities(request: Annotated[CapabilityQuery, Query()], store: PostgresOperationalStore = Depends(operational_store),
+                 registry: CapabilityRegistry = Depends(configured_capabilities)) -> CapabilityResponse:
+    try:
+        return published_contributions(registry, store, store.current_publication_version(), request)
+    except LookupError:
+        raise HTTPException(404, "Published Meeting or Session not found") from None
+
+
 @app.get("/api/vehicles", response_model=VehicleListResponse)
 def vehicles(store: PostgresOperationalStore = Depends(operational_store)) -> VehicleListResponse:
     version = store.current_publication_version()
@@ -206,7 +216,7 @@ class AssistantSessionResponse(BaseModel):
 def assistant_service() -> AssistantService:
     read_url = os.environ.get("ASSISTANT_DATABASE_URL")
     return AssistantService(AssistantReadStore(read_url) if read_url else None, configured_provider() if read_url else None,
-                            graph_factory=configured_graph_factory())
+                            graph_factory=configured_graph_factory(), capability_factory=configured_capabilities)
 
 
 def assistant_origin(request: Request, response: Response):
