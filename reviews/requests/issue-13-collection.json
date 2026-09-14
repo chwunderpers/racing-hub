@@ -1,0 +1,34 @@
+{
+  "mode": "captured-official-response-replay",
+  "reason": "Dynamic HTML raw bytes drift between requests; the unchanged collector verifies retained raw captures instead. Actual capture times preserved before preview. No assertion of fresh network verification.",
+  "itemId": "52cc4f41-a2e2-4c0e-8455-1361e649becf",
+  "sources": [
+    {
+      "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+      "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
+      "kind": "authoritative",
+      "retrieved_at": "2026-09-14T12:55:33.998474Z",
+      "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
+      "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026",
+      "language": "en"
+    },
+    {
+      "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+      "publisher": "BMW M GmbH / BMW M Motorsport",
+      "kind": "authoritative",
+      "retrieved_at": "2026-09-14T12:55:34.165622Z",
+      "sha256": "c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43",
+      "anchor": "THE GT FLAGSHIP. > latest evolutionary stage; first season in 2025; BMW M4 GT3 model from 2022 to 2024",
+      "language": "en"
+    },
+    {
+      "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
+      "publisher": "Mercedes-AMG GmbH",
+      "kind": "authoritative",
+      "retrieved_at": "2026-09-14T12:55:34.549772Z",
+      "sha256": "9691e49c175273e6c3c815da0eead5d4fc98cc115dbc7255bae810043dfb9d2e",
+      "anchor": "The Mercedes-AMG GT3 > Sequential AMG 6-gear race car transmission; Highlights > customer sports series paragraph",
+      "language": "en"
+    }
+  ]
+}

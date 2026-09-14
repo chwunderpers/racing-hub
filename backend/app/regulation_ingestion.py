@@ -45,7 +45,8 @@ def prepare_candidate(path: Path, store: ReviewStore, client: httpx.Client) -> P
     seasons = baseline.seasons if isinstance(baseline, PublicationSnapshot) else [baseline]
     previous = baseline.regulations if isinstance(baseline, PublicationSnapshot) else []
     retained = [entry for entry in previous if (entry.competition_identity, entry.season_year) != (bundle.competition_identity, bundle.season_year)]
-    return PublicationSnapshot(seasons=seasons, regulations=[*retained, bundle])
+    return PublicationSnapshot(seasons=seasons, regulations=[*retained, bundle],
+                               vehicles=baseline.vehicles if isinstance(baseline, PublicationSnapshot) else [])
 
 
 def main() -> int:

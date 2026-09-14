@@ -38,6 +38,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vehicles */
+        get: operations["vehicles_api_vehicles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vehicles/{identity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vehicle Details */
+        get: operations["vehicle_details_api_vehicles__identity__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/assistant/sessions": {
         parameters: {
             query?: never;
@@ -423,6 +457,81 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** VehicleAssertionResponse */
+        VehicleAssertionResponse: {
+            /** Iri */
+            iri: string;
+            /** Value */
+            value: string;
+            /** Applicability */
+            applicability: string;
+            /**
+             * Evidencekind
+             * @enum {string}
+             */
+            evidenceKind: "authoritative" | "secondary";
+            /** Publisher */
+            publisher: string;
+            /** Sourceurl */
+            sourceUrl: string;
+            /** Retrievedat */
+            retrievedAt: string;
+            /** Checksum */
+            checksum: string;
+            /** Anchor */
+            anchor: string;
+        };
+        /** VehicleDetailsResponse */
+        VehicleDetailsResponse: {
+            /** Publicationversion */
+            publicationVersion: string;
+            vehicle: components["schemas"]["VehicleSpecificationResponse"];
+        };
+        /** VehicleFieldResponse */
+        VehicleFieldResponse: {
+            /**
+             * Field
+             * @enum {string}
+             */
+            field: "manufacturer" | "model_name" | "category" | "generation" | "variant" | "engine" | "drivetrain" | "dimensions" | "base_weight" | "power";
+            /** Value */
+            value: string | null;
+            /** Conflict */
+            conflict: boolean;
+            /** Assertions */
+            assertions: components["schemas"]["VehicleAssertionResponse"][];
+        };
+        /** VehicleListResponse */
+        VehicleListResponse: {
+            /** Publicationversion */
+            publicationVersion: string | null;
+            /** Vehicles */
+            vehicles: components["schemas"]["VehicleSummaryResponse"][];
+        };
+        /** VehicleSpecificationResponse */
+        VehicleSpecificationResponse: {
+            /** Iri */
+            iri: string;
+            /** Title */
+            title: string;
+            /**
+             * Eligibilityestablished
+             * @default false
+             * @constant
+             */
+            eligibilityEstablished: false;
+            /** Fields */
+            fields: components["schemas"]["VehicleFieldResponse"][];
+        };
+        /** VehicleSummaryResponse */
+        VehicleSummaryResponse: {
+            /** Identity */
+            identity: string;
+            /** Iri */
+            iri: string;
+            /** Title */
+            title: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -477,6 +586,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleResponse"];
+                };
+            };
+        };
+    };
+    vehicles_api_vehicles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VehicleListResponse"];
+                };
+            };
+        };
+    };
+    vehicle_details_api_vehicles__identity__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VehicleDetailsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

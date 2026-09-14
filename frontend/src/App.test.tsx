@@ -10,6 +10,44 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
 });
 
+it("opens vehicle details separately from schedule filters and retains field provenance", async () => {
+  const assertion = { iri: "https://example.test/assertion", value: "GT racing car", applicability: "Descriptive model only", evidenceKind: "secondary", publisher: "Wikipedia", sourceUrl: "https://en.wikipedia.org/wiki/Fixture", retrievedAt: "2026-09-14T08:00:00Z", checksum: "a".repeat(64), anchor: "Model overview" };
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    const url = String(input);
+    if (url.endsWith("/api/health")) return Response.json({ status: "ok", database: "ok" });
+    if (url.endsWith("/api/vehicles")) return Response.json({ publicationVersion: "test", vehicles: [{ identity: "fixture:model", iri: "https://example.test/model", title: "Fixture GT" }] });
+    if (url.endsWith("/api/vehicles/fixture%3Amodel")) return Response.json({ publicationVersion: "test", vehicle: { iri: "https://example.test/model", title: "Fixture GT", eligibilityEstablished: false, fields: [{ field: "category", value: "GT racing car", conflict: false, assertions: [assertion] }] } });
+    return Response.json({ meetings: [] });
+  });
+  render(<App />);
+  await screen.findByText("System ready");
+  fireEvent.click(screen.getByRole("link", { name: "Vehicles" }));
+  expect(screen.queryByRole("region", { name: "Schedule filters" })).not.toBeInTheDocument();
+  fireEvent.click(await screen.findByRole("link", { name: "Fixture GT" }));
+  expect(await screen.findByRole("heading", { name: "Fixture GT" })).toBeVisible();
+  expect(screen.getByText(/Competition Eligibility is not established/)).toBeVisible();
+  fireEvent.click(screen.getByText("Evidence (1)"));
+  expect(screen.getByText("Secondary Evidence")).toBeVisible();
+  expect(screen.getByText("Descriptive model only")).toBeVisible();
+  expect(screen.getByRole("link", { name: "Wikipedia" })).toHaveAttribute("href", assertion.sourceUrl);
+  expect(screen.queryByText("Power")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("link", { name: "Schedule" }));
+  expect(screen.getByRole("region", { name: "Schedule filters" })).toBeVisible();
+});
+
+it.each(["empty", "missing", "unavailable"])("shows the %s vehicle state without schedule filters", async state => {
+  window.history.replaceState({}, "", state === "missing" ? "/?view=vehicles&vehicle=unknown" : "/?view=vehicles");
+  vi.spyOn(globalThis, "fetch").mockImplementation(async input => {
+    const url = String(input);
+    if (url.includes("/api/vehicles")) return state === "unavailable" ? new Response(null, { status: 503 }) : state === "missing" ? Response.json({ detail: "Not found" }, { status: 404 }) : Response.json({ publicationVersion: null, vehicles: [] });
+    return Response.json(url.endsWith("/api/health") ? { status: "ok", database: "ok" } : { meetings: [] });
+  });
+  render(<App />);
+  expect(await screen.findByRole("heading", { name: state === "empty" ? "No vehicles published yet" : state === "missing" ? "Vehicle not found" : "Vehicle service unavailable" })).toBeVisible();
+  expect(screen.queryByRole("region", { name: "Schedule filters" })).not.toBeInTheDocument();
+  if (state === "unavailable") expect(screen.getByRole("button", { name: "Retry" })).toBeVisible();
+});
+
 
 it("shows a ready empty schedule when the backend is healthy", async () => {
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {

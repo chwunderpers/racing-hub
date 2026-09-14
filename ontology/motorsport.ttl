@@ -101,3 +101,17 @@ msh:normalizedValue a owl:DatatypeProperty ; rdfs:label "normalized value"@en ;
     rdfs:comment "An English evidence-linked interpretation for a known profile topic, preserving applicability, uncertainty, exceptions and discretion."@en .
 msh:year a owl:DatatypeProperty ; rdfs:label "year"@en ;
     rdfs:comment "A neutral integer season year; it does not imply complete regulation coverage or historical applicability of a document version."@en .
+
+msh:VehicleModel a owl:Class ; rdfs:label "Vehicle Model"@en ;
+    rdfs:comment "A canonical model-level vehicle description with manufacturer, English model name, category and known generation or variant; not an Entered Vehicle or proof of Competition Eligibility."@en .
+msh:VehicleSpecificationAssertion a owl:Class ; rdfs:label "Vehicle Specification Assertion"@en ;
+    rdfs:comment "A sourced descriptive Basic Vehicle Specification field value with applicability, publisher, source anchor, checksum and retrieval time. Authoritative and Secondary Evidence values remain distinct; neither establishes Competition Eligibility."@en .
+msh:includesVehicle a owl:ObjectProperty ; rdfs:label "includes vehicle"@en ;
+    rdfs:comment "Links a Publication to a Vehicle Model included in that version; inclusion does not establish regulatory eligibility or approval by itself."@en .
+msh:vehicleField a owl:DatatypeProperty ; rdfs:label "vehicle field"@en ;
+    rdfs:comment "A language-neutral Basic Vehicle Specification field code: manufacturer, model_name, category, generation, variant, engine, drivetrain, dimensions, base_weight or power."@en .
+msh:value a owl:DatatypeProperty ; rdfs:label "value"@en ;
+    rdfs:comment "An English source assertion value, interpreted with its evidence kind and applicability; not an inferred regulatory conclusion."@en .
+msh:evidenceKind rdfs:comment "For Vehicle Specification Assertions, the neutral code authoritative or secondary classifies source authority. This context-specific use does not change quotation, paraphrase or translation codes on English Evidence Passages."@en .
+msh:authority rdfs:comment "For Vehicle Specification Assertions, identifies the source publisher in English rather than asserting that a manufacturer governs a Competition."@en .
+msh:applicability rdfs:comment "For Vehicle Specification Assertions, preserves model, revision and descriptive scope without establishing Competition Eligibility or a homologated configuration."@en .

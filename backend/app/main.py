@@ -17,6 +17,8 @@ from app.graph_config import configured_graph_factory
 from app.freshness import FreshnessResponse
 from app.stores import PostgresOperationalStore
 from app.publication import FieldAssertion, CandidatePlace, CandidateLayout, CoverageAssessment, coverage_view
+from app.vehicle_projection import vehicle_iri
+from app.vehicles import VehicleDetailsResponse, VehicleListResponse
 
 
 class HealthResponse(BaseModel):
@@ -164,6 +166,28 @@ def schedule(store: PostgresOperationalStore = Depends(operational_store)) -> Sc
         **({"coverage": coverage_view(store.publication_envelope(version))} if version else {}),
         **({"freshness": FreshnessResponse.model_validate(store.source_freshness())} if hasattr(store, "source_freshness") else {}),
     )
+
+
+@app.get("/api/vehicles", response_model=VehicleListResponse)
+def vehicles(store: PostgresOperationalStore = Depends(operational_store)) -> VehicleListResponse:
+    version = store.current_publication_version()
+    summaries = []
+    if version:
+        snapshot = store.publication_envelope(version)
+        for vehicle in getattr(snapshot, "vehicles", []):
+            document = store.lookup_document(str(vehicle_iri(vehicle.identity)), version)
+            if document and "vehicleSpecification" in document:
+                summaries.append({"identity": vehicle.identity, "iri": document["iri"], "title": document["title"]})
+    return VehicleListResponse.model_validate({"publicationVersion": version, "vehicles": summaries})
+
+
+@app.get("/api/vehicles/{identity}", response_model=VehicleDetailsResponse)
+def vehicle_details(identity: str, store: PostgresOperationalStore = Depends(operational_store)) -> VehicleDetailsResponse:
+    version = store.current_publication_version()
+    document = store.lookup_document(str(vehicle_iri(identity)), version) if version else None
+    if not document or "vehicleSpecification" not in document:
+        raise HTTPException(404, "Published vehicle not found")
+    return VehicleDetailsResponse.model_validate({"publicationVersion": version, "vehicle": document["vehicleSpecification"]})
 
 
 class AssistantMessage(BaseModel):

@@ -412,6 +412,9 @@ class GraphDbProjection:
                 from app.regulation_projection import regulation_graph
                 for bundle in envelope.regulations:
                     graph += regulation_graph(bundle, version)
+                from app.vehicle_projection import vehicle_graph
+                for vehicle in envelope.vehicles:
+                    graph += vehicle_graph(vehicle, version)
             seasons = envelope.seasons if isinstance(envelope, PublicationSnapshot) else [envelope]
             for season in seasons:
                 if season.coverage is None:

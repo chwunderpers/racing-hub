@@ -14,7 +14,7 @@ NEUTRAL_FIELDS = """
     field locator rule preferred responseSha256 effectiveLocal translationVersion translatedAt
     translationReviewState number coverageState activity kind timeZone durationMinutes startLocal
     endLocal startOffset endOffset startZone endZone startInstant endInstant lengthKm
-    checksum sectionAnchor evidenceKind topic knowledgeState
+    checksum sectionAnchor evidenceKind topic knowledgeState vehicleField
 """.split()
 HUMAN_FIELDS = [RDFS.label, RDFS.comment] + [ONTOLOGY[name] for name in (
     "evidence", "coverageReason", "translationMethod", "translationReviewer", "translationAuthorization",

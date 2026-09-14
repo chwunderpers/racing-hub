@@ -5,7 +5,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Literal, Protocol
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -53,6 +53,12 @@ class RegulationQuery(BaseModel):
     topic: Topic
 
 
+class VehicleQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    identity: str = Field(min_length=1, max_length=120, pattern=r"^[a-z0-9][a-z0-9:._-]*$")
+    intent: Literal["description", "eligibility"] = "description"
+
+
 class RegulationComparisonQuery(BaseModel):
     model_config = ConfigDict(extra="forbid")
     season: int = Field(ge=1950, le=2100)
@@ -92,6 +98,8 @@ class ReadTools:
         self.graph = graph
         self.citations: dict[str, Citation] = {}
         self.comparisons: list[dict] = []
+        self.vehicle_eligibility_requested = False
+        self.vehicle_specifications: dict[str, dict] = {}
         self.calls = 0
         self.bytes = 0
 
@@ -216,7 +224,56 @@ class ReadTools:
             result.update(status="insufficient-evidence", limitations=["Formula One versus NLS comparison exceeds the evidence budget."])
             raise
 
+    def vehicle(self, request: VehicleQuery) -> dict:
+        from app.vehicle_projection import vehicle_iri
+        self._begin()
+        if request.intent == "eligibility":
+            self.vehicle_eligibility_requested = True
+            return {"status": "insufficient-evidence", "scope": "Basic Vehicle Specifications and Secondary Evidence cannot establish Competition Eligibility. Governing provisions and temporal applicability are required."}
+        record = self.store.lookup_document(str(vehicle_iri(request.identity)), self.version) if self.version else None
+        specification = self._vehicle_evidence(record)
+        return self._bounded({"status": "available" if specification else "insufficient-evidence", "vehicle": specification,
+            "publicationVersion": self.version, "scope": "Descriptive values only, never Competition Eligibility or a homologated configuration. Prefer the selected authoritative value; preserve all conflicts, applicability and Secondary Evidence labels. Missing fields remain unknown."})
+
+    def _vehicle_evidence(self, record):
+        specification = json.loads(json.dumps(record["vehicleSpecification"])) if record and "vehicleSpecification" in record else None
+        if specification:
+            if specification["iri"] in self.vehicle_specifications:
+                return self.vehicle_specifications[specification["iri"]]
+            for entry in specification["fields"]:
+                for assertion in entry["assertions"]:
+                    assertion["citation"] = self._cite(assertion["iri"], specification["title"] + ": " + entry["field"] + " / " + assertion["anchor"],
+                                                       assertion["sourceUrl"], assertion["retrievedAt"])
+            self.vehicle_specifications[specification["iri"]] = specification
+        return specification
+
+    def vehicle_answer(self) -> AnswerDraft:
+        lines = ["Basic Vehicle Specifications are descriptive and cannot establish Competition Eligibility."]
+        references = []
+        for specification in self.vehicle_specifications.values():
+            lines.extend(["", specification["title"]])
+            for entry in specification["fields"]:
+                value = json.dumps(entry["value"], ensure_ascii=False) if entry["value"] is not None else "Unresolved"
+                lines.append(entry["field"].replace("_", " ").capitalize() + ": " + value + (" (conflicting source values)" if entry["conflict"] else ""))
+                for assertion in entry["assertions"]:
+                    kind = "Secondary Evidence" if assertion["evidenceKind"] == "secondary" else "Authoritative source"
+                    lines.append(f"  {kind}: {json.dumps(assertion['value'], ensure_ascii=False)}. Applicability: {assertion['applicability']} [{assertion['citation']}]")
+                    references.append(assertion["citation"])
+        text = "\n".join(lines)
+        if len(text) > 6000 or len(references) > 32:
+            return AnswerDraft(text="Vehicle evidence exceeds the answer budget. Ask about one model or consult its vehicle details. Descriptions cannot establish Competition Eligibility.", citations=[], classification="unsupported")
+        return AnswerDraft(text=text, citations=references, classification="stated")
+
     def _document(self, record):
+        vehicle_record = record
+        if "https://w3id.org/motorsport-hub/ontology/VehicleSpecificationAssertion" in record["rdfTypes"]:
+            vehicle_record = self.store.lookup_document(record["iri"].split("/assertion/", 1)[0], self.version)
+        specification = self._vehicle_evidence(vehicle_record)
+        if specification:
+            return {key: record[key] for key in ("iri", "title", "rdfTypes", "language")} | {
+                "vehicleIdentity": unquote(specification["iri"].rsplit("/", 1)[-1]), "vehicle": specification,
+                "citations": [assertion["citation"] for entry in specification["fields"] for assertion in entry["assertions"]],
+                "scope": "Descriptive evidence only; cannot establish Competition Eligibility."}
         references = [self._cite(record["iri"], record["title"], source["url"], source["retrievedAt"]) for source in record["sources"][:3]]
         return {key: record[key] for key in ("iri", "title", "rdfTypes", "language")} | {"excerpt": record["markdown"][:6000], "truncated": len(record["markdown"]) > 6000, "citations": references}
 
@@ -340,6 +397,7 @@ class AssistantService:
                 raise RuntimeError("Publication changed; retry the question")
             references = [tools.citations[identity] for identity in dict.fromkeys(draft.citations) if identity in tools.citations]
             valid = bool(references) and len(references) == len(set(draft.citations)) and draft.classification != "unsupported"
+            valid = valid and not tools.vehicle_eligibility_requested
             for comparison_result in tools.comparisons:
                 valid = valid and comparison_result["status"] == "available" and all(
                     any(provision["citation"] in draft.citations and provision.get("governing", True)
@@ -348,6 +406,13 @@ class AssistantService:
                     for side in comparison_result["profiles"]
                 )
             text = draft.text if valid else "I could not verify an answer from the published schedule and documentation."
+            if valid and tools.vehicle_specifications:
+                draft = tools.vehicle_answer()
+                valid = draft.classification != "unsupported"
+                references = [tools.citations[identity] for identity in draft.citations]
+                text = draft.text
+            if tools.vehicle_eligibility_requested:
+                text = "Basic Vehicle Specifications and Secondary Evidence cannot establish Competition Eligibility. Reviewed governing provisions and temporal applicability are required."
             if not valid and tools.comparisons:
                 reasons = [f"{result['season']} {result['topic']} ({result['onDate'] or 'no event date'}): {reason}"
                            for result in tools.comparisons for reason in result["limitations"]]

@@ -15,6 +15,7 @@ import { getHealth, getSchedule } from "./api/client";
 import type { components } from "./api/schema";
 import { MeetingDetails } from "./MeetingDetails";
 import { AssistantChat } from "./AssistantChat";
+import { Vehicles } from "./Vehicles";
 import "./styles.css";
 
 type Meeting = components["schemas"]["MeetingResponse"];
@@ -157,6 +158,11 @@ function App() {
 
       <main>
         {chatOpen && <AssistantChat zone={query.get("zone") === "event" ? selected?.eventTimezone || "UTC" : query.get("zone") && query.get("zone") !== "browser" ? query.get("zone")! : Intl.DateTimeFormat().resolvedOptions().timeZone} setZone={zone => changeQuery("zone", zone)} />}
+        <nav className="section-nav" aria-label="Main views">
+          <a href={queryFor("view", "")} aria-current={query.get("view") !== "vehicles" ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", ""); }}>Schedule</a>
+          <a href={queryFor("view", "vehicles")} aria-current={query.get("view") === "vehicles" ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", "vehicles"); }}>Vehicles</a>
+        </nav>
+        {query.get("view") === "vehicles" ? <Vehicles identity={query.get("vehicle") || ""} href={identity => queryFor("vehicle", identity)} navigate={identity => changeQuery("vehicle", identity)} /> : <>
         <section className="schedule-heading" aria-labelledby="schedule-title">
           <div>
             <p className="date-line">2026 season</p>
@@ -272,6 +278,7 @@ function App() {
             </div>
           )}
         </section>
+        </>}
       </main>
 
       <footer>

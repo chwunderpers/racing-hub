@@ -1,0 +1,24 @@
+{
+  "issue": 13,
+  "authorizedBy": "Chris (repository operator)",
+  "authorizedOn": "2026-09-14",
+  "executionDelegate": "GitHub Copilot",
+  "scope": "Local Racing Hub proof of concept, Issue 13 closeout only",
+  "userInstruction": "So do wahtever is needed to close this ticket, I approve whatever content you want to ingest, but please do it withoput asking me all of the time",
+  "rationale": "The operator prioritizes exercising collection, handoff, approval and publication workflows with disposable PoC content, and delegates their execution without repeated confirmation prompts. This is not a claim of exhaustive factual accuracy.",
+  "authorizedOperations": [
+    "Inspect and refresh the three agreed vehicle source inventories",
+    "Prepare, rehearse and accept the additive vehicle ontology proposal and promote its canonical vocabulary",
+    "Review English wording, source authority, vehicle identity and applicability on the operator's behalf",
+    "Create and confirm the exact vehicle decision proposal",
+    "Separately create and confirm the exact publication proposal",
+    "Verify the local application and assistant against the completed publication",
+    "Record closeout evidence, commit locally and close GitHub Issue 13"
+  ],
+  "constraints": [
+    "Preserve existing schedules, regulations, unrelated review items and user changes",
+    "Use the existing preview, digest, baseline and projection gates; do not bypass or disable them",
+    "Record actual delegate execution and hashes; do not claim the operator personally inspected each assertion",
+    "No blanket production approval, public deployment, data deletion, git push or merge is included"
+  ]
+}

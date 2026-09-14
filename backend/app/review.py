@@ -23,6 +23,7 @@ class DecisionRequest(BaseModel):
     corrected_candidate: dict | None = None
     identity_resolutions: dict[str, str] = Field(default_factory=dict)
     regulation_confirmations: list[str] = Field(default_factory=list)
+    vehicle_confirmations: list[str] = Field(default_factory=list)
 
 
 class ReviewStore(Protocol):
@@ -69,6 +70,10 @@ class ReviewService:
             for passage in bundle.get("passages", []):
                 if passage.get("language") != "en":
                     raise ValueError("Only English regulation evidence may be persisted; translate before preview")
+        for vehicle in candidate.get("vehicles", []):
+            if vehicle.get("language") != "en" or any(assertion.get("source", {}).get("language") != "en"
+                    for assertions in vehicle.get("fields", {}).values() for assertion in assertions):
+                raise ValueError("Only English vehicle evidence may be persisted")
         item = self._preview(candidate)
         if expected_baseline is not None and item["baselineVersion"] != expected_baseline:
             raise ValueError("Publication baseline changed during ingestion; prepare and review again")
@@ -87,11 +92,13 @@ class ReviewService:
         evidence: list[str], corrected_candidate: dict | None = None,
         identity_resolutions: dict[str, str] | None = None,
         regulation_confirmations: list[str] | None = None,
+        vehicle_confirmations: list[str] | None = None,
     ) -> dict:
         request = DecisionRequest.model_validate({
             "outcome": outcome, "person": person, "rationale": rationale, "evidence": evidence,
             "corrected_candidate": corrected_candidate, "identity_resolutions": identity_resolutions or {},
             "regulation_confirmations": regulation_confirmations or [],
+            "vehicle_confirmations": vehicle_confirmations or [],
         })
         if (request.outcome == "corrected") != (request.corrected_candidate is not None):
             raise ValueError("A correction requires exactly one corrected candidate")
@@ -107,6 +114,7 @@ class ReviewService:
             "preview": item["preview"], "correctedCandidate": request.corrected_candidate,
             "identityResolutions": request.identity_resolutions,
             "regulationConfirmations": request.regulation_confirmations,
+            "vehicleConfirmations": request.vehicle_confirmations,
         }
         proposal = {"decision": decision, "confirmation": self._digest(decision)}
         item["proposal"] = proposal
@@ -200,6 +208,8 @@ class ReviewService:
         required = decision["preview"].get("regulationConfirmations", [])
         if not set(required).issubset(decision.get("regulationConfirmations", [])):
             raise ValueError("Explicit regulation evidence, translation and identity confirmation is required")
+        if not set(decision["preview"].get("vehicleConfirmations", [])).issubset(decision.get("vehicleConfirmations", [])):
+            raise ValueError("Explicit vehicle evidence, source authority and identity confirmation is required")
         if isinstance(envelope, PublicationSnapshot):
             for bundle in envelope.regulations:
                 if any(passage.translation and passage.translation.review_state != "accepted" for passage in bundle.passages):
@@ -292,6 +302,16 @@ class ReviewService:
                 conflicts.append("Missing published Meetings; retain them with explicit sourced cancellation: " + ", ".join(missing))
         changes = {}
         regulation_confirmations = []
+        vehicle_confirmations = []
+        previous_vehicles = {entry.identity: entry.model_dump(mode="json") for entry in baseline.vehicles} if isinstance(baseline, PublicationSnapshot) else {}
+        next_vehicles = {entry["identity"]: entry for entry in candidate.get("vehicles", [])} if not errors else {}
+        for identity in previous_vehicles.keys() | next_vehicles.keys():
+            before, after = previous_vehicles.get(identity), next_vehicles.get(identity)
+            if before != after:
+                changes["vehicles/" + identity] = {"before": before, "after": after}
+                vehicle_confirmations.append("vehicles/" + identity + "/" + self._digest({"before": before, "after": after}))
+                if after is None:
+                    conflicts.append("Missing published Vehicle Model: " + identity)
         previous_regulations = {f"{entry.competition_identity}:{entry.season_year}": entry.model_dump(mode="json") for entry in baseline.regulations} if isinstance(baseline, PublicationSnapshot) else {}
         next_regulations = {f"{entry['competition_identity']}:{entry['season_year']}": entry for entry in candidate.get("regulations", [])} if not errors else {}
         for scope in previous_regulations.keys() | next_regulations.keys():
@@ -338,5 +358,6 @@ class ReviewService:
                 "cancellations": [identity for identity, entry in proposed.items() if entry["meeting"]["status"] == "cancelled" and previous.get(identity, {}).get("meeting", {}).get("status") != "cancelled"],
                 "conflicts": conflicts, "unresolvedIdentities": unresolved, "validationErrors": errors,
                 "regulationConfirmations": regulation_confirmations,
+                "vehicleConfirmations": vehicle_confirmations,
             },
         }
