@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.publication import coverage_view
-from app.freshness import FreshnessResponse
+from app.freshness import FreshnessResponse, regulation_freshness_view
 from app.regulations import Topic
 
 
@@ -71,7 +71,7 @@ class Citation(BaseModel):
 class AnswerDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=1, max_length=6000)
-    citations: list[str] = Field(max_length=12)
+    citations: list[str] = Field(max_length=32)
     classification: Literal["stated", "derived", "unsupported"] = "stated"
 
 
@@ -357,7 +357,9 @@ class AssistantService:
                 text = text[:6000]
             classification = "derived" if tools.comparisons else draft.classification
             answer = AssistantAnswer(text=text, citations=references if valid else [], classification=classification if valid else "unsupported",
-                                     displayTimeZone=zone, publicationVersion=version, freshness=self.store.source_freshness())
+                                     displayTimeZone=zone, publicationVersion=version,
+                                     freshness=FreshnessResponse.model_validate(regulation_freshness_view(tools.comparisons[0]))
+                                     if comparison is not None else self.store.source_freshness())
             session.history.extend([{"role": "user", "content": question}, {"role": "assistant", "content": answer.text}])
             session.touched = self.clock()
             return answer

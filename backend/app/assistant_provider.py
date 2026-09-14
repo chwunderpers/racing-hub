@@ -93,6 +93,8 @@ class AzureAnswerProvider:
             "Do not infer completion from past dates. Unknown end times, dates and offsets stay unknown. "
             "Use deterministic tool display values for conversions; unresolved clocks retain published local time. "
             "Cite relevant returned citation IDs in citations; never invent IDs, URLs or facts. "
+            "Each citations entry must be one exact returned citation ID, without appended labels, page numbers or commentary. "
+            "Include every citation used in the answer text in that list; do not merge or truncate IDs. "
             "For unsupported questions say evidence is unavailable and use classification unsupported. "
             "Classification is stated for sourced facts, derived for time conversions or evidence-linked comparisons; do not claim inference. "
             f"Display time zone: {tools.zone}. Today UTC: {datetime.now(timezone.utc).date()}. "

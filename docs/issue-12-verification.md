@@ -1,8 +1,9 @@
 # Issue 12 Verification
 
-Updated: 2026-09-12. Scope: Formula One versus NLS, 2026 race-points allocation,
+Updated: 2026-09-14. Scope: Formula One versus NLS, 2026 race-points allocation,
 with F1 as the reference. Review baseline: `4f87d77`. Implementation is local on
-`main`; no push, merge, new evidence approval or live publication is authorized.
+`main`; no push or merge is authorized. The separately authorized 2026-09-14
+publication and subsequent live fix below supersede the earlier pending gates.
 
 ## Delivered
 
@@ -144,3 +145,48 @@ remains open for review of the 14 pending real translations and separate exact
 candidate/publication approvals. Successful real-data comparison and live model
 evaluation remain gated by that evidence review; synthetic integration success
 does not replace it.
+
+## Published Evidence And Live Follow-up, 2026-09-14
+
+Chris approved all 14 translations, then separately confirmed the exact candidate
+and publication proposals. Decision `fb83f34b-2b7a-4b4a-a9c6-5b60505d8a48`
+published version `5106927820d7b8d6a710009b5ff15b532df54314dd1ad391b0577a1638a72ae3`
+at 06:31:53 UTC. The receipt and live API agree on that version; 50 Meetings
+remain available. Private operational records are not implementation changes.
+
+The first real comparison failed the governing-citation guard. A direct live
+provider probe confirmed available evidence with 16 governing citations, but the
+response schema allowed only 12. The generated structured list contained the
+invalid ID `citation-12 classical` while the answer text referenced more passages.
+The bounded capacity is now 32, with explicit exact-ID serialization instructions.
+No fabricated citations are repaired or attached, and the bilateral guard remains
+unchanged. A subsequent live answer was derived with all 16 valid FIA/VLN citations
+and the unchanged publication version. This verifies the observed case, not a
+guarantee of arbitrary model prose accuracy.
+
+Explicit comparison freshness previously inherited all schedule-source attempts,
+including unrelated GT World Challenge checks. It now uses the oldest verified
+regulation document retrieval per Competition with separately declared F1/NLS
+regulation policies, each conservatively retaining a 24-hour threshold. Missing
+evidence remains unverified. F1's older document verification can legitimately
+remain stale; no timestamp, source content or approved publication was changed.
+Ordinary Chat and schedule freshness remain unchanged.
+
+Validation:
+
+- Full backend suite: **260 passed, zero skipped**, 945.45s, before the final
+  explicit policy/model-validation refinement.
+- After those refinements: **22 focused tests passed**, including seven freshness
+  cases and SDK coverage for 16 citations, malformed/one-sided rejection and
+  nonempty-history isolation. Existing dependency warnings remain.
+- Final changed-file Pyright: zero errors. Final live HTTP checks after rebuilding
+  only the backend: scoring derived with 16 bilateral citations; tyres and dated
+  scoring unsupported with no citations; all three used the approved publication.
+  Freshness correctly reported F1's 2026-09-10 17:50 UTC document check as expired
+  and NLS's 2026-09-14 06:15 UTC check as current, without unrelated schedule checks.
+  All 50 Meetings remained available; temporary session deletion returned 204.
+- Two-axis follow-up review: Spec found no confirmed defects. Standards identified
+  inherited universal expiry; corrected to explicit per-source regulation policy
+  with an independence test. One low aggregation-duplication advisory remains.
+- Successful live comparison evidence does not refresh schedule checks or extend
+  historical applicability. Issue closure, push and merge have not been performed.

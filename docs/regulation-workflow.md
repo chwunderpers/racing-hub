@@ -19,7 +19,10 @@ Use the [NLS research](nls-regulations-source-inventory.md) to review exact anch
 table values, the conflicting approval dates and incomplete amendment coverage.
 Its scoring value is conditional; six other topics are unknown. The class-based
 A-F championship allocation is distinct from the Speed Trophy H overall award.
-No NLS evidence has been approved or published by Issue #12 implementation.
+The checked-in fixture remains pending. Chris approved the private copy's 14
+translations on 2026-09-14; the separately accepted candidate was published as
+`5106927820d7b8d6a710009b5ff15b532df54314dd1ad391b0577a1638a72ae3`.
+That approval does not change unknown dates or resolve the documented conflicts.
 
 For a new source, inventory the official HTTPS FIA, VLN or DMSB PDF and review its identity,
 season, authority, version, section anchors and permissible evidence reuse before
@@ -86,6 +89,15 @@ keep operational review artifacts out of implementation commits.
    current Publication; corrections preserve earlier private envelopes by version.
 
 ## Assistant Contract
+
+Explicit comparison freshness describes the regulation evidence retrieved for
+that answer, not schedule-ingestion attempts for unrelated Competitions. F1 and
+NLS regulation verification each currently have an explicit 24-hour policy,
+independent of schedule policies. Each side uses its oldest document retrieval
+timestamp; missing evidence remains unverified. These timestamps originate from
+the checksum-verified ingestion, not publication time. Publication does not reset
+them, establish historical applicability, or prove complete amendment coverage.
+Ordinary Chat retains its existing aggregate schedule-source freshness behavior.
 
 `competition_regulations` reads a completed season-scoped Competition Profile
 through the restricted document view. It returns governing Provisions, English
