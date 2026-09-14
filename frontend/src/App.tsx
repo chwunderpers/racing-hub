@@ -17,6 +17,7 @@ import { MeetingDetails } from "./MeetingDetails";
 import { MeetingCapabilities } from "./MeetingCapabilities";
 import { AssistantChat } from "./AssistantChat";
 import { Vehicles } from "./Vehicles";
+import { Exports } from "./Exports";
 import "./styles.css";
 
 type Meeting = components["schemas"]["MeetingResponse"];
@@ -160,10 +161,11 @@ function App() {
       <main>
         {chatOpen && <AssistantChat zone={query.get("zone") === "event" ? selected?.eventTimezone || "UTC" : query.get("zone") && query.get("zone") !== "browser" ? query.get("zone")! : Intl.DateTimeFormat().resolvedOptions().timeZone} setZone={zone => changeQuery("zone", zone)} />}
         <nav className="section-nav" aria-label="Main views">
-          <a href={queryFor("view", "")} aria-current={query.get("view") !== "vehicles" ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", ""); }}>Schedule</a>
+          <a href={queryFor("view", "")} aria-current={!["vehicles", "exports"].includes(query.get("view") || "") ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", ""); }}>Schedule</a>
           <a href={queryFor("view", "vehicles")} aria-current={query.get("view") === "vehicles" ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", "vehicles"); }}>Vehicles</a>
+          <a href={queryFor("view", "exports")} aria-current={query.get("view") === "exports" ? "page" : undefined} onClick={event => { event.preventDefault(); changeQuery("view", "exports"); }}>Exports</a>
         </nav>
-        {query.get("view") === "vehicles" ? <Vehicles identity={query.get("vehicle") || ""} href={identity => queryFor("vehicle", identity)} navigate={identity => changeQuery("vehicle", identity)} /> : <>
+        {query.get("view") === "exports" ? <Exports /> : query.get("view") === "vehicles" ? <Vehicles identity={query.get("vehicle") || ""} href={identity => queryFor("vehicle", identity)} navigate={identity => changeQuery("vehicle", identity)} /> : <>
         <section className="schedule-heading" aria-labelledby="schedule-title">
           <div>
             <p className="date-line">2026 season</p>

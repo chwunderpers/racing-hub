@@ -51,6 +51,99 @@
         }
       }
     },
+    "/api/exports": {
+      "get": {
+        "summary": "Export Selection",
+        "operationId": "export_selection_api_exports_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSelection"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Publication store unavailable"
+          }
+        }
+      }
+    },
+    "/api/exports/ontology": {
+      "get": {
+        "summary": "Export Ontology",
+        "operationId": "export_ontology_api_exports_ontology_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/turtle": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/exports/publications/{version}/{format}": {
+      "get": {
+        "summary": "Export Publication",
+        "operationId": "export_publication_api_exports_publications__version___format__get",
+        "parameters": [
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Version"
+            }
+          },
+          {
+            "name": "format",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "json",
+                "csv",
+                "turtle"
+              ],
+              "type": "string",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/ld+json": {},
+              "text/csv": {},
+              "text/turtle": {}
+            }
+          },
+          "409": {
+            "description": "Publication unavailable or changed"
+          },
+          "503": {
+            "description": "Publication store unavailable"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/capabilities": {
       "get": {
         "summary": "Capabilities",
@@ -563,6 +656,26 @@
           "source_url"
         ],
         "title": "CoverageAssessment"
+      },
+      "ExportSelection": {
+        "properties": {
+          "publicationVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publicationversion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publicationVersion"
+        ],
+        "title": "ExportSelection"
       },
       "FieldAssertion": {
         "properties": {
