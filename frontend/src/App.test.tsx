@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
 import App from "./App";
+import { MeetingCapabilities } from "./MeetingCapabilities";
 
 
 afterEach(() => {
@@ -243,4 +244,55 @@ it("shows multi-Round NLS details with abandonment, nominal duration, place and 
   expect(screen.getByText("Qualifiers route 2026 / 25.378 km")).toBeVisible();
   expect(screen.getByText("Coverage incomplete: Friday timetable unverified")).toBeVisible();
   expect(screen.getAllByText("abandoned").length).toBeGreaterThan(0);
+});
+
+it("shows identity-scoped synthetic Meeting data and removes its UI when unregistered", async () => {
+  window.history.replaceState({}, "", "/?meeting=meeting%3Af1%3A2026%3Aaustralia");
+  let registered = true;
+  let reads = 0;
+  const subjectIri = "https://w3id.org/motorsport-hub/resource/meeting/f1%3A2026%3Aaustralia";
+  vi.spyOn(globalThis, "fetch").mockImplementation(async input => {
+    const url = String(input);
+    if (url.endsWith("/api/health")) return Response.json({ status: "ok", database: "ok" });
+    if (url.includes("/api/capabilities")) {
+      reads += 1;
+      expect(new URL(url, "http://localhost").searchParams.get("subjectIri")).toBe(subjectIri);
+      return Response.json({ publicationVersion: "sample", contributions: registered ? [{ id: "sample", title: "Synthetic Meeting note", subjectIri, text: "Demonstration record only.", kind: "synthetic" }] : [] });
+    }
+    return Response.json({ meetings: [{ id: "meeting:f1:2026:australia", publicationVersion: "sample", name: "Australian Grand Prix", competition: "Formula One", season: 2026, circuit: "Albert Park", startDate: "2026-03-06", endDate: "2026-03-08", sourceUrl: "https://example.test/source", retrievedAt: "2026-09-14T08:00:00Z", sessions: [] }] });
+  });
+  const first = render(<App />);
+  expect(await screen.findByRole("heading", { name: "Synthetic Meeting note" })).toBeVisible();
+  expect(screen.getByText("Synthetic data / Not sporting evidence")).toBeVisible();
+  expect(screen.getByText("Demonstration record only.")).toBeVisible();
+  first.unmount();
+  registered = false;
+  render(<App />);
+  await screen.findByRole("heading", { name: "Australian Grand Prix" });
+  await waitFor(() => expect(reads).toBe(2));
+  expect(screen.queryByRole("heading", { name: "Synthetic Meeting note" })).not.toBeInTheDocument();
+  expect(screen.queryByText("Synthetic data / Not sporting evidence")).not.toBeInTheDocument();
+});
+
+it.each(["unavailable", "publication-changed"])("keeps %s optional data separate and allows retry", async state => {
+  const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(state === "unavailable"
+    ? new Response(null, { status: 503 })
+    : Response.json({ publicationVersion: "other", contributions: [{ id: "sample", title: "Wrong publication", text: "Must stay hidden", kind: "synthetic" }] }))
+    .mockResolvedValueOnce(Response.json({ publicationVersion: "current", contributions: [] }));
+  render(<MeetingCapabilities identity="meeting:f1:2026:australia" publicationVersion="current" />);
+  fireEvent.click(await screen.findByRole("button", { name: "Retry optional data" }));
+  await waitFor(() => expect(screen.queryByText("Optional data unavailable")).not.toBeInTheDocument());
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(screen.queryByText("Must stay hidden")).not.toBeInTheDocument();
+});
+
+it("ignores an old Meeting response after navigation", async () => {
+  let finish: (response: Response) => void = () => {};
+  vi.spyOn(globalThis, "fetch").mockImplementationOnce(() => new Promise<Response>(resolve => { finish = resolve; }))
+    .mockResolvedValueOnce(Response.json({ publicationVersion: "current", contributions: [] }));
+  const view = render(<MeetingCapabilities identity="meeting:f1:2026:australia" publicationVersion="current" />);
+  view.rerender(<MeetingCapabilities identity="meeting:f1:2026:bahrain" publicationVersion="current" />);
+  finish(Response.json({ publicationVersion: "current", contributions: [{ id: "sample", title: "Old Meeting", text: "Old Meeting data", kind: "synthetic" }] }));
+  await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledTimes(2));
+  expect(screen.queryByText("Old Meeting data")).not.toBeInTheDocument();
 });

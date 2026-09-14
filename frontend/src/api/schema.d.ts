@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Capabilities */
+        get: operations["capabilities_api_capabilities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vehicles": {
         parameters: {
             query?: never;
@@ -143,6 +160,8 @@ export interface components {
             /** Publicationversion */
             publicationVersion: string | null;
             freshness: components["schemas"]["FreshnessResponse"];
+            /** Contributions */
+            contributions?: components["schemas"]["CapabilityContribution"][];
         };
         /** AssistantMessage */
         AssistantMessage: {
@@ -174,6 +193,30 @@ export interface components {
             identity: string;
             /** Name */
             name: string;
+        };
+        /** CapabilityContribution */
+        CapabilityContribution: {
+            /** Subjectiri */
+            subjectIri: string;
+            /** Text */
+            text: string;
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /**
+             * Kind
+             * @default synthetic
+             * @constant
+             */
+            kind: "synthetic";
+        };
+        /** CapabilityResponse */
+        CapabilityResponse: {
+            /** Publicationversion */
+            publicationVersion: string | null;
+            /** Contributions */
+            contributions: components["schemas"]["CapabilityContribution"][];
         };
         /** Citation */
         Citation: {
@@ -586,6 +629,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScheduleResponse"];
+                };
+            };
+        };
+    };
+    capabilities_api_capabilities_get: {
+        parameters: {
+            query: {
+                subjectIri: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CapabilityResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

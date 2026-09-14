@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from app.publication import coverage_view
 from app.freshness import FreshnessResponse, regulation_freshness_view
 from app.regulations import Topic
+from app.capabilities import CapabilityContribution, CapabilityQuery, CapabilityRegistry, published_contributions
 
 
 class ScheduleQuery(BaseModel):
@@ -88,14 +89,18 @@ class AssistantAnswer(BaseModel):
     displayTimeZone: str
     publicationVersion: str | None
     freshness: FreshnessResponse
+    contributions: list[CapabilityContribution] = Field(default_factory=list)
 
 
 class ReadTools:
-    def __init__(self, store, version: str | None, zone: str, graph=None):
+    def __init__(self, store, version: str | None, zone: str, graph=None, capabilities: CapabilityRegistry | None = None):
         self.store = store
         self.version = version
         self.zone = zone
         self.graph = graph
+        self.capabilities = capabilities if capabilities is not None else CapabilityRegistry()
+        self.capability_requested = False
+        self.contributions: list[CapabilityContribution] = []
         self.citations: dict[str, Citation] = {}
         self.comparisons: list[dict] = []
         self.vehicle_eligibility_requested = False
@@ -165,6 +170,14 @@ class ReadTools:
         self._begin()
         record = self.store.lookup_document(request.iri, self.version) if self.version else None
         return self._bounded({"document": self._document(record) if record else None})
+
+    def meeting_capabilities(self, request: CapabilityQuery) -> dict:
+        self._begin()
+        self.capability_requested = True
+        result = published_contributions(self.capabilities, self.store, self.version, request)
+        bounded = self._bounded(result.model_dump(mode="json"))
+        self.contributions = result.contributions
+        return bounded
 
     def regulations(self, request: RegulationQuery) -> dict:
         from app.regulation_projection import regulation_iri
@@ -330,11 +343,12 @@ class TabSession:
 
 
 class AssistantService:
-    def __init__(self, store, provider: AnswerProvider | None, clock=time.monotonic, graph_factory=None):
+    def __init__(self, store, provider: AnswerProvider | None, clock=time.monotonic, graph_factory=None, capability_factory=None):
         self.store = store
         self.provider = provider
         self.clock = clock
         self.graph_factory = graph_factory
+        self.capability_factory = capability_factory
         self.sessions: dict[str, TabSession] = {}
 
     def _expire(self):
@@ -380,7 +394,8 @@ class AssistantService:
         session.task = asyncio.current_task()
         try:
             version = self.store.current_publication_version()
-            tools = ReadTools(self.store, version, zone, self.graph_factory(version) if self.graph_factory and version else None)
+            tools = ReadTools(self.store, version, zone, self.graph_factory(version) if self.graph_factory and version else None,
+                              self.capability_factory() if self.capability_factory else None)
             async with asyncio.timeout(60):
                 if comparison is not None:
                     question = (f"Compare Formula One and NLS {comparison.season} {comparison.topic} "
@@ -421,8 +436,13 @@ class AssistantService:
                 )
                 text = text[:6000]
             classification = "derived" if tools.comparisons else draft.classification
+            if tools.capability_requested:
+                valid = False
+                text = ("Synthetic module data is shown separately below. It is not published sporting evidence and cannot establish schedule facts, results, rules or eligibility."
+                        if tools.contributions else "No synthetic contribution is available for this published Meeting or Session.")
             answer = AssistantAnswer(text=text, citations=references if valid else [], classification=classification if valid else "unsupported",
                                      displayTimeZone=zone, publicationVersion=version,
+                                     contributions=tools.contributions,
                                      freshness=FreshnessResponse.model_validate(regulation_freshness_view(tools.comparisons[0]))
                                      if comparison is not None else self.store.source_freshness())
             session.history.extend([{"role": "user", "content": question}, {"role": "assistant", "content": answer.text}])

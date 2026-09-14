@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeftRight, ExternalLink, RotateCcw, Send, Square } from "lucide-react";
 import type { components } from "./api/schema";
+import { CapabilityEntries } from "./MeetingCapabilities";
 import "./AssistantChat.css";
 
 type Answer = components["schemas"]["AssistantAnswer"];
@@ -103,6 +104,7 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
     <div className="assistant-transcript" role="log" aria-label="Conversation" ref={transcript}>
       {turns.map((turn, index) => <article className="assistant-turn" key={index}><h3>{turn.question}</h3>
         {turn.answer && <><p className="assistant-answer">{turn.answer.text}</p>
+          <CapabilityEntries contributions={turn.answer.contributions || []} />
           <p className="assistant-answer-meta">Display time zone: {turn.answer.displayTimeZone}</p>
           <p className="assistant-answer-meta">{turn.answer.classification === "derived" ? "Derived answer" : turn.answer.classification === "unsupported" ? "Evidence unavailable" : "Sourced answer"}{turn.answer.freshness.stale ? " / Sources may be outdated" : " / Source checks current"}</p>
           <ul className="assistant-citations">{turn.answer.citations.map(citation => <li key={citation.id}>

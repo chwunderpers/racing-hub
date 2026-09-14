@@ -7,6 +7,7 @@ from agent_framework.openai import OpenAIChatClient
 from openai import AsyncOpenAI
 
 from app.assistant import AnswerDraft, GraphQuery, IriQuery, ReadTools, RegulationComparisonQuery, RegulationQuery, ScheduleQuery, SearchQuery, VehicleQuery
+from app.capabilities import CapabilityQuery
 
 
 class AzureAnswerProvider:
@@ -58,6 +59,13 @@ class AzureAnswerProvider:
                 return tools.vehicle(VehicleQuery.model_validate(request))
             except Exception:
                 return {"status": "insufficient-evidence", "error": "Published vehicle evidence unavailable or request exceeds permitted bounds"}
+
+        @tool(name="meeting_capabilities", description="Read optional synthetic contributions for one published Meeting or Session by exact canonical IRI. Discover that IRI with search_documentation or lookup_iri. No writes or external providers. Synthetic data is not sporting evidence and cannot establish facts, results, rules or eligibility.")
+        def meeting_capabilities(request: CapabilityQuery) -> dict:
+            try:
+                return tools.meeting_capabilities(CapabilityQuery.model_validate(request))
+            except Exception:
+                return {"error": "Synthetic contribution unavailable or request exceeds permitted bounds"}
 
         @tool(name="graph_shared_circuits", description="Find shared canonical Circuits across ALL competitions in the current Publication using native GraphDB MCP. Use this for shared tracks; includes source citations and IRIs.")
         async def graph_shared_circuits() -> dict:
@@ -116,6 +124,8 @@ class AzureAnswerProvider:
             client = OpenAIChatClient(model=self.deployment, async_client=transport,
                                       function_invocation_configuration={"max_iterations": 4, "max_function_calls": 6, "include_detailed_errors": False})
             agent_tools = [schedule, search_documentation, lookup_iri, competition_regulations, compare_regulations, vehicle_specification]
+            if tools.capabilities.available:
+                agent_tools.append(meeting_capabilities)
             if tools.graph is not None:
                 agent_tools.extend([graph_shared_circuits, graph_query])
             messages = [Message(entry["role"], [entry["content"]]) for entry in history]

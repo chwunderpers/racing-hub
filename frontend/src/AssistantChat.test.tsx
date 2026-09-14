@@ -4,6 +4,19 @@ import { AssistantChat } from "./AssistantChat";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
+it("renders synthetic contributions separately without source citations", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({ sessionToken: "synthetic-session", available: true }))
+    .mockResolvedValueOnce(Response.json({ text: "Synthetic data is not sporting evidence.", displayTimeZone: "UTC", classification: "unsupported", freshness: { stale: false }, citations: [], contributions: [{ id: "sample", title: "Synthetic Meeting note", subjectIri: "https://w3id.org/motorsport-hub/resource/meeting/sample", text: "Demonstration marker: A-01.", kind: "synthetic" }] }))
+    .mockResolvedValue(new Response(null, { status: 204 }));
+  render(<AssistantChat zone="UTC" setZone={() => {}} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Question" }), { target: { value: "Show the synthetic note" } });
+  await waitFor(() => expect(screen.getByRole("button", { name: "Send question" })).toBeEnabled());
+  fireEvent.click(screen.getByRole("button", { name: "Send question" }));
+  expect(await screen.findByText("Demonstration marker: A-01.")).toBeVisible();
+  expect(screen.getByText("Synthetic data / Not sporting evidence")).toBeVisible();
+  expect(screen.queryByRole("link")).not.toBeInTheDocument();
+});
+
 it("answers with source and display zone, then resets ephemeral context", async () => {
   const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ sessionToken: "first-session", available: true })))
     .mockResolvedValueOnce(new Response(JSON.stringify({ text: "Australian Meeting: 6-8 March 2026.", displayTimeZone: "UTC", publicationVersion: "a".repeat(64), classification: "stated", freshness: { stale: false }, citations: [{ id: "citation-1", iri: "https://w3id.org/motorsport-hub/resource/meeting/australia", title: "Australian Grand Prix", sourceUrl: "https://www.formula1.com/en/racing/2026/australia", retrievedAt: "2026-09-10T08:00:00Z" }] })))

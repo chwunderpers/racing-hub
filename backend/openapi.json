@@ -51,6 +51,47 @@
         }
       }
     },
+    "/api/capabilities": {
+      "get": {
+        "summary": "Capabilities",
+        "operationId": "capabilities_api_capabilities_get",
+        "parameters": [
+          {
+            "name": "subjectIri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 500,
+              "pattern": "^https://w3id\\.org/motorsport-hub/resource/(meeting|session)/[^/]+$",
+              "title": "Subjectiri"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CapabilityResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/vehicles": {
       "get": {
         "summary": "Vehicles",
@@ -253,6 +294,13 @@
           },
           "freshness": {
             "$ref": "#/components/schemas/FreshnessResponse"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityContribution"
+            },
+            "type": "array",
+            "title": "Contributions"
           }
         },
         "type": "object",
@@ -366,6 +414,73 @@
           "name"
         ],
         "title": "CandidatePlace"
+      },
+      "CapabilityContribution": {
+        "properties": {
+          "subjectIri": {
+            "type": "string",
+            "maxLength": 500,
+            "pattern": "^https://w3id\\.org/motorsport-hub/resource/(meeting|session)/[^/]+$",
+            "title": "Subjectiri"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "kind": {
+            "type": "string",
+            "const": "synthetic",
+            "title": "Kind",
+            "default": "synthetic"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subjectIri",
+          "text",
+          "id",
+          "title"
+        ],
+        "title": "CapabilityContribution"
+      },
+      "CapabilityResponse": {
+        "properties": {
+          "publicationVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publicationversion"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/CapabilityContribution"
+            },
+            "type": "array",
+            "title": "Contributions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publicationVersion",
+          "contributions"
+        ],
+        "title": "CapabilityResponse"
       },
       "Citation": {
         "properties": {

@@ -14,6 +14,7 @@ import {
 import { getHealth, getSchedule } from "./api/client";
 import type { components } from "./api/schema";
 import { MeetingDetails } from "./MeetingDetails";
+import { MeetingCapabilities } from "./MeetingCapabilities";
 import { AssistantChat } from "./AssistantChat";
 import { Vehicles } from "./Vehicles";
 import "./styles.css";
@@ -205,6 +206,7 @@ function App() {
           <span>{assessment.reason}</span><a href={assessment.source_url} target="_blank" rel="noreferrer">Source</a>
         </div>)}
         {viewState === "ready" && selected && <MeetingDetails meeting={selected} meetings={meetings} meetingHref={(identity) => queryFor("meeting", identity)} onMeeting={(identity) => changeQuery("meeting", identity)} zone={query.get("zone") || "browser"} setZone={(zone) => changeQuery("zone", zone)} backHref={queryFor("meeting", "")} onBack={() => changeQuery("meeting", "")} />}
+        {viewState === "ready" && selected && <MeetingCapabilities key={`${selected.id}:${selected.publicationVersion}`} identity={selected.id} publicationVersion={selected.publicationVersion} />}
         {viewState === "ready" && selectedId && !selected && <div className="empty-state"><h2>Meeting not found</h2><a href={queryFor("meeting", "")} onClick={(event) => { event.preventDefault(); changeQuery("meeting", ""); }}>Back to schedule</a></div>}
 
         <section className="schedule-lane" aria-live="polite" hidden={viewState === "ready" && Boolean(selectedId)}>
