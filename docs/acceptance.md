@@ -55,11 +55,16 @@ vehicles, optional capabilities, search, native MCP and assistant behavior.
 
 Recovery tests use disposable databases/repositories and exercise private
 backup/restore, overwrite refusal, corrupt archives, retained source failure
-state, and reconciliation of a deleted accepted graph. Existing tests cover
+state, a missing restored graph remaining unpublished, and reconciliation of a
+deleted accepted graph. Existing tests cover
 retrieval and projection failure with the previous publication retained.
 Security suites exercise least-privilege access, bounded queries/tools,
 SSRF restrictions, prompt-injection requests, citation enforcement and private
-data exclusion. Test output is not proof of model immunity to arbitrary
+data exclusion. The HTTP/SDK regression supplies malicious retrieved source
+text, simulates an attempted SQL/oversized tool request, and checks refusal of
+fabricated citations without exposing provider credentials. Its provider
+transport is deterministic, not a live-model adversarial evaluation.
+Test output is not proof of model immunity to arbitrary
 prompt injection; the assistant remains bounded by its server-side tools.
 
 ## Reports And Cleanup
@@ -123,4 +128,52 @@ before considering recovery complete.
 ## Verification Record
 
 Review baseline: `9a78b72b546e32f6e7133735919449c11c7f919b`.
-Full clean-checkout results and two-axis review will be recorded after the run.
+
+On 2026-09-14, clean-checkout run `issue-16-run-002` passed at revision
+`4d1cc1ea200fce620be3560ae2bdc3012cb1811f`:
+
+- 301 backend tests, zero skips, including real disposable PostgreSQL/GraphDB.
+- 27 frontend component tests and the production/typecheck build.
+- Frontend dependency audit: zero vulnerabilities.
+- Four Playwright tests across desktop (1440x1000) and mobile (390x844), with
+  zero axe WCAG A/AA violations, no horizontal overflow, and actual downloads.
+- Fresh security setup and cleanup of all rehearsal containers/volumes passed.
+
+The private report is `acceptance-results/issue-16-run-002/report.json`.
+Saved desktop/mobile screenshots were visually inspected without overlap.
+Run 001 failed because restarting GraphDB changed its dynamic host port; the
+runner now resolves the port again. Its disposable resources were also removed.
+
+Post-review additions were verified separately: three recovery tests (including
+missing-current-graph refusal), 12 assistant tests (including malicious source
+text), and all four browser tests with the explicit stale-state assertion
+passed. These additions are not included in the 301-test run's recorded commit.
+Pyright reported zero errors/warnings for the new modules and touched Python
+tests; editor diagnostics were clear. No application runtime code changed after
+the successful clean-checkout run.
+
+## Standards
+
+The initial parallel review found zero hard violations and two low-priority
+heuristics: repeated dotenv loading and environment/port configuration grouped
+as primitive values. These remain in the single operator workflow; no new
+abstraction was needed for correctness. A focused follow-up review found no
+violations in the added recovery, assistant and browser tests.
+
+## Spec
+
+The initial review's actionable gaps, explicit browser stale-state coverage and
+failed restoration staying unpublished, were closed and tested. An additional
+malicious-source regression makes the injection boundary explicit. Suggestions
+about the audit gate and invoking virtualenv were checked against the command
+and documented prerequisites; neither was a missing requirement. Checking the
+entire freshness notice's wording was not required for the browser stale-state
+assertion. No confirmed defects remain from the focused follow-up review.
+
+Both axes used supplied scoped files, not an independent Git diff. Summary:
+Standards zero hard findings/two retained low heuristics; Spec zero remaining
+confirmed findings. This is local PoC acceptance, not a production security
+certification or a new approval/publication of live source evidence. Existing
+source staleness remains visible; no refresh was fabricated. Issue #16 remains
+open pending the separately authorized delivery step; no push or merge is part
+of this implementation.

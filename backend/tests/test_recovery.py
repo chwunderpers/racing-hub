@@ -1,4 +1,5 @@
 import os
+import json
 import subprocess
 import sys
 import zipfile
@@ -7,6 +8,7 @@ from uuid import uuid4
 
 import httpx
 import psycopg
+import pytest
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from fastapi.testclient import TestClient
@@ -17,7 +19,8 @@ from app.publication import CandidateEnvelope, PublicationModule
 from app.stores import PostgresOperationalStore
 
 
-def test_operator_backup_restores_accepted_knowledge_and_refuses_overwrite(isolated_services, tmp_path):
+@pytest.mark.parametrize("missing_graph", [False, True])
+def test_operator_backup_restores_accepted_knowledge_and_refuses_overwrite(isolated_services, tmp_path, missing_graph):
     store, graph = isolated_services
     candidate = CandidateEnvelope.model_validate_json(
         (Path(__file__).parents[1] / "fixtures/f1-2026-australia.json").read_text("utf-8")
@@ -41,6 +44,16 @@ def test_operator_backup_restores_accepted_knowledge_and_refuses_overwrite(isola
     assert refused.returncode != 0
     assert "empty" in refused.stderr
     assert store.current_publication_version() == published.version
+    if missing_graph:
+        with zipfile.ZipFile(archive) as source:
+            manifest = json.loads(source.read("manifest.json"))
+            files = {name: source.read(name) for name in manifest["checksums"]}
+        del manifest["checksums"][f"graphs/{published.version}.ttl"]
+        del files[f"graphs/{published.version}.ttl"]
+        with zipfile.ZipFile(archive, "w") as target_archive:
+            target_archive.writestr("manifest.json", json.dumps(manifest))
+            for name, body in files.items():
+                target_archive.writestr(name, body)
     parameters = conninfo_to_dict(store._database_url)
     identifier = "review_test_" + uuid4().hex
     parameters["dbname"] = "postgres"
@@ -50,9 +63,15 @@ def test_operator_backup_restores_accepted_knowledge_and_refuses_overwrite(isola
             parameters["dbname"] = identifier
             target_url = make_conninfo("", **parameters)
             restored = command("restore", {**environment, "DATABASE_URL": target_url, "GRAPHDB_REPOSITORY": identifier})
-            assert restored.returncode == 0, restored.stderr
             target = PostgresOperationalStore(target_url)
             app.dependency_overrides[operational_store] = lambda: target
+            if missing_graph:
+                assert restored.returncode == 1
+                with TestClient(app) as client:
+                    assert client.get("/api/exports").json()["publicationVersion"] is None
+                    assert client.get(f"/api/exports/publications/{published.version}/turtle").status_code == 409
+                return
+            assert restored.returncode == 0, restored.stderr
             with TestClient(app) as client:
                 assert client.get("/api/exports").json()["publicationVersion"] == published.version
                 assert client.get(f"/api/exports/publications/{published.version}/turtle").status_code == 200

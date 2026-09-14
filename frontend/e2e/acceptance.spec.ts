@@ -4,6 +4,7 @@ import { expect, test } from "@playwright/test";
 test("schedule discovery, filters, clocks, provenance and assistant fit accessible desktop/mobile views", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("System ready")).toBeVisible();
+  await expect(page.getByText(/Schedule may be outdated/)).toBeVisible();
   await expect(page.getByRole("link", { name: "Australian Grand Prix", exact: true })).toBeVisible();
   await page.getByRole("combobox", { name: "Competition", exact: true }).selectOption({ label: "Formula One" });
   await page.getByLabel("From date").fill("2026-03-01");
