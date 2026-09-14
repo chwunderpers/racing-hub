@@ -121,5 +121,26 @@ and the rendered UI download workflow. Review baseline:
   320px also has no horizontal overflow. Only backend/frontend containers were
   rebuilt. The local view is available at `http://localhost:5173/?view=exports`.
 
-Two-axis review results will be recorded after review of the local commit.
-No push, PR, merge or issue closure is authorized by this implementation step.
+## Review
+
+Implementation commit: `3c11aab`.
+Review command: `git diff 988a70da17e1fb940ed4df0ff255c722eb83f768...HEAD`.
+The baseline resolved and the 12-file committed diff was confirmed nonempty.
+Two independent agents reviewed the supplied scoped files, rather than
+independently reconstructing the Git diff. Test and live evidence above was
+supplied by the implementing agent, not independently rerun by reviewers.
+
+### Standards
+
+Zero documented-standard violations and zero named code-smell findings.
+The review checked domain terminology, public/private filtering, canonical
+IRIs, English content, response handling and consistency with the existing UI.
+
+### Spec
+
+Zero substantive findings: all six Issue #15 criteria are represented in the
+implementation and its HTTP/UI tests. No missing requirements or scope creep
+were identified. Review did not establish broader PoC acceptance for #16.
+
+Totals: Standards 0; Spec 0. No push, PR, merge or issue closure is authorized
+by this implementation step.
