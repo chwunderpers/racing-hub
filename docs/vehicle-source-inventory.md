@@ -1,6 +1,27 @@
 # Vehicle Source Inventory
 
-Issue 13 private research note, 2026-09-14. Sample scope: Porsche 911 GT3 R (992), BMW M4 GT3 EVO, Mercedes-AMG GT3. **Pending human source, identity, applicability and English wording review.** All three official response bodies and the minimal assertions below were verified by direct HTTP research. The pending local [inventory](../examples/vehicle-inventory.json) is input for review only, not accepted evidence. No source or ontology approval, database, queue, preview or publication modification was performed.
+Issue 13 source research and collection record, 2026-09-14. Sample scope: Porsche 911 GT3 R (992), BMW M4 GT3 EVO, Mercedes-AMG GT3. **The minimal inventory is now accepted and published for the local PoC under the operator's explicit delegation.** See [delegated closeout](vehicles.md#delegated-closeout). The initial research observations below are historical: their pending-review wording and no-publication statements describe the research stage, not the completed closeout. Optional technical notes were not ingested.
+
+## Closeout Capture
+
+The fresh official captures returned HTTP 200 with no redirects or compression.
+Porsche's PDF hash was unchanged. BMW and AMG HTML hashes changed while the
+inspected model passages remained supportive of the same sparse assertions.
+The final [inventory](../examples/vehicle-inventory.json) and
+[collection record](../reviews/requests/issue-13-collection.json) contain these
+updated hashes and actual capture times:
+
+- Porsche: `e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3` (130154 bytes).
+- BMW: `c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43` (134841 bytes).
+- AMG: `9691e49c175273e6c3c815da0eead5d4fc98cc115dbc7255bae810043dfb9d2e` (259254 bytes).
+
+Repeated live collection still detected raw-byte drift. Rather than disable that
+gate, the PoC execution replayed the retained official responses through the
+unchanged collector validation and preserved their original observation times.
+The raw captures are retained privately, unlike the initial research stage.
+This demonstrates a captured-source handoff, not stable repeated live collection.
+Source classification and wording were accepted by GitHub Copilot acting under
+Chris's scoped delegation; no claim that Chris inspected each field is made.
 
 GT3 below is a manufacturer's vehicle-category description only. No competition eligibility, homologation, class mapping, season applicability, or Balance of Performance inference is made. Omitted fields mean not established for this sample, not that the vehicle lacks the feature.
 

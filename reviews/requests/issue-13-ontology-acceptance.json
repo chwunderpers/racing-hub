@@ -1,0 +1,27 @@
+{
+  "issue": 13,
+  "outcome": "accepted",
+  "person": "GitHub Copilot, delegated by Chris for local PoC",
+  "recordedAt": "2026-09-14T12:54:27.474370+00:00",
+  "authorization": "reviews/requests/issue-13-standing-approval.json",
+  "rationale": "Accept the English additive vehicle vocabulary and neutral-code policy after SHACL and all five competency checks passed. Synthetic examples are not real eligibility evidence; shared Circuit does not prove shared Layout. Separately authorize canonical promotion under the standing delegation.",
+  "report": "ontology-reviews\\issue-13-rehearsal-002\\report.json",
+  "reportSha256": "1e24a236e6f4c3aa72e55f90dde5d78c6b3602b22d5fa73eb646f4bbbe37960d",
+  "inputs_sha256": {
+    "baseline": "758310f5747aa043ccfcceb6ac76e92c2a17080ad2f7afc2363aaa65944e801b",
+    "ontology": "b75f9dea49f0f1c7c471e69fd9303e5d7956349f34123c045eebffea1d468035",
+    "data": "1706475bce4907c646edbbdc14e4cdc1cc41f25fa358bf51fa4f6335daba5bf2",
+    "proposal": "6f65ab1c04cb5aa609a53d15e2cdc25110d9e105649ad08b836b8ef3c7d8a254"
+  },
+  "compatibility": "additive",
+  "addedTriples": 18,
+  "removedTriples": 0,
+  "competency": {
+    "class": true,
+    "inverse": true,
+    "shared-circuit": true,
+    "distinct-circuit-identities": true,
+    "graph-separation": true
+  },
+  "conforms": true
+}

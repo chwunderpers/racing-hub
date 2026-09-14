@@ -4,161 +4,183 @@
       "identity": "porsche-911-gt3-r-992",
       "language": "en",
       "fields": {
-        "manufacturer": [{
-          "value": "Porsche",
-          "applicability": "Manufacturer brand of the Porsche 911 GT3 R (Generation 992), Model Year 2026, described in the 8 August 2025 technical data. Not a claim about every 992 revision or competition eligibility.",
-          "source": {
-            "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
-            "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.423165+00:00",
-            "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
-            "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026; publisher footer",
-            "language": "en"
+        "manufacturer": [
+          {
+            "value": "Porsche",
+            "applicability": "Manufacturer brand of the Porsche 911 GT3 R (Generation 992), Model Year 2026, described in the 8 August 2025 technical data. Not a claim about every 992 revision or competition eligibility.",
+            "source": {
+              "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+              "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:33.998474+00:00",
+              "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
+              "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026; publisher footer",
+              "language": "en"
+            }
           }
-        }],
-        "model_name": [{
-          "value": "911 GT3 R",
-          "applicability": "Porsche 911 GT3 R (Generation 992), Model Year 2026, described in the 8 August 2025 technical data. Does not describe the road-going homologation-basis car or GT3 R rennsport.",
-          "source": {
-            "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
-            "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.423165+00:00",
-            "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
-            "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026",
-            "language": "en"
+        ],
+        "model_name": [
+          {
+            "value": "911 GT3 R",
+            "applicability": "Porsche 911 GT3 R (Generation 992), Model Year 2026, described in the 8 August 2025 technical data. Does not describe the road-going homologation-basis car or GT3 R rennsport.",
+            "source": {
+              "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+              "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:33.998474+00:00",
+              "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
+              "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026",
+              "language": "en"
+            }
           }
-        }],
-        "category": [{
-          "value": "GT3 racing car",
-          "applicability": "Manufacturer's descriptive category for the Model Year 2026 Porsche 911 GT3 R (Generation 992). Does not establish homologation validity, Competition Eligibility, Class mapping, Season applicability or Balance of Performance.",
-          "source": {
-            "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
-            "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.423165+00:00",
-            "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
-            "anchor": "Page 1 of 5, Concept: Single-seater customer race car; homologated for the FIA GT3 category",
-            "language": "en"
+        ],
+        "category": [
+          {
+            "value": "GT3 racing car",
+            "applicability": "Manufacturer's descriptive category for the Model Year 2026 Porsche 911 GT3 R (Generation 992). Does not establish homologation validity, Competition Eligibility, Class mapping, Season applicability or Balance of Performance.",
+            "source": {
+              "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+              "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:33.998474+00:00",
+              "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
+              "anchor": "Page 1 of 5, Concept: Single-seater customer race car; homologated for the FIA GT3 category",
+              "language": "en"
+            }
           }
-        }],
-        "generation": [{
-          "value": "992",
-          "applicability": "Generation explicitly named for the Porsche 911 GT3 R, Model Year 2026, in the 8 August 2025 technical data. No transfer of revision-specific specifications to the original 2023 car or every 992 car.",
-          "source": {
-            "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
-            "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.423165+00:00",
-            "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
-            "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026",
-            "language": "en"
+        ],
+        "generation": [
+          {
+            "value": "992",
+            "applicability": "Generation explicitly named for the Porsche 911 GT3 R, Model Year 2026, in the 8 August 2025 technical data. No transfer of revision-specific specifications to the original 2023 car or every 992 car.",
+            "source": {
+              "url": "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+              "publisher": "Dr. Ing. h.c. F. Porsche Aktiengesellschaft",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:33.998474+00:00",
+              "sha256": "e73140237efcf3a470233fe6315eadd560c75ef3a88536789483e0d82a0d2df3",
+              "anchor": "Page 1 of 5, Technical Data: Porsche 911 GT3 R (Generation 992) Model Year 2026",
+              "language": "en"
+            }
           }
-        }]
+        ]
       }
     },
     {
       "identity": "bmw-m4-gt3-evo",
       "language": "en",
       "fields": {
-        "manufacturer": [{
-          "value": "BMW",
-          "applicability": "Manufacturer brand of the BMW M4 GT3 EVO revision described as competing since 2025. Not the earlier 2022-2024 M4 GT3, M4 GT4 EVO or road-going M4 CS; no competition-validity interval is established.",
-          "source": {
-            "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
-            "publisher": "BMW M GmbH / BMW M Motorsport",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.913083+00:00",
-            "sha256": "39a0ff41c8fadebdcb5236ba590df3821e28e65ff983a96a5c21689216ad13c2",
-            "anchor": "THE GT FLAGSHIP. > introductory BMW M4 GT3 EVO description",
-            "language": "en"
+        "manufacturer": [
+          {
+            "value": "BMW",
+            "applicability": "Manufacturer brand of the BMW M4 GT3 EVO revision described as competing since 2025. Not the earlier 2022-2024 M4 GT3, M4 GT4 EVO or road-going M4 CS; no competition-validity interval is established.",
+            "source": {
+              "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+              "publisher": "BMW M GmbH / BMW M Motorsport",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.165622+00:00",
+              "sha256": "c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43",
+              "anchor": "THE GT FLAGSHIP. > introductory BMW M4 GT3 EVO description",
+              "language": "en"
+            }
           }
-        }],
-        "model_name": [{
-          "value": "BMW M4 GT3 EVO",
-          "applicability": "BMW M4 GT3 EVO revision described as competing since 2025. Not the earlier 2022-2024 M4 GT3, M4 GT4 EVO or road-going M4 CS; no competition-validity interval is established.",
-          "source": {
-            "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
-            "publisher": "BMW M GmbH / BMW M Motorsport",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.913083+00:00",
-            "sha256": "39a0ff41c8fadebdcb5236ba590df3821e28e65ff983a96a5c21689216ad13c2",
-            "anchor": "THE GT FLAGSHIP. > introductory BMW M4 GT3 EVO description",
-            "language": "en"
+        ],
+        "model_name": [
+          {
+            "value": "BMW M4 GT3 EVO",
+            "applicability": "BMW M4 GT3 EVO revision described as competing since 2025. Not the earlier 2022-2024 M4 GT3, M4 GT4 EVO or road-going M4 CS; no competition-validity interval is established.",
+            "source": {
+              "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+              "publisher": "BMW M GmbH / BMW M Motorsport",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.165622+00:00",
+              "sha256": "c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43",
+              "anchor": "THE GT FLAGSHIP. > introductory BMW M4 GT3 EVO description",
+              "language": "en"
+            }
           }
-        }],
-        "category": [{
-          "value": "GT3 racing car",
-          "applicability": "Manufacturer's descriptive category for the BMW M4 GT3 EVO revision described as competing since 2025. Does not establish Competition Eligibility, Class mapping, homologation validity, Season applicability or Balance of Performance.",
-          "source": {
-            "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
-            "publisher": "BMW M GmbH / BMW M Motorsport",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.913083+00:00",
-            "sha256": "39a0ff41c8fadebdcb5236ba590df3821e28e65ff983a96a5c21689216ad13c2",
-            "anchor": "5 POWERFUL FACTS: > GT3 racing car with the new BMW M design",
-            "language": "en"
+        ],
+        "category": [
+          {
+            "value": "GT3 racing car",
+            "applicability": "Manufacturer's descriptive category for the BMW M4 GT3 EVO revision described as competing since 2025. Does not establish Competition Eligibility, Class mapping, homologation validity, Season applicability or Balance of Performance.",
+            "source": {
+              "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+              "publisher": "BMW M GmbH / BMW M Motorsport",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.165622+00:00",
+              "sha256": "c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43",
+              "anchor": "5 POWERFUL FACTS: > GT3 racing car with the new BMW M design",
+              "language": "en"
+            }
           }
-        }],
-        "variant": [{
-          "value": "EVO",
-          "applicability": "Explicit EVO revision of the BMW M4 GT3, described as competing since 2025 and distinguished from the 2022-2024 model. The year identifies revision context, not competition validity.",
-          "source": {
-            "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
-            "publisher": "BMW M GmbH / BMW M Motorsport",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:09.913083+00:00",
-            "sha256": "39a0ff41c8fadebdcb5236ba590df3821e28e65ff983a96a5c21689216ad13c2",
-            "anchor": "THE GT FLAGSHIP. > latest evolutionary stage; first season in 2025; BMW M4 GT3 model from 2022 to 2024",
-            "language": "en"
+        ],
+        "variant": [
+          {
+            "value": "EVO",
+            "applicability": "Explicit EVO revision of the BMW M4 GT3, described as competing since 2025 and distinguished from the 2022-2024 model. The year identifies revision context, not competition validity.",
+            "source": {
+              "url": "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+              "publisher": "BMW M GmbH / BMW M Motorsport",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.165622+00:00",
+              "sha256": "c4dfd9e1bbfaf8f21587331ffe8d6268c547508e9e8583e595e1f6cc99e21b43",
+              "anchor": "THE GT FLAGSHIP. > latest evolutionary stage; first season in 2025; BMW M4 GT3 model from 2022 to 2024",
+              "language": "en"
+            }
           }
-        }]
+        ]
       }
     },
     {
       "identity": "mercedes-amg-gt3",
       "language": "en",
       "fields": {
-        "manufacturer": [{
-          "value": "Mercedes-AMG",
-          "applicability": "Manufacturer brand of the Mercedes-AMG GT3 successor unveiled in 2019, as described on this page. Not a blanket claim about the original 2015 car or the separate GT3 Edition 130Y Motorsport; no formal generation code or EVO variant is asserted.",
-          "source": {
-            "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
-            "publisher": "Mercedes-AMG GmbH",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:10.371387+00:00",
-            "sha256": "0229d321aa41c76a267449e2ac11dabb9618a78c02931948ff292e7e3e1c3037",
-            "anchor": "The Mercedes-AMG GT3 > introduction contrasting the 2015 model and successor unveiled in 2019",
-            "language": "en"
+        "manufacturer": [
+          {
+            "value": "Mercedes-AMG",
+            "applicability": "Manufacturer brand of the Mercedes-AMG GT3 successor unveiled in 2019, as described on this page. Not a blanket claim about the original 2015 car or the separate GT3 Edition 130Y Motorsport; no formal generation code or EVO variant is asserted.",
+            "source": {
+              "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
+              "publisher": "Mercedes-AMG GmbH",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.549772+00:00",
+              "sha256": "9691e49c175273e6c3c815da0eead5d4fc98cc115dbc7255bae810043dfb9d2e",
+              "anchor": "The Mercedes-AMG GT3 > introduction contrasting the 2015 model and successor unveiled in 2019",
+              "language": "en"
+            }
           }
-        }],
-        "model_name": [{
-          "value": "Mercedes-AMG GT3",
-          "applicability": "Mercedes-AMG GT3 successor unveiled in 2019, as described on this page. Not the separate GT3 Edition 130Y Motorsport; no formal generation code, named EVO variant or model-year validity range is established.",
-          "source": {
-            "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
-            "publisher": "Mercedes-AMG GmbH",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:10.371387+00:00",
-            "sha256": "0229d321aa41c76a267449e2ac11dabb9618a78c02931948ff292e7e3e1c3037",
-            "anchor": "The Mercedes-AMG GT3 > introduction contrasting the 2015 model and successor unveiled in 2019",
-            "language": "en"
+        ],
+        "model_name": [
+          {
+            "value": "Mercedes-AMG GT3",
+            "applicability": "Mercedes-AMG GT3 successor unveiled in 2019, as described on this page. Not the separate GT3 Edition 130Y Motorsport; no formal generation code, named EVO variant or model-year validity range is established.",
+            "source": {
+              "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
+              "publisher": "Mercedes-AMG GmbH",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.549772+00:00",
+              "sha256": "9691e49c175273e6c3c815da0eead5d4fc98cc115dbc7255bae810043dfb9d2e",
+              "anchor": "The Mercedes-AMG GT3 > introduction contrasting the 2015 model and successor unveiled in 2019",
+              "language": "en"
+            }
           }
-        }],
-        "category": [{
-          "value": "GT3 racing car",
-          "applicability": "Descriptive normalization of the Mercedes-AMG GT3 name and explicit race-car context for the successor unveiled in 2019. Not a verbatim category label or a finding of Competition Eligibility, Class mapping, homologation validity, Season applicability or Balance of Performance.",
-          "source": {
-            "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
-            "publisher": "Mercedes-AMG GmbH",
-            "kind": "authoritative",
-            "retrieved_at": "2026-09-14T11:57:10.371387+00:00",
-            "sha256": "0229d321aa41c76a267449e2ac11dabb9618a78c02931948ff292e7e3e1c3037",
-            "anchor": "The Mercedes-AMG GT3 > Sequential AMG 6-gear race car transmission; Highlights > customer sports series paragraph",
-            "language": "en"
+        ],
+        "category": [
+          {
+            "value": "GT3 racing car",
+            "applicability": "Descriptive normalization of the Mercedes-AMG GT3 name and explicit race-car context for the successor unveiled in 2019. Not a verbatim category label or a finding of Competition Eligibility, Class mapping, homologation validity, Season applicability or Balance of Performance.",
+            "source": {
+              "url": "https://www.mercedes-amg.com/en/mercedes-amg-gt3",
+              "publisher": "Mercedes-AMG GmbH",
+              "kind": "authoritative",
+              "retrieved_at": "2026-09-14T12:55:34.549772+00:00",
+              "sha256": "9691e49c175273e6c3c815da0eead5d4fc98cc115dbc7255bae810043dfb9d2e",
+              "anchor": "The Mercedes-AMG GT3 > Sequential AMG 6-gear race car transmission; Highlights > customer sports series paragraph",
+              "language": "en"
+            }
           }
-        }]
+        ]
       }
     }
   ]

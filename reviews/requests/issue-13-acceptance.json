@@ -1,0 +1,15 @@
+{
+  "outcome": "accepted",
+  "person": "GitHub Copilot, delegated by Chris for local PoC",
+  "rationale": "Under reviews/requests/issue-13-standing-approval.json, accept the three sparse vehicle descriptions, English wording, identities, official source classification and retained model applicability for disposable PoC workflow verification. Captured official responses were replayed after repeated dynamic HTML checksum drift; original observation times retained. Ontology acceptance recorded separately. This is not exhaustive factual assurance or Competition Eligibility.",
+  "evidence": [
+    "https://newsroom.porsche.com/dam/jcr:3b5e8287-01fb-481f-9d5c-2add88364f30/250808e_Technical%20Data%20911%20GT3%20R26.pdf",
+    "https://www.bmw-m.com/en/fastlane/motorsport/race-cars/bmw-m4-gt3-evo.html",
+    "https://www.mercedes-amg.com/en/mercedes-amg-gt3"
+  ],
+  "vehicle_confirmations": [
+    "vehicles/porsche-911-gt3-r-992/e7ba1bf55918d40120a90957d60d86e37b25af23c767f75d238c1f0003c5cd36",
+    "vehicles/mercedes-amg-gt3/5613fa04df9f901e8140808834b282ba6d69ea939d6d8d39f2908a6944d19eaa",
+    "vehicles/bmw-m4-gt3-evo/ae72d6cf4b900732001b46354082ea65458033954e0ec84a51c6027e28a6661b"
+  ]
+}

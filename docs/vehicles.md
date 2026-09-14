@@ -5,7 +5,7 @@ details and assistant retrieval. Vehicles are a separate view, never a schedule
 filter. These are model descriptions, not Entered Vehicles, detailed Technical
 Specifications, Balance of Performance, setup data or Competition Eligibility.
 
-## Pending Sample
+## Published PoC Sample
 
 [The inventory](../examples/vehicle-inventory.json) contains Porsche 911 GT3 R
 (992, model year 2026), BMW M4 GT3 EVO and Mercedes-AMG GT3 (the successor unveiled
@@ -14,15 +14,19 @@ name, category and known generation or variant. Optional mechanical fields are
 absent. [Source research](vehicle-source-inventory.md) records inspected official
 passages, raw download hashes and applicability limits.
 
-**The inventory is pending human review, not accepted or published knowledge.**
-Source authority, identity, wording and applicability require explicit review.
-The implementation proposes `VehicleModel`, `VehicleSpecificationAssertion`,
-`includesVehicle` and `vehicleField` under the existing w3id ontology authority.
-The canonical ontology has not been changed. Before using this for real vehicle
-publication, obtain explicit scope approval for the offline
-[ontology rehearsal](ontology-maintenance.md), review its exact input hashes
-and outcomes, and separately authorize any canonical migration. No proposal
-approval or publication authorization is implied by this implementation.
+**Published locally on 2026-09-14 under explicit delegated PoC authorization.**
+The operator authorized GitHub Copilot to execute source, identity, English
+wording, applicability, vocabulary and separate exact publication decisions
+without repeated prompts. The [standing authorization](../reviews/requests/issue-13-standing-approval.json)
+is scoped to this disposable local PoC, not production or future inventories.
+The approval controls remain unchanged; records identify delegated execution,
+not personal inspection of every assertion by the operator.
+
+The accepted additive vocabulary declares `VehicleModel`,
+`VehicleSpecificationAssertion`, `includesVehicle`, `vehicleField` and `value`,
+with context-specific comments on reused evidence properties. The canonical
+ontology is RDF-isomorphic to the rehearsed candidate. The private synthetic
+rehearsal graphs were not published. See the closeout record below.
 
 ## Private Collection
 
@@ -128,3 +132,62 @@ Implementation verification on 2026-09-14:
 	to avoid unrelated refactoring. Both specification defects (identity discovery
 	and model-intent-dependent eligibility refusal) were fixed and independently
 	rechecked. Real source approval, vocabulary review and publication remain open.
+
+## Delegated Closeout
+
+The preceding implementation-only verification predates this completed closeout.
+The operator explicitly delegated all remaining Issue 13 PoC content and approval
+operations on 2026-09-14. No assertion of 100% factual accuracy is made; the purpose
+is exercising the collection, review, handoff and publication workflow with useful
+disposable sample content.
+
+- Ontology rehearsal first blocked three neutral `vehicleField` strings. The
+	language-policy correction added only that machine field; tests still require
+	English for values, applicability and publisher prose. All 29 ontology tests
+	passed. The fresh rehearsal passed SHACL and all five OWL-RL competencies:
+	class, inverse, shared-circuit, distinct-circuit-identities and graph-separation.
+	Delta: 18 added triples, zero removed, zero migrated; 166 synthetic asserted
+	triples and 607 separate inferred triples. Shared Circuit does not prove shared
+	Layout. Exact inputs and report hashes are in the
+	[delegated ontology acceptance](../reviews/requests/issue-13-ontology-acceptance.json).
+- The live collector correctly refused changed BMW/AMG raw HTML hashes, including
+	a retry after refreshing inspected captures. The final PoC handoff replayed
+	bounded raw HTTP 200 captures through `prepare_candidate` using HTTPX's injected
+	transport, without changing the collector or bypassing checksum validation.
+	Actual capture times were restored before preview; replay time is not claimed
+	as source verification time. Raw captures remain private under
+	`ontology-reviews/issue-13-inputs/`. The
+	[collection record](../reviews/requests/issue-13-collection.json) identifies the
+	mode and exact source hashes. A future fresh ingestion still needs stable
+	captures or a separately designed dynamic-source collection workflow.
+- Review Item `52cc4f41-a2e2-4c0e-8455-1361e649becf` changed only the three vehicle
+	entries, with no validation errors, conflicts or unresolved identities.
+	[The decision request](../reviews/requests/issue-13-acceptance.json) supplied all
+	three exact vehicle confirmation tokens. The existing CLI proposed and confirmed
+	decision digest `001bf56e7ca3100314eef9f79c6dde35c228ce54e5c6e1e8e8c33cff5004c5da`.
+	Decision `0c46c8bb-162a-46d8-8d69-4860fadd1cd3` records GitHub Copilot as delegated
+	by Chris for the local PoC. No existing unrelated review item was resolved.
+- A separate publication proposal and confirmation used digest
+	`665d03c57f501cb6e024235b9bdf11540eda99f4c49eb9d790b746851813b74b`.
+	[The receipt](../reviews/publications/0c46c8bb-162a-46d8-8d69-4860fadd1cd3.yaml)
+	records publication `61f2c49c6232aa786352eeb667c102fb14ec0be341d263a68413d23e694da7b1`
+	at `2026-09-14T12:57:32.100087+00:00`. The baseline was
+	`5106927820d7b8d6a710009b5ff15b532df54314dd1ad391b0577a1638a72ae3`.
+- Live SQL/API/RDF checks passed: three models, eleven fields, 50 Meetings,
+	two regulation profiles, and exact versioned RDF agreement. Schedule and
+	regulation payloads were compared unchanged before publication. Vehicle APIs
+	return explicit `eligibilityEstablished: false` and no schedule vehicle filter.
+- Actual configured assistant HTTP requests returned BMW's four descriptive fields
+	and four field-level source citations (`stated`), then refused the NLS eligibility
+	claim (`unsupported`, zero citations). Both used the completed version above;
+	temporary sessions were deleted. No simulated provider was used in this check.
+- The live published BMW details were inspected at 1440 px and 390 px, with source
+	evidence expanded, readable provenance and no horizontal overflow. Earlier
+	mock-only screenshots are not substituted for this live check.
+- After vocabulary promotion and inventory refresh, all 21 vehicle tests passed
+	against disposable SQL/GraphDB stores (74.01 seconds). Editor diagnostics were
+	clear for the touched language policy, tests and documentation. Incremental
+	closeout reviews found zero Standards hard violations and zero Spec defects;
+	one nonblocking test-name heuristic was left unchanged. Reviewers inspected
+	the supplied files and audit evidence, not an independently reconstructed Git
+	diff, and did not independently rerun live checks or tests.

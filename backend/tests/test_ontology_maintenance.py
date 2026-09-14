@@ -121,6 +121,7 @@ def test_regulation_machine_fields_require_neutral_strings(tmp_path, literal_opt
         ONTOLOGY.evidenceKind: "original",
         ONTOLOGY.topic: "scoring",
         ONTOLOGY.knowledgeState: "known",
+        ONTOLOGY.vehicleField: "manufacturer",
     }
     data = Graph()
     for predicate, value in values.items():
@@ -142,7 +143,8 @@ def test_regulation_machine_fields_require_neutral_strings(tmp_path, literal_opt
                          ids=["english", "untagged", "typed-string", "non-english"])
 def test_regulation_prose_still_requires_english(tmp_path, literal_options):
     predicates = {RDFS.label, RDFS.comment, ONTOLOGY.evidence, ONTOLOGY.translationMethod,
-                  ONTOLOGY.passageText, ONTOLOGY.normalizedValue}
+                  ONTOLOGY.passageText, ONTOLOGY.normalizedValue, ONTOLOGY.value,
+                  ONTOLOGY.authority, ONTOLOGY.applicability}
     data = Graph()
     for predicate in predicates:
         data.add((RESOURCE["example-regulation"], predicate, Literal("Example prose", **literal_options)))
