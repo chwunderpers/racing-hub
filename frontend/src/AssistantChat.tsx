@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, RotateCcw, Send, Square } from "lucide-react";
+import { ArrowLeftRight, ExternalLink, RotateCcw, Send, Square } from "lucide-react";
 import type { components } from "./api/schema";
 import "./AssistantChat.css";
 
 type Answer = components["schemas"]["AssistantAnswer"];
+type Comparison = components["schemas"]["RegulationComparisonQuery"];
 type Turn = { question: string; answer?: Answer };
 const base = import.meta.env.VITE_API_BASE_URL ?? "";
 
@@ -15,6 +16,10 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [generation, setGeneration] = useState(0);
+  const [mode, setMode] = useState<"chat" | "comparison">("chat");
+  const [season, setSeason] = useState("2026");
+  const [topic, setTopic] = useState<Comparison["topic"]>("scoring");
+  const [onDate, setOnDate] = useState("");
   const activeRequest = useRef<AbortController | null>(null);
   const transcript = useRef<HTMLDivElement>(null);
   const activeToken = useRef("");
@@ -60,8 +65,9 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
   }
 
   async function send() {
-    if (!message.trim() || !token || busy) return;
-    const question = message.trim();
+    if ((!message.trim() && mode === "chat") || !token || busy) return;
+    const comparison: Comparison | undefined = mode === "comparison" ? { season: Number(season), topic, on_date: onDate || null } : undefined;
+    const question = comparison ? `Formula One vs NLS: ${season} ${topic}${onDate ? ` on ${onDate}` : " (cited versions)"}` : message.trim();
     const controller = new AbortController();
     activeRequest.current = controller;
     setTurns(previous => [...previous, { question }]);
@@ -72,7 +78,7 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
       const response = await fetch(`${base}/api/assistant/messages`, {
         method: "POST", signal: controller.signal,
         headers: { "Content-Type": "application/json", "X-Assistant-Session": token },
-        body: JSON.stringify({ message: question, displayTimeZone: zone }),
+        body: JSON.stringify({ message: question, displayTimeZone: zone, ...(comparison ? { comparison } : {}) }),
       });
       if (!response.ok) throw new Error(response.status === 410 ? "Conversation expired. Start a new conversation." : response.status === 400 ? "Request or conversation limit reached. Start a new conversation." : "Assistant temporarily unavailable. Try again.");
       const answer = await response.json() as Answer;
@@ -90,6 +96,10 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
         <option value="UTC">UTC</option>{Intl.supportedValuesOf("timeZone").map(name => <option key={name} value={name}>{name.replaceAll("_", " ")}</option>)}
       </select></label><button type="button" className="assistant-icon" aria-label="New conversation" title="New conversation" onClick={reset}><RotateCcw size={20} /></button></div>
     </div>
+    <div className="assistant-mode" role="radiogroup" aria-label="Answer mode">
+      <label><input type="radio" name="assistant-mode" checked={mode === "chat"} disabled={busy} onChange={() => setMode("chat")} />Chat</label>
+      <label><input type="radio" name="assistant-mode" checked={mode === "comparison"} disabled={busy} onChange={() => setMode("comparison")} />Compare rules</label>
+    </div>
     <div className="assistant-transcript" role="log" aria-label="Conversation" ref={transcript}>
       {turns.map((turn, index) => <article className="assistant-turn" key={index}><h3>{turn.question}</h3>
         {turn.answer && <><p className="assistant-answer">{turn.answer.text}</p>
@@ -104,8 +114,16 @@ export function AssistantChat({ zone, setZone }: { zone: string; setZone: (zone:
     </div>
     {error && <p className="assistant-error" role="alert">{error}</p>}
     <form className="assistant-composer" onSubmit={event => { event.preventDefault(); void send(); }}>
-      <label className="assistant-question">Question<textarea aria-label="Question" value={message} onChange={event => setMessage(event.target.value)} maxLength={2000} rows={2} disabled={!available} /></label>
-      {busy ? <button type="button" className="assistant-icon" aria-label="Cancel reply" title="Cancel reply" onClick={reset}><Square size={20} /></button> : <button type="submit" className="assistant-icon" aria-label="Send question" title="Send question" disabled={!available || !token || !message.trim()}><Send size={20} /></button>}
+      {mode === "comparison" ? <fieldset className="assistant-comparison" disabled={!available || busy}>
+        <legend>Formula One vs NLS</legend>
+        <label>Season<input aria-label="Season" type="number" min="1950" max="2100" step="1" required value={season} onChange={event => setSeason(event.target.value)} /></label>
+        <label>Topic<select aria-label="Topic" value={topic} onChange={event => setTopic(event.target.value as Comparison["topic"])}>
+          <option value="scoring">Scoring</option><option value="eligibility">Eligibility</option><option value="format">Format</option>
+          <option value="tyres">Tyres</option><option value="pit-stops">Pit stops</option><option value="sporting">Sporting</option><option value="technical">Technical</option>
+        </select></label>
+        <label>On date (optional)<input aria-label="On date (optional)" type="date" value={onDate} onChange={event => setOnDate(event.target.value)} /></label>
+      </fieldset> : <label className="assistant-question">Question<textarea aria-label="Question" value={message} onChange={event => setMessage(event.target.value)} maxLength={2000} rows={2} disabled={!available} /></label>}
+      {busy ? <button type="button" className="assistant-icon" aria-label="Cancel reply" title="Cancel reply" onClick={reset}><Square size={20} /></button> : <button type="submit" className="assistant-icon" aria-label={mode === "comparison" ? "Compare rules" : "Send question"} title={mode === "comparison" ? "Compare rules" : "Send question"} disabled={!available || !token || (mode === "chat" ? !message.trim() : !season)}>{mode === "comparison" ? <ArrowLeftRight size={20} /> : <Send size={20} />}</button>}
     </form>
   </section>;
 }

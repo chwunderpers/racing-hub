@@ -222,6 +222,16 @@
             "maxLength": 100,
             "minLength": 1,
             "title": "Displaytimezone"
+          },
+          "comparison": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RegulationComparisonQuery"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -754,6 +764,48 @@
           "retrievedAt"
         ],
         "title": "MeetingResponse"
+      },
+      "RegulationComparisonQuery": {
+        "properties": {
+          "season": {
+            "type": "integer",
+            "maximum": 2100.0,
+            "minimum": 1950.0,
+            "title": "Season"
+          },
+          "topic": {
+            "type": "string",
+            "enum": [
+              "eligibility",
+              "format",
+              "scoring",
+              "tyres",
+              "pit-stops",
+              "sporting",
+              "technical"
+            ],
+            "title": "Topic"
+          },
+          "on_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "season",
+          "topic"
+        ],
+        "title": "RegulationComparisonQuery"
       },
       "RoundResponse": {
         "properties": {

@@ -1,6 +1,6 @@
 ---
 name: racing-regulations
-description: Use when inventorying Formula One regulations, preparing English rule evidence or previewing a season-scoped Competition Profile for private review.
+description: Use when inventorying Formula One or NLS regulations, preparing English rule evidence or previewing a season-scoped Competition Profile for private review.
 ---
 
 # Private Regulation Preview

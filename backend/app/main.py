@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.assistant import AssistantAnswer, AssistantService
+from app.assistant import AssistantAnswer, AssistantService, RegulationComparisonQuery
 from app.assistant_provider import configured_provider
 from app.assistant_store import AssistantReadStore
 from app.graph_config import configured_graph_factory
@@ -170,6 +170,7 @@ class AssistantMessage(BaseModel):
     model_config = ConfigDict(extra="forbid")
     message: str = Field(min_length=1, max_length=2000)
     displayTimeZone: str = Field(min_length=1, max_length=100)
+    comparison: RegulationComparisonQuery | None = None
 
 
 class AssistantSessionResponse(BaseModel):
@@ -203,7 +204,7 @@ async def assistant_session(service: AssistantService = Depends(assistant_servic
 @app.post("/api/assistant/messages", response_model=AssistantAnswer, dependencies=[Depends(assistant_origin)])
 async def assistant_message(payload: AssistantMessage, x_assistant_session: str = Header(min_length=32, max_length=100), service: AssistantService = Depends(assistant_service)):
     try:
-        return await service.ask(x_assistant_session, payload.message, payload.displayTimeZone)
+        return await service.ask(x_assistant_session, payload.message, payload.displayTimeZone, payload.comparison)
     except LookupError:
         raise HTTPException(410, "Session expired; start a new conversation") from None
     except ValueError:

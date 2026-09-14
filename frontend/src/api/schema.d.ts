@@ -116,6 +116,7 @@ export interface components {
             message: string;
             /** Displaytimezone */
             displayTimeZone: string;
+            comparison?: components["schemas"]["RegulationComparisonQuery"] | null;
         };
         /** AssistantSessionResponse */
         AssistantSessionResponse: {
@@ -283,6 +284,18 @@ export interface components {
             eventTimezone?: string | null;
             /** Sessions */
             sessions?: components["schemas"]["SessionResponse"][];
+        };
+        /** RegulationComparisonQuery */
+        RegulationComparisonQuery: {
+            /** Season */
+            season: number;
+            /**
+             * Topic
+             * @enum {string}
+             */
+            topic: "eligibility" | "format" | "scoring" | "tyres" | "pit-stops" | "sporting" | "technical";
+            /** On Date */
+            on_date?: string | null;
         };
         /** RoundResponse */
         RoundResponse: {

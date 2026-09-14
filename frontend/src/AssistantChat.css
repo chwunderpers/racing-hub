@@ -19,5 +19,14 @@
 .assistant-question textarea { display: block; width: 100%; resize: vertical; min-height: 76px; max-height: 180px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); padding: 10px; font: inherit; }
 .assistant-question textarea:focus-visible { outline: 2px solid var(--accent); }
 .assistant-error { color: var(--warning-text); }
+.assistant-mode { display: flex; gap: 0; margin-top: 16px; }
+.assistant-mode label { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 2px solid var(--border); cursor: pointer; }
+.assistant-mode label:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+.assistant-mode input { accent-color: var(--accent); }
+.assistant-comparison { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; padding: 0; margin: 0; border: 0; }
+.assistant-comparison legend { padding: 0 0 10px; font-size: 16px; }
+.assistant-comparison label { display: grid; min-width: 0; gap: 4px; font-size: 14px; color: var(--secondary); }
+.assistant-comparison input, .assistant-comparison select { width: 100%; min-width: 0; height: 42px; box-sizing: border-box; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); font: inherit; }
+.assistant-comparison input:focus-visible, .assistant-comparison select:focus-visible { outline: 2px solid var(--accent); }
 .assistant-toggle { display: inline-flex; align-items: center; gap: 8px; background: none; color: var(--accent); border: 0; padding: 8px; cursor: pointer; }
 @media (max-width: 480px) { .assistant-controls { gap: 8px; width: 100%; flex-wrap: nowrap; } .assistant-controls label { flex: 1; } .assistant-controls select { max-width: 100%; } .assistant-transcript { max-height: 420px; } }

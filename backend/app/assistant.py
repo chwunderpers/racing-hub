@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.publication import coverage_view
-from app.freshness import FreshnessResponse
+from app.freshness import FreshnessResponse, regulation_freshness_view
 from app.regulations import Topic
 
 
@@ -53,6 +53,13 @@ class RegulationQuery(BaseModel):
     topic: Topic
 
 
+class RegulationComparisonQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    season: int = Field(ge=1950, le=2100)
+    topic: Topic
+    on_date: date | None = None
+
+
 class Citation(BaseModel):
     id: str
     iri: str
@@ -64,7 +71,7 @@ class Citation(BaseModel):
 class AnswerDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
     text: str = Field(min_length=1, max_length=6000)
-    citations: list[str] = Field(max_length=12)
+    citations: list[str] = Field(max_length=32)
     classification: Literal["stated", "derived", "unsupported"] = "stated"
 
 
@@ -84,6 +91,7 @@ class ReadTools:
         self.zone = zone
         self.graph = graph
         self.citations: dict[str, Citation] = {}
+        self.comparisons: list[dict] = []
         self.calls = 0
         self.bytes = 0
 
@@ -167,6 +175,46 @@ class ReadTools:
             "publicationVersion": self.version,
             "scope": "Reviewed single-Competition profile, not event-specific results. Preserve applicability, amendments, exceptions and discretion. Unknown is not false; do not infer historical applicability from season alone.",
         })
+
+    def compare_regulations(self, request: RegulationComparisonQuery) -> dict:
+        result = {"status": "insufficient-evidence", "season": request.season, "topic": request.topic,
+                  "onDate": request.on_date.isoformat() if request.on_date else None,
+                  "profiles": [], "limitations": ["Formula One versus NLS comparison evidence is unavailable."],
+                  "publicationVersion": self.version}
+        self.comparisons.append(result)
+        profiles = [self.regulations(RegulationQuery(competition=competition, season=request.season, topic=request.topic))
+                    for competition in ("formula-one", "nls")]
+        limitations = []
+        for side in profiles:
+            competition = side["competition"]
+            if side["status"] != "available":
+                limitations.append(f"{competition}: reviewed {request.topic} evidence is unavailable.")
+            for entry in side["profile"]:
+                for provision in entry["provisions"]:
+                    start, end = provision["effectiveFrom"], provision["effectiveUntil"]
+                    if request.on_date is None:
+                        provision["temporalStatus"] = "not-assessed"
+                    elif start is None:
+                        provision["temporalStatus"] = "unresolved"
+                        limitations.append(f"{competition}: applicability is unresolved for {provision['iri']}.")
+                    elif request.on_date < date.fromisoformat(start) or (end and request.on_date > date.fromisoformat(end)):
+                        provision["temporalStatus"] = "outside-period"
+                        if provision.get("governing", True):
+                            limitations.append(f"{competition}: requested date is outside {provision['iri']}'s stated period.")
+                    else:
+                        provision["temporalStatus"] = "within-stated-bounds"
+                    if provision["amends"] and provision["temporalStatus"] != "outside-period":
+                        limitations.append(f"{competition}: amendment relationships require resolution before applying a normalized value.")
+        result.update({
+            "status": "insufficient-evidence" if limitations else "available",
+            "profiles": profiles, "limitations": list(dict.fromkeys(limitations)), "publicationVersion": self.version,
+            "scope": "Formula One versus NLS, not an equivalence of overall and class results. Show both evidence sets and disclose conflicting assertions; do not choose an authoritative winner or compute event awards. Unknown date bounds and absent amendment links do not prove applicability or absence of changes.",
+        })
+        try:
+            return self._bounded(result)
+        except ValueError:
+            result.update(status="insufficient-evidence", limitations=["Formula One versus NLS comparison exceeds the evidence budget."])
+            raise
 
     def _document(self, record):
         references = [self._cite(record["iri"], record["title"], source["url"], source["retrievedAt"]) for source in record["sources"][:3]]
@@ -254,7 +302,7 @@ class AssistantService:
         if session and session.task and not session.task.done():
             session.task.cancel()
 
-    async def ask(self, token: str, question: str, zone: str) -> AssistantAnswer:
+    async def ask(self, token: str, question: str, zone: str, comparison: RegulationComparisonQuery | None = None) -> AssistantAnswer:
         self._expire()
         session = self.sessions.get(token)
         if not session:
@@ -277,14 +325,41 @@ class AssistantService:
             version = self.store.current_publication_version()
             tools = ReadTools(self.store, version, zone, self.graph_factory(version) if self.graph_factory and version else None)
             async with asyncio.timeout(60):
-                draft = await self.provider.answer(list(session.history), question, tools)
+                if comparison is not None:
+                    question = (f"Compare Formula One and NLS {comparison.season} {comparison.topic} "
+                                + (f"on {comparison.on_date.isoformat()}." if comparison.on_date else "conditionally for the cited versions, without an event date."))
+                    try:
+                        result = tools.compare_regulations(comparison)
+                    except Exception:
+                        result = {"status": "insufficient-evidence"}
+                    draft = (await self.provider.answer([], question, tools) if result["status"] == "available"
+                             else AnswerDraft(text="Comparison evidence unavailable.", citations=[], classification="unsupported"))
+                else:
+                    draft = await self.provider.answer(list(session.history), question, tools)
             if self.store.current_publication_version() != version:
                 raise RuntimeError("Publication changed; retry the question")
             references = [tools.citations[identity] for identity in dict.fromkeys(draft.citations) if identity in tools.citations]
             valid = bool(references) and len(references) == len(set(draft.citations)) and draft.classification != "unsupported"
+            for comparison_result in tools.comparisons:
+                valid = valid and comparison_result["status"] == "available" and all(
+                    any(provision["citation"] in draft.citations and provision.get("governing", True)
+                        and provision["temporalStatus"] in ("not-assessed", "within-stated-bounds")
+                        for entry in side["profile"] for provision in entry["provisions"])
+                    for side in comparison_result["profiles"]
+                )
             text = draft.text if valid else "I could not verify an answer from the published schedule and documentation."
-            answer = AssistantAnswer(text=text, citations=references if valid else [], classification=draft.classification if valid else "unsupported",
-                                     displayTimeZone=zone, publicationVersion=version, freshness=self.store.source_freshness())
+            if not valid and tools.comparisons:
+                reasons = [f"{result['season']} {result['topic']} ({result['onDate'] or 'no event date'}): {reason}"
+                           for result in tools.comparisons for reason in result["limitations"]]
+                text = "I cannot establish this Formula One versus NLS comparison. " + (
+                    " ".join(dict.fromkeys(reasons)) if reasons else "The answer requires verified, in-scope governing citations from both Competition profiles."
+                )
+                text = text[:6000]
+            classification = "derived" if tools.comparisons else draft.classification
+            answer = AssistantAnswer(text=text, citations=references if valid else [], classification=classification if valid else "unsupported",
+                                     displayTimeZone=zone, publicationVersion=version,
+                                     freshness=FreshnessResponse.model_validate(regulation_freshness_view(tools.comparisons[0]))
+                                     if comparison is not None else self.store.source_freshness())
             session.history.extend([{"role": "user", "content": question}, {"role": "assistant", "content": answer.text}])
             session.touched = self.clock()
             return answer
