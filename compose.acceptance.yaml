@@ -1,0 +1,64 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: motorsport
+      POSTGRES_USER: motorsport
+      POSTGRES_PASSWORD: ${ACCEPTANCE_POSTGRES_PASSWORD:?Generated password required}
+    ports: ["127.0.0.1::5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "motorsport", "-d", "motorsport"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  graphdb:
+    image: ontotext/graphdb:11.5.0
+    environment:
+      GDB_JAVA_OPTS: -Xms256m -Xmx768m -Dgraphdb.license.file=/run/secrets/graphdb.license
+    ports: ["127.0.0.1::7200"]
+    volumes:
+      - graphdb-data:/opt/graphdb/home
+      - type: bind
+        source: ${GRAPHDB_LICENSE_FILE:?External license required}
+        target: /run/secrets/graphdb.license
+        read_only: true
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:7200/protocol"]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://packagefeedproxy.microsoft.io/pypi/simple/}
+    environment:
+      DATABASE_URL: ${ACCEPTANCE_DOCKER_DATABASE_URL:?Generated database URL required}
+      GRAPHDB_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY: motorsport
+      GRAPHDB_MCP_URL: http://graphdb:7200/mcp
+      GRAPHDB_MAINTENANCE_USER: ${GRAPHDB_MAINTENANCE_USER:-}
+      GRAPHDB_MAINTENANCE_PASSWORD: ${GRAPHDB_MAINTENANCE_PASSWORD:-}
+      GRAPHDB_ASSISTANT_USER: ${GRAPHDB_ASSISTANT_USER:-}
+      GRAPHDB_ASSISTANT_PASSWORD: ${GRAPHDB_ASSISTANT_PASSWORD:-}
+      ASSISTANT_DATABASE_URL: ${ASSISTANT_DOCKER_DATABASE_URL:-}
+      CORS_ORIGINS: ${ACCEPTANCE_BASE_URL:-http://127.0.0.1}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_BASE_URL: ${AZURE_OPENAI_BASE_URL:-https://admin-4138-resource.services.ai.azure.com/openai/v1/}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-gpt-6-astra}
+    ports: ["127.0.0.1::8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports: ["127.0.0.1::80"]
+volumes:
+  postgres-data:
+  graphdb-data:

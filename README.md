@@ -11,12 +11,20 @@ the Meeting appears in the React schedule with its source and retrieval time.
 
 ## Run with Compose
 
+For a reproducible complete-stack check from a clean Git checkout, use the
+[isolated acceptance and recovery workflow](docs/acceptance.md). It starts a
+separate licensed GraphDB service, configures least-privilege credentials and
+runs all backend, frontend and desktop/mobile acceptance checks without
+replacing an existing local publication.
+
 Prerequisites: Docker with Compose v2 and a valid GraphDB license outside the
 repository. Set `GRAPHDB_LICENSE_FILE` to its absolute path in the shell or an
 ignored `.env` file. The license is mounted read-only; never commit its contents.
 
-The credentials in `compose.yaml` are development-only placeholders for this
-local proof of concept.
+The PostgreSQL credentials in `compose.yaml` are development-only placeholders.
+For the persistent stack, follow [GraphDB and assistant security setup](docs/assistant.md)
+after initial bootstrap and before using the assistant. The acceptance runner
+automates equivalent setup only for its disposable stack.
 
 ```powershell
 docker compose up --build
@@ -38,19 +46,21 @@ API-key configuration and restricted PostgreSQL reader provisioning.
 GraphDB Workbench is at <http://localhost:7200>. Compose provisions the
 `motorsport` repository with OWL 2 RL optimized reasoning, then runs the
 one-shot bootstrap before starting the API. Service ports bind to loopback;
-these development credentials and unauthenticated services are not for hosting.
+these development credentials and loopback-only services are not for hosting.
 
 GraphDB 11.5.0 is the default and the live local database. Native MCP is available
 at <http://localhost:7200/mcp>; initialization, tool discovery and a bounded
-publication query were verified. Assistant integration and query authorization
-remain separate work. See [migration results and configuration](docs/graphdb-upgrade.md).
+publication query were verified. The assistant uses restricted native MCP with
+publication-scoped queries; see [assistant security](docs/assistant.md) and
+[migration results and configuration](docs/graphdb-upgrade.md).
 
 GraphDB may enable anonymous usage statistics by default depending on
 the license. Disable them in Workbench under Setup > Repositories > Edit
 common settings. This stack does not claim to disable telemetry automatically.
 
-Stop the stack with `docker compose down`. Add `--volumes` to also delete the
-local PostgreSQL and GraphDB data volumes.
+Stop the stack with `docker compose down`. Do not add `--volumes` unless you
+intend to permanently delete local data. See [backup and restore](docs/acceptance.md)
+before destructive maintenance.
 
 ## Publication
 
